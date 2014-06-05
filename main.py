@@ -7,7 +7,8 @@ Contains HivePlot module used to produce the javascript files
 needed to make a hive plot in D3 using Mike Bolstock's D3 hive module
 '''
 
-import os,sys
+import os
+import sys
 import csv
 import numpy as np
 
