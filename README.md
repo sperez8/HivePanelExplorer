@@ -1,4 +1,5 @@
 HivePlotter
 ===========
 
-Python script that writes javascript files necessary to create hive plots in D3
+A Python script that writes Html and Javascript files necessary to create hive plots in D3.
+
