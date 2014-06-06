@@ -9,8 +9,8 @@ including node position, edge coloring, number of axes etc...
 
 #library imports
 import numpy as np
-
-
+from math import pi
+import networkx as nx
 
 class Hive():
     '''contains node and edge, coloring, position, etc...'''
@@ -37,9 +37,9 @@ class Hive():
         self.nodeProperties = [self.convert_type(p) for p in nodeProperties]
         
         if self.debug:
-            print self.nodes
-            print self.nodeNames
-            print self.nodeProperties
+            print 'Nodes are: ', self.nodes
+            print 'Node names are: ', self.nodeNames
+            print 'Node properties are: ', self.nodeProperties
         return None
 
     def get_edges(self,inputFile, delimiter = ','):
@@ -61,16 +61,93 @@ class Hive():
         self.edgeProperties = [self.convert_type(p) for p in edgeProperties]
         
         if self.debug:
-            print self.sources
-            print self.targets
-            print self.edgeProperties
+            print 'Sources are: ', self.sources
+            print 'Targets are: ', self.targets
+            print 'Edge properties are: ', self.edgeProperties
+        return None
+
+    def make_axes(self, numAxes = 3, doubleAxes = False):
+        '''creates axes and angles given the number of axes desired
+        and whether the axes are being doubled or not'''
+        angles = []
+        if doubleAxes:
+            #create a total of 3*numAxes to make spacing between the doubled axes
+            allAngles = [2.0*pi/float(numAxes*3)*i for i in range(0,numAxes*3)]
+            #recenter the axes for symmetry when the number of axes is odd
+            if numAxes % 2 != 0:
+                shiftBy = allAngles[1]/2.0
+                allAngles = [a-shiftBy for a in allAngles]
+            #remove the "spacer" axes
+            for a in allAngles:
+                if (allAngles.index(a)+1) % 3 != 0:
+                    angles.append(a)
+        else:
+            angles = [2.0*pi/float(numAxes)*i for i in range(0,numAxes)]
+
+        angles = [round(a,2) for a in angles]
+        if self.debug:
+            print "\nAxes angles are", angles   
+        self.angles = angles
+        return None
+
+    def make_graph(self):
+        '''Makes a graph using networkx Graph instance'''
+        self.check_input()
+        G = nx.Graph()
+        G.add_edges_from(zip(self.sources,self.targets))
+        if self.debug:
+            print 'nodes', G.nodes()
+            print 'edges', G.edges()
+        return G
+
+    def node_assignment(self, rule):
+        '''determines on which axis the node should be placed
+            depending on the rule. Integer valued rules indicate the use of
+            node properties. Rules which are string values denote network 
+            properties which need to be calculated.'''
+        nodeAssignment = {}
+        if type(rule) is int:
+            #FILL ME :)
+            pass
+        else:
+            #Need to make a graph instance using networkx
+            G = self.make_graph()
+            assignmentValue = self.node_analysis(G, rule)
+        return None
+    
+    def node_position(self, rule):
+        return None
+    
+    def make_edges(self):
+        return None
+    
+    def node_properties(self):
+        return None
+    
+    def edge_properties(self):
         return None
 
     def check_input(self):
         '''IN DEVELOPMENT
         checks if all edges are connecting nodes which exist in the self.nodes'''
-        
         return None
+
+    @staticmethod
+    def node_analysis(G, rule):
+        if rule == 'degree':
+            return nx.degree(G)
+        elif rule == 'clustering':
+            return nx.clustering(G)
+        elif rule == 'closeness' or rule == 'centrality':
+            return nx.closeness_centrality(G)
+        elif rule == 'betweeness':
+            return nx.betweeness_centrality(G)
+        elif rule == 'average neighbor degree':
+            return nx.average_neighbor_degree(G)
+        else:
+            print "Node assignment rule not recognized."
+            sys.exit()
+        
 
     @staticmethod
     def convert_type(data):

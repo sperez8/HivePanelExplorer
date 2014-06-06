@@ -20,18 +20,46 @@ sys.path.insert(0, _root_dir)
 from data import html_items
 from hive import Hive
 
+#-----------------------
+# Below are variables which would normally be inputer by the user.
+# For the sake of developing the script I have stored them here for convenience
+#-----------------------
+debug = False
+numAxes = 3
+doubleAxes = True
+axisAssignRule = 'degree'
+axisPositRule = 1
 
-def make_html():
+
+def make_html(hive):
+    '''takes a hive instance and write the
+    following files:
+        nodes.js - contains nodes, position and coloring
+        edges.js - contains edges and their type
+        hiveplot.html - contains the html and D3 script to make the hive plot!
+    '''
+    
     #print htmlContainer
     return None
 
 def make_hive(nodefile, edgefile):
-    hive = Hive(debug=True)
+    '''creates a hive instance form user input'''
+    
+    hive = Hive(debug=debug)
     hive.get_nodes('tests/test_nodes_friends.csv')
     hive.get_edges('tests/test_edges_friends.csv')
-    return None
+    hive.make_axes(numAxes = numAxes, doubleAxes = doubleAxes)
+    hive.node_assignment(rule = axisAssignRule)
+    hive.node_position(rule = axisPositRule)
+    hive.node_properties()
+    hive.make_edges()
+    hive.edge_properties()
+    
+    return hive
 
 def main(*argv):
+    '''handles the user input and runs the functions 
+        needed to make the hive plot'''
     nodefile = ''
     edgefile = ''
     try:
@@ -47,10 +75,13 @@ def main(*argv):
           nodefile = arg
        elif opt in ("-e", "--efile"):
           edgefile = arg
-    print 'Node file is "', nodefile, '"'
+    print '\n\nNode file is "', nodefile, '"'
     print 'Edge file is "', edgefile, '"'
     
-    make_hive(nodefile, edgefile)
+    hive = make_hive(nodefile, edgefile)
+    make_html(hive)
+    
+    print "\n\n"
     
 
 
