@@ -7,9 +7,6 @@ Contains HivePlot module used to produce the JavaScript files
 needed to make a hive plot in D3 using Mike Bolstock's D3 hive module
 '''
 #library imports
-import os
-import sys
-import csv
 import numpy as np
 
 
@@ -33,6 +30,7 @@ class HivePlotter():
             nodeProperties.append(list(column))
         if len(nodeProperties) == 1: 
             nodeProperties=nodeProperties[0] #avoid having a list of one list when there is only 1 property 
+        
         #transform it into the right data type
         self.nodes = self.convert_type(nodes)
         self.nodeNames = self.convert_type(nodeNames)
@@ -68,6 +66,11 @@ class HivePlotter():
             print self.edgeProperties
         return None
 
+    def check_input(self):
+        '''IN DEVELOPMENT
+        checks if all edges are connecting nodes which exist in the self.nodes'''
+        
+        return None
 
     @staticmethod
     def convert_type(data):
@@ -81,7 +84,6 @@ class HivePlotter():
             except ValueError:
                 return data
             
-        
 
 
 # I test stuff here
