@@ -10,7 +10,6 @@ needed to make a hive plot in D3 using Mike Bolstock's D3 hive module
 import os
 import sys
 import getopt
-import numpy as np
 
 #hive data imports
 _cur_dir = os.path.dirname(os.path.realpath(__file__))

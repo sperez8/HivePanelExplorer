@@ -69,6 +69,7 @@ class Hive():
     def make_axes(self, numAxes = 3, doubleAxes = False):
         '''creates axes and angles given the number of axes desired
         and whether the axes are being doubled or not'''
+        self.numAxes = numAxes
         angles = []
         if doubleAxes:
             #create a total of 3*numAxes to make spacing between the doubled axes
@@ -105,14 +106,34 @@ class Hive():
             depending on the rule. Integer valued rules indicate the use of
             node properties. Rules which are string values denote network 
             properties which need to be calculated.'''
-        nodeAssignment = {}
+        assignmentValues = {}
         if type(rule) is int:
             #FILL ME :)
             pass
         else:
             #Need to make a graph instance using networkx
             G = self.make_graph()
-            assignmentValue = self.node_analysis(G, rule)
+            assignmentValues = self.node_analysis(G, rule)
+        
+        #get values to be used to assign nodes
+        #and partition into groups of nodes
+        #make as many groups as numAxes
+        #only works for numerical variables
+        
+        values = assignmentValues.values()
+        values.sort()
+        cutoffs = [int(len(values)/self.numAxes)*i for i in range(1,self.numAxes+1)]
+        
+        nodeAssignments = {}
+        for n in self.nodeNames:
+            i = 0
+            while i < len(cutoffs):
+                if assignmentValues[n] <= cutoffs[i]:
+                    nodeAssignments[n]=i
+                    break
+                else: i+=1
+        if self.debug:
+            print nodeAssignments
         return None
     
     def node_position(self, rule):
