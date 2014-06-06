@@ -128,6 +128,3 @@ function degrees(radians) {
 </script>"""
 
 #more to be added
-
-for i,j in htmlContainer.iteritems():
-    print j
