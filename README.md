@@ -10,12 +10,22 @@ Visualizing large networks is tricky; convential graph layout algorithms such as
 [D3](http://d3js.org/) is a Javascript library used to produce beautiful and interactive graphics in html. Mike Bostock developed a D3 library specifically for plotting beautiful hive plots. Unfortunately, making D3 plots is quit difficult, and often isn't part of a researcher's skill set. Yet many researchers study their data in networks! From social networks to biological networks, all deserve beautiful visualizations. HivePlotter provides an easy to use python interface to build hive plots.
 
 ##Details
-
-**Input**
+###Input
 The network should be stored in two csv input files. The node file should look like:
-kkk
+
+|Node | Name | Property 1 | Property 2|
+|:----:|:----:|:----------:|:----------:|
+|node1 | Alice | girl | ...|
+|node2 | Bob | boy | ...|
+|node 3 | Cam | boy | ...|
+
 
 The link file should look like:
-xxx
 
-*In development:* Inputting the network using an instance of a [networkx](https://networkx.github.io/) is in the works.
+|Source | Target | Property 1 | Property 2|
+|:------:|:------:|:----------:|:----------:|
+|Bob | Alice | friends | ...|
+Bob | Cam | enemies | ...|
+|Alice | Cam | friends | ...|
+
+\* *In development: Inputting the network as an instance of a [networkx](https://networkx.github.io/) is in the works.*
