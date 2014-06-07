@@ -45,8 +45,8 @@ def make_hive(nodefile, edgefile):
     '''creates a hive instance form user input'''
     
     hive = Hive(debug=debug)
-    hive.get_nodes('tests/test_nodes_friends.csv')
-    hive.get_edges('tests/test_edges_friends.csv')
+    hive.get_nodes(nodefile)
+    hive.get_edges(edgefile)
     hive.make_axes(numAxes = numAxes, doubleAxes = doubleAxes)
     hive.node_assignment(rule = axisAssignRule)
     hive.node_position(rule = axisPositRule)
@@ -62,13 +62,13 @@ def main(*argv):
     nodefile = ''
     edgefile = ''
     try:
-       opts, args = getopt.getopt(argv,"hn:e:",["nfile=","ofile="])
+       opts, args = getopt.getopt(argv,"hn:e:",["nfile=","efile="])
     except getopt.GetoptError:
-       print 'main.py -n <nodefile> -o <edgefile>'
+       print 'main.py -n <nodefile> -e <edgefile>'
        sys.exit(2)
     for opt, arg in opts:
        if opt == '-h':
-          print 'main.py -n <nodefile> -o <edgefile>'
+          print 'main.py -n <nodefile> -e <edgefile>'
           sys.exit()
        elif opt in ("-n", "--nfile"):
           nodefile = arg
