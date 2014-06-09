@@ -23,7 +23,7 @@ HivePlotter was developped using Python version 2.7. The following packages are 
 ####Input
 The network should be stored in two csv input files. The node file should look like:
 
-|Node number| Property 1 | Property 2|
+| Node | Property 1 | Property 2|
 |:----:|:----------:|:----------:|
 | Alice | girl | 12 |
 | Bob | boy | 11 |
