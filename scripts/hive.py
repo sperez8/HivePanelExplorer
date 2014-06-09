@@ -44,12 +44,10 @@ class Hive():
         #    nodeProperties=nodeProperties[0] #avoid having a list of one list when there is only 1 property 
         
         #transform node names and properties into the numerical types if possible
-        self.nodeNames = self.convert_type(nodeNames)
         self.nodeProperties = [self.convert_type(p) for p in nodeProperties]
         
         if self.debug:
             print 'Nodes are: ', self.nodes
-            print 'Node names are: ', self.nodeNames
             print 'Node properties are: ', self.nodeProperties
         return None
 
@@ -100,7 +98,7 @@ class Hive():
         return None
 
     def make_graph(self):
-        '''Makes a graph using networkx package Graph instance'''
+        '''Makes a graph using the networkx package Graph instance'''
         self.check_input()
         G = nx.Graph()
         G.add_edges_from(zip(self.sources,self.targets))

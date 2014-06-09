@@ -6,34 +6,36 @@ by sperez
 contains all the pieces of the html and d3 functions to plot the hive
 '''
 
-from collections import OrderedDict
+htmlContainer= {}
 
-htmlContainer= OrderedDict()
+keyOrder = ['intro', 'nodefile', 'edgefile','start js parameters','titleheader',
+            'numAxes', 'angles','color', 'end js parameters', 'd3functions']
 
 htmlContainer['intro'] = """<!comment This is a hive plot developed using HivePlotter.>
-
 <!DOCTYPE html>
 <meta charset="utf-8">
 <body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/d3.hive.v0.min.js"></script>
-<script src="
 """
-htmlContainer['nodefile'] = 'nodes.js' #will be specified by user                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-htmlContainer['filewrapper'] ='"></script> \n<script src="'
-htmlContainer['linkfile'] = 'links.js' #will be specified by user
-htmlContainer['titleheader'] = '"></script> \n<script> \nvar SVGTitle = \''
-htmlContainer['title'] = 'hive plot 1' #will be modifed by user
-htmlContainer['d3functions'] = """\'
 
-var show_indicator = true
+htmlContainer['nodefile'] = 'nodes.js' #will be specified by user
+htmlContainer['edgefile'] = 'links.js' #will be specified by user
 
-var nodesize = 5
+htmlContainer['start js parameters'] = '' #will be specified by user
+htmlContainer['titleheader'] = '' #will be specified by user
+htmlContainer['numAxes'] = '' #will be specified by user
+htmlContainer['angles'] = '' #will be specified by user
+htmlContainer['color'] = '' #will be specified by user
+htmlContainer['end js parameters'] = '' #will be specified by user
+
+
+htmlContainer['d3functions'] = """
+<script>
+
+var nodesize = 7
     nodestroke = 0.4
     nodestrokecolor = "grey"
-    ind1 = "#E3CD9D" //beige
-    ind2 = "#EBAB21" //orange
-    indmin = "#543A02" //brown
     
 var width = 600
     height = 500
@@ -42,16 +44,11 @@ var width = 600
 
 var linkfill = "none"
     linkwidth = 0.8
-    oplink = 0.8
-    opnode = 0.8
+    oplink = 0.9
+    opnode = 0.9
     bkgcolor = "white"
-    //modulecolor = ["#bdbdbd","#80cdc1","#35978f","#01665e","#003c30"]
-    //folowing colors are in order of dark to light
-    modulecolor = ["#bdbdbd","#003c30","#01665e","#35978f","#80cdc1"]
-    num_axis = 6    //want 6 axis
     
-var angle = [-0.35, 0.35, 1.75, 2.44, 3.84, 4.54], // for 6 axis
-    radius = d3.scale.linear().range([innerRadius, outerRadius]);
+var radius = d3.scale.linear().range([innerRadius, outerRadius]);
 
 var angles = d3.scale.ordinal()
     .domain(d3.range(num_axis))
@@ -88,7 +85,7 @@ svg.selectAll(".link")
     .radius(function(d) { return radius(d.pos); }))
     .style("fill", linkfill)
     .style("stroke-opacity", oplink)
-    .style("stroke", function(d) { return colors(d.source.mod); })
+    .style("stroke", color)
     .style("stroke-width", linkwidth);
   
 svg.selectAll(".node")
@@ -100,26 +97,7 @@ svg.selectAll(".node")
     .attr("r", nodesize)
     .attr("stroke-width", nodestroke)
     .attr("stroke", nodestrokecolor)
-    .style("fill-opacity", function(d) {
-        if (show_indicator){
-            if (d.ind == 0){
-                return opnode*0.3}
-            else {return opnode}
-            }
-        else{return opnode}
-        })
-     .style("fill", function(d) { 
-         if (show_indicator){
-            if (d.ind == 1){
-                return ind1}
-            else if (d.ind == 2){
-                return ind2}
-            else if (d.ind == 3){
-                return indmin}
-            else {return colors(d.mod)}
-            }
-        else {return colors(d.mod)}
-        })
+    .style("fill-opacity", color);
 
 function degrees(radians) {
   return radians / Math.PI * 180 - 90;

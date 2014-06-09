@@ -27,17 +27,45 @@ numAxes = 3
 doubleAxes = False
 axisAssignRule = 'degree'
 axisPositRule = 2
+color = 'purple'
 
 
-def make_html(hive):
+def make_html(title, hive):
     '''takes a hive instance and write the
     following files:
         nodes.js - contains nodes, position and coloring
         edges.js - contains edges and their type
         hiveplot.html - contains the html and D3 script to make the hive plot!
     '''
+    htmlItems = html_items.htmlContainer
+    keyOrder = html_items.keyOrder
     
-    #print htmlContainer
+    outputfile = _root_dir + '/tests/' + title + ".html"
+    
+    with open(outputfile, 'w') as f:
+        for key in keyOrder:
+            text = htmlItems[key]
+            #wrap text given user input
+            if key == 'nodefile':
+                f.write('<script src="' + 'nodes' + title + '.js'+  '"></script>')
+            elif key == 'edgefile':
+                f.write('<script src="' + 'edges' + title + '.js'+  '"></script>')
+            elif key == 'start js parameters':
+                f.write('<script>')
+            elif key == 'titleheader':
+                f.write('var SVGTitle = \'' + 'Hive plot : ' + title + '\'')
+            elif key == 'angles':
+                f.write('var angle = ['+ ','.join([str(a) for a in hive.angles]) +']')
+            elif key == 'color':
+                f.write('var modulecolor = ' + '\'' + color + '\'')
+            elif key == 'end js parameters':
+                f.write('</script>')
+            else:
+                f.write(text)
+            f.write('\n')
+        
+    f.close()
+    
     return None
 
 def make_hive(nodefile, edgefile, debug):
@@ -65,14 +93,15 @@ def main(*argv):
     nodefile = ''
     edgefile = ''
     debug = False
+    title = ''
     try:
-        opts, args = getopt.getopt(argv,"hn:e:d",["nfile=","efile="])
+        opts, args = getopt.getopt(argv,"hn:e:t:d",["nfile=","efile=","title="])
     except getopt.GetoptError:
-       print 'main.py -n <nodefile> -e <edgefile> -d'
+       print 'main.py -n <nodefile> -e <edgefile> -t <title> -d'
        sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print 'main.py -n <nodefile> -e <edgefile> -d'
+            print 'main.py -n <nodefile> -e <edgefile> -t <title> -d'
             sys.exit()
         elif opt in ("-n", "--nfile"):
             nodefile = arg
@@ -80,11 +109,13 @@ def main(*argv):
             edgefile = arg
         elif opt in ("-d"):
             debug = True
+        elif opt in ("-t", "--title"):
+            title = arg
     print '\nNode file is "', nodefile, '"'
     print 'Edge file is "', edgefile, '"'
     
     hive = make_hive(nodefile, edgefile, debug)
-    make_html(hive)    
+    make_html(title, hive)    
     
     print '\n'
 
