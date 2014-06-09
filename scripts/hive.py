@@ -30,16 +30,21 @@ class Hive():
         '''gets nodes and their properties from csv file'''
         data = np.genfromtxt(inputFile, delimiter=delimiter, skiprows = 1, dtype='str')
         #get all the node data
-        nodes = data[:,0]        
+        nodes = data[:,0]
+        #double the number of nodes when axes are doubled
+        if self.doubleAxes:
+            self.nodes = [n+".1" for n in nodes]
+            self.nodes.extend([n+".2" for n in nodes])
+        else: 
+            self.nodes = node
         nodeNames = data[:,1]
         nodeProperties = []
         for column in data[:,2:].T:
             nodeProperties.append(list(column))
-        if len(nodeProperties) == 1: 
-            nodeProperties=nodeProperties[0] #avoid having a list of one list when there is only 1 property 
+        #if len(nodeProperties) == 1: 
+        #    nodeProperties=nodeProperties[0] #avoid having a list of one list when there is only 1 property 
         
-        #transform it into the right data type
-        self.nodes = self.convert_type(nodes)
+        #transform node names and properties into the numerical types if possible
         self.nodeNames = self.convert_type(nodeNames)
         self.nodeProperties = [self.convert_type(p) for p in nodeProperties]
         
@@ -127,10 +132,16 @@ class Hive():
             i = 0
             while i < len(cutoffValues):
                 if assignmentValues[n] <= cutoffValues[i]:
-                    nodeAssignments[n]=i
+                    nodeAssignments[n]=i+1 #want the node group to start at 1, not 0
                     break
                 else: i+=1
                 
+        if self.doubleAxes:
+            #for the case of 3 doubled axis, the axis groups become 2,4,6 below
+            [nodeAssignments.update({n:i*2}) for n,i in nodeAssignments.iteritems()]
+            #for the node on the first axis, we change its group to 1,2 or 3
+            #so that nodes in group 1 are now on axis 1 or 2, group 2 in 3 or 4 and group 3 in 5 or 6.
+            [nodeAssignments.update({n:(i-1)}) if n[-2:] == '.1' else None for n,i in nodeAssignments.iteritems()]
         if self.debug:
             print 'node assignments to axis:', nodeAssignments
             
@@ -170,21 +181,35 @@ class Hive():
             G = self.make_graph()
             assignmentValues = self.node_analysis(G, rule)
         
-        return assignmentValues
+        if self.doubleAxes:
+            newAssignmentValues = {}
+            for n,v in assignmentValues.iteritems():
+                newAssignmentValues[n +'.1'] = v
+                newAssignmentValues[n +'.2'] = v
+            return newAssignmentValues
+        else:
+            return assignmentValues
 
     def make_edges(self):
+        '''takes sources and targets and makes a list of 
+        edges while assignment nodes to the correct axis in 
+        the case of double axis.'''
+        
+        
+        
+        
         return None
     
-    def node_properties(self):
+    def node_style(self, opacity = 0.9, color = 'purple', size = '7'):
         return None
     
-    def edge_properties(self):
+    def edge_style(self, opacity = 0.9, color = 'purple', size = '7'):
         return None
 
     def check_input(self):
         '''IN DEVELOPMENT
         checks if all edges are connecting nodes which exist in the self.nodes'''
-        return None
+        return True
 
     @staticmethod
     def node_analysis(G, rule):

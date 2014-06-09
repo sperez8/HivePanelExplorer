@@ -24,7 +24,7 @@ from hive import Hive
 # Below are variables which would normally be inputer by the user.
 # For the sake of developing the script I have stored them here for convenience
 numAxes = 3
-doubleAxes = False
+doubleAxes = True
 axisAssignRule = 'degree'
 axisPositRule = 2
 
@@ -53,9 +53,9 @@ def make_hive(nodefile, edgefile, debug):
     hive.make_axes()
     hive.node_assignment()
     hive.node_position()
-    hive.node_properties()
+    hive.node_style()
     hive.make_edges()
-    hive.edge_properties()
+    hive.edge_style()
     
     return hive
 
