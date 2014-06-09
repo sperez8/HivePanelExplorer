@@ -23,11 +23,11 @@ HivePlotter was developped using Python version 2.7. The following packages are 
 ####Input
 The network should be stored in two csv input files. The node file should look like:
 
-|Node number| Node name | Property 1 | Property 2|
-|:----:|:----:|:----------:|:----------:|
-|node1 | Alice | girl | ...|
-|node2 | Bob | boy | ...|
-|node 3 | Cam | boy | ...|
+|Node number| Property 1 | Property 2|
+|:----:|:----------:|:----------:|
+| Alice | girl | 12 |
+| Bob | boy | 11 |
+| Cam | boy | 13 |
 
 
 The link file needs to specify edges using sources and targets (thought the directionality of the link will be ignored unless specified). The 'Node number' or the 'Node name' as specified in the node input file can be used to specify an edge. The link input file should look like:
