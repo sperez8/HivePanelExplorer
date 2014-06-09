@@ -3,6 +3,10 @@ HivePlotter
 
 A Python script that takes a network and writes the HTML and JavaScript files necessary to create hive plots in D3.
 
+
+**Warning:** Please note that the code is under heavy development. A fully functional code will be available in the next few weeks.
+
+
 ## Why hive plots?
 Visualizing large networks is tricky; conventional graph layout such as force directed layouts are inconsistent, often resemble "hair balls" and can even suggest patterns which aren't actually there. Comes in Martin Krzywinski (Genome Science Center, Vancouver, BC) and develops [hive plots](http://www.hiveplot.net/), a coherent network layout algorithm that places nodes using predefined rules. Hive plots facilitate the visualization of structural patterns in a network and the comparison on networks.
 
