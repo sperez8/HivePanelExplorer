@@ -173,13 +173,15 @@ class Hive():
 
     @staticmethod
     def convert_type(data):
-        try:
-            convertedData = [int(d) for d in data]
-            return convertedData
-        except ValueError:
-            try:
-                convertedData = [float(d) for d in data]
-                return convertedData
-            except ValueError:
-                return data
-    
+    	def num(s):
+    		'''convert list of strings to corresponding int or float type'''
+    		try:
+    			return int(d)
+    		except ValueError:
+    			return float(d)
+    		
+    	try:
+    		convertedData = [num(d) for d in data]
+    		return convertedData
+    	except ValueError:
+    		return data
