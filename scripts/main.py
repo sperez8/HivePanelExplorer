@@ -24,7 +24,7 @@ from hive import Hive
 # Below are variables which would normally be inputer by the user.
 # For the sake of developing the script I have stored them here for convenience
 numAxes = 3
-doubleAxes = False
+doubleAxes = True
 axisAssignRule = 'degree'
 axisPositRule = 2
 color = 'purple'
@@ -35,7 +35,7 @@ def write_nodes(file, hive):
     
     f = open(file, 'w')
     f.write('var nodes = [\n')
-
+    
     for i,n in enumerate(hive.nodes):
         f.write('  {axis: ' + str(hive.axisAssignment[n]-1) + ', pos: ' + str(hive.nodePositions[n]) + '},\n')
     f.write('];')
@@ -46,7 +46,7 @@ def write_edges(file, hive):
     
     f = open(file, 'w')
     f.write('var links = [\n')
-    for s, t in zip(hive.sources, hive.targets):
+    for s, t in zip(hive.newSources, hive.newTargets):
         f.write('  {source: nodes['+str(hive.nodes.index(s))+'], target: nodes['+str(hive.nodes.index(t))+']},\n')
     f.write('];')
     

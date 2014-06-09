@@ -142,7 +142,7 @@ class Hive():
         self.axisAssignment = axisAssignment
         
         if self.debug:
-            print 'node assignments to axis:', axisAssignment
+            print '    Node assignments to axis:', axisAssignment
             
         return None
     
@@ -163,7 +163,7 @@ class Hive():
             
         self.nodePositions = nodePositions
         if self.debug:
-            print 'node positions on axis:', nodePositions
+            print '    Node positions on axis:', nodePositions
         return None
 
     def get_assignment_values(self, rule):
@@ -175,20 +175,25 @@ class Hive():
                 print 'Please choose a node assignment rule which is either a network'
                 print 'feature or one of the {0} column(s) of the node properties in the input file'.format(len(nodeProperties))
                 sys.exit()
-            [assignmentValues.update({n:p}) for n,p in zip(self.nodes, properties)]
-        if isinstance(rule, str):
+            if self.doubleAxes:
+                [assignmentValues.update({n:p}) for n,p in zip(self.nodes, properties*2)]
+            else:
+                [assignmentValues.update({n:p}) for n,p in zip(self.nodes, properties)]
+            return assignmentValues
+        
+        elif isinstance(rule, str):
             #Need to make a graph instance using networkx
             G = self.make_graph()
             assignmentValues = self.node_analysis(G, rule)
-        
-        if self.doubleAxes:
-            newAssignmentValues = {}
-            for n,v in assignmentValues.iteritems():
-                newAssignmentValues[n +'.1'] = v
-                newAssignmentValues[n +'.2'] = v
-            return newAssignmentValues
-        else:
-            return assignmentValues
+            if self.doubleAxes:
+                newAssignmentValues = {}
+                for n,v in assignmentValues.iteritems():
+                    newAssignmentValues[n +'.1'] = v
+                    newAssignmentValues[n +'.2'] = v
+                return newAssignmentValues
+        else: 
+            print "Rule could not be parsed"
+            sys.exit()
 
     def make_edges(self):
         '''takes sources and edges and makes a list of 
