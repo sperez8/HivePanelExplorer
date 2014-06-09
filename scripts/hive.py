@@ -97,8 +97,8 @@ class Hive():
         G = nx.Graph()
         G.add_edges_from(zip(self.sources,self.targets))
         if self.debug:
-            print 'nodes', G.nodes()
-            print 'edges', G.edges()
+            print 'Graph nodes:', G.nodes()
+            print 'Graph edges:', G.edges()
         return G
 
     def node_assignment(self, rule):
@@ -107,10 +107,15 @@ class Hive():
             node properties. Rules which are string values denote network 
             properties which need to be calculated.'''
         assignmentValues = {}
-        if type(rule) is int:
-            #FILL ME :)
-            pass
-        else:
+        if isinstance(rule, int):
+            try: 
+                properties = self.nodeProperties[rule-1]
+            except ValueError:
+                print 'Please choose a node assignment rule which is either a network'
+                print 'feature or one of the {0} column(s) of the node properties in the input file'.format(len(nodeProperties))
+                sys.exit()
+            [assignmentValues.update({n:p}) for n,p in zip(self.nodes, properties)]
+        if isinstance(rule, str):
             #Need to make a graph instance using networkx
             G = self.make_graph()
             assignmentValues = self.node_analysis(G, rule)
@@ -118,23 +123,24 @@ class Hive():
         #get values to be used to assign nodes
         #and partition into groups of nodes
         #make as many groups as numAxes
-        #only works for numerical variables
+        #only works for numerical variables for now but will be improved for categorical ones
         
         values = assignmentValues.values()
         values.sort()
         cutoffs = [int(len(values)/self.numAxes)*i for i in range(1,self.numAxes+1)]
+        cutoffValues = [values[c] for c in cutoffs] # to prevent nodes with the same value to be in different groups
         
         nodeAssignments = {}        
         
         for n in self.nodes:
             i = 0
-            while i < len(cutoffs):
-                if assignmentValues[n] <= cutoffs[i]:
+            while i < len(cutoffValues):
+                if assignmentValues[n] <= cutoffValues[i]:
                     nodeAssignments[n]=i
                     break
                 else: i+=1
         if self.debug:
-            print nodeAssignments
+            print 'node assignments to axis:', nodeAssignments
         return None
     
     def node_position(self, rule):

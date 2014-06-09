@@ -3,7 +3,7 @@ created  03/06/2014
 
 by sperez
 
-Takes user input and calles Hive module to produce the JavaScript files
+Takes user input and calls Hive module to produce the JavaScript files
 needed to make a hive plot in D3 using Mike Bolstock's D3 hive module
 '''
 #library imports
@@ -25,8 +25,8 @@ from hive import Hive
 # For the sake of developing the script I have stored them here for convenience
 #-----------------------
 numAxes = 3
-doubleAxes = True
-axisAssignRule = 'degree'
+doubleAxes = False
+axisAssignRule = 2 #'degree'
 axisPositRule = 1
 
 
@@ -63,7 +63,7 @@ def main(*argv):
     edgefile = ''
     debug = False
     try:
-        opts, args = getopt.getopt(argv,"hn:e:",["nfile=","efile="])
+        opts, args = getopt.getopt(argv,"hn:e:d",["nfile=","efile="])
     except getopt.GetoptError:
        print 'main.py -n <nodefile> -e <edgefile> -d'
        sys.exit(2)
@@ -77,7 +77,7 @@ def main(*argv):
             edgefile = arg
         elif opt in ("-d"):
             debug = True
-    print '\n\nNode file is "', nodefile, '"'
+    print '\nNode file is "', nodefile, '"'
     print 'Edge file is "', edgefile, '"'
     
     hive = make_hive(nodefile, edgefile, debug)
