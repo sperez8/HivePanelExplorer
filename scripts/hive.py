@@ -15,7 +15,14 @@ import networkx as nx
 class Hive():
     '''contains node and edge, coloring, position, etc...'''
     
-    def __init__(self, debug = True):
+    def __init__(self, numAxes = 3, doubleAxes = False, 
+                 axisAssignRule = 'degree', axisPositRule = 'closeness', 
+                 debug = True):
+        '''Initializing defining parameters of the hive''' 
+        self.numAxes = numAxes
+        self.doubleAxes = doubleAxes
+        self.axisAssignRule = axisAssignRule
+        self.axisPositRule = axisPositRule
         self.debug = debug
         return None
     
@@ -66,16 +73,15 @@ class Hive():
             print 'Edge properties are: ', self.edgeProperties
         return None
 
-    def make_axes(self, numAxes = 3, doubleAxes = False):
+    def make_axes(self):
         '''creates axes and angles given the number of axes desired
         and whether the axes are being doubled or not'''
-        self.numAxes = numAxes
         angles = []
-        if doubleAxes:
-            #create a total of 3*numAxes to make spacing between the doubled axes
-            allAngles = [2.0*pi/float(numAxes*3)*i for i in range(0,numAxes*3)]
-            #recenter the axes for symmetry when the number of axes is odd
-            if numAxes % 2 != 0:
+        if self.doubleAxes:
+            #create a total of 3*self.numAxes to make spacing between the doubled axes
+            allAngles = [2.0*pi/float(self.numAxes*3)*i for i in range(0,self.numAxes*3)]
+            #re-center the axes for symmetry when the number of axes is odd
+            if self.numAxes % 2 != 0:
                 shiftBy = allAngles[1]/2.0
                 allAngles = [a-shiftBy for a in allAngles]
             #remove the "spacer" axes
@@ -83,16 +89,16 @@ class Hive():
                 if (allAngles.index(a)+1) % 3 != 0:
                     angles.append(a)
         else:
-            angles = [2.0*pi/float(numAxes)*i for i in range(0,numAxes)]
+            angles = [2.0*pi/float(self.numAxes)*i for i in range(0,self.numAxes)]
 
         angles = [round(a,2) for a in angles]
         if self.debug:
-            print "\nAxes angles are", angles   
+            print "Axes angles are", angles   
         self.angles = angles
         return None
 
     def make_graph(self):
-        '''Makes a graph using networkx Graph instance'''
+        '''Makes a graph using networkx package Graph instance'''
         self.check_input()
         G = nx.Graph()
         G.add_edges_from(zip(self.sources,self.targets))
@@ -101,28 +107,28 @@ class Hive():
             print 'Graph edges:', G.edges()
         return G
 
-    def node_assignment(self, rule):
+    def node_assignment(self):
         '''determines on which axis the node should be placed
             depending on the rule. Integer valued rules indicate the use of
             node properties. Rules which are string values denote network 
             properties which need to be calculated.'''
         assignmentValues = {}
-        if isinstance(rule, int):
+        if isinstance(self.axisAssignRule, int):
             try: 
-                properties = self.nodeProperties[rule-1]
+                properties = self.nodeProperties[self.axisAssignRule-1]
             except ValueError:
                 print 'Please choose a node assignment rule which is either a network'
                 print 'feature or one of the {0} column(s) of the node properties in the input file'.format(len(nodeProperties))
                 sys.exit()
             [assignmentValues.update({n:p}) for n,p in zip(self.nodes, properties)]
-        if isinstance(rule, str):
+        if isinstance(self.axisAssignRule, str):
             #Need to make a graph instance using networkx
             G = self.make_graph()
-            assignmentValues = self.node_analysis(G, rule)
+            assignmentValues = self.node_analysis(G, self.axisAssignRule)
         
         #get values to be used to assign nodes
         #and partition into groups of nodes
-        #make as many groups as numAxes
+        #make as many groups as self.numAxes
         #only works for numerical variables for now but will be improved for categorical ones
         
         values = assignmentValues.values()
@@ -143,7 +149,7 @@ class Hive():
             print 'node assignments to axis:', nodeAssignments
         return None
     
-    def node_position(self, rule):
+    def node_position(self):
         return None
     
     def make_edges(self):

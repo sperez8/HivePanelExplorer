@@ -23,7 +23,6 @@ from hive import Hive
 #-----------------------
 # Below are variables which would normally be inputer by the user.
 # For the sake of developing the script I have stored them here for convenience
-#-----------------------
 numAxes = 3
 doubleAxes = False
 axisAssignRule = 2 #'degree'
@@ -44,12 +43,16 @@ def make_html(hive):
 def make_hive(nodefile, edgefile, debug):
     '''creates a hive instance form user input'''
     
-    hive = Hive(debug=debug)
+    hive = Hive(numAxes = numAxes, 
+                doubleAxes = doubleAxes, 
+                axisAssignRule = axisAssignRule, 
+                axisPositRule = axisPositRule, 
+                debug = debug)
     hive.get_nodes(nodefile)
     hive.get_edges(edgefile)
-    hive.make_axes(numAxes = numAxes, doubleAxes = doubleAxes)
-    hive.node_assignment(rule = axisAssignRule)
-    hive.node_position(rule = axisPositRule)
+    hive.make_axes()
+    hive.node_assignment()
+    hive.node_position()
     hive.node_properties()
     hive.make_edges()
     hive.edge_properties()
@@ -81,10 +84,9 @@ def main(*argv):
     print 'Edge file is "', edgefile, '"'
     
     hive = make_hive(nodefile, edgefile, debug)
-    make_html(hive)
+    make_html(hive)    
     
-    print "\n\n"
-    
+    print '\n'
 
 
 if __name__ == "__main__":
