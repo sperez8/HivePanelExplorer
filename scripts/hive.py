@@ -36,10 +36,9 @@ class Hive():
             self.nodes = [n+".1" for n in nodes]
             self.nodes.extend([n+".2" for n in nodes])
         else: 
-            self.nodes = node
-        nodeNames = data[:,1]
+            self.nodes = nodes
         nodeProperties = []
-        for column in data[:,2:].T:
+        for column in data[:,1:].T:
             nodeProperties.append(list(column))
         #if len(nodeProperties) == 1: 
         #    nodeProperties=nodeProperties[0] #avoid having a list of one list when there is only 1 property 
@@ -58,8 +57,8 @@ class Hive():
         '''gets edges and their properties from csv file'''
         data = np.genfromtxt(inputFile, delimiter=delimiter, skiprows = 1, dtype='str')
         #get all the edge data
-        sources = data[:,0]        
-        targets = data[:,1]
+        self.sources = data[:,0]        
+        self.targets = data[:,1]
         edgeProperties = []
         for column in data[:,2:].T:
             edgeProperties.append(list(column))
@@ -68,8 +67,6 @@ class Hive():
             edgeProperties=edgeProperties[0] #avoid having a list of one list when there is only 1 property 
             
         #transform it into the right data type
-        self.sources = self.convert_type(sources)
-        self.targets = self.convert_type(targets)
         self.edgeProperties = [self.convert_type(p) for p in edgeProperties]
         
         if self.debug:
@@ -142,6 +139,9 @@ class Hive():
             #for the node on the first axis, we change its group to 1,2 or 3
             #so that nodes in group 1 are now on axis 1 or 2, group 2 in 3 or 4 and group 3 in 5 or 6.
             [nodeAssignments.update({n:(i-1)}) if n[-2:] == '.1' else None for n,i in nodeAssignments.iteritems()]
+        
+        self.nodeAssignments = nodeAssignments
+        
         if self.debug:
             print 'node assignments to axis:', nodeAssignments
             
@@ -191,10 +191,64 @@ class Hive():
             return assignmentValues
 
     def make_edges(self):
-        '''takes sources and targets and makes a list of 
+        '''takes sources and edges and makes a list of 
         edges while assignment nodes to the correct axis in 
         the case of double axis.'''
+        newSources = []
+        newTargets = []
+        axis = self.nodeAssignments
+        for s,t in zip(self.sources, self.targets):
+            if self.doubleAxes:
+                s1 = s + '.1'
+                s2 = s + '.2'
+                t1 = t + '.1'
+                t2 = t + '.2'
+                
+                #if nodes are from same group we add edge
+                #and it's symmetrical edge within the doubled Axes
+                #works for non double axes as well
+                if axis[s1] == axis[t1]:
+                    newSources.extend([s1,t1])
+                    newTargets.extend([t2,s2])
+                #if nodes from different groups, we make an edge
+                #between the '.1' or '.2' nodes nearest to each other
+                elif axis[s1] == axis[t1] + 2:
+                    newSources.append(s1)
+                    newTargets.append(t2)
+                elif axis[s1] + 2 == axis[t1]:
+                    newSources.append(s2)
+                    newTargets.append(t1)
+                #the edges below loop back from the highest numbered axis to the first axis
+                elif axis[s1] == 1 and axis[t2] == self.numAxes*2:
+                    newSources.append(s1)
+                    newTargets.append(t2)
+                elif axis[t1] == 1 and axis[s2] == self.numAxes*2:
+                    newSources.append(s2)
+                    newTargets.append(t1)
+                else:
+                    pass
+            else:
+                #makes edges for nodes of neighboring axes,
+                #doesn't include self nodes, nor nodes of same group
+                #nor nodes from non-neighboring axes when numAxes >3
+                if abs(axis[s]-axis[t]) == 1:
+                    newSources.append(s)
+                    newTargets.append(t)
+                #gets edges that connect nodes on the 1st and last axes
+                elif axis[s] == 1 and axis[t] == self.numAxes:
+                    newSources.append(s)
+                    newTargets.append(t)
+                elif axis[t] == 1 and axis[t] == self.numAxes:
+                    newSources.append(s)
+                    newTargets.append(t)        
+        self.newSources = newSources
+        self.newTargets = newTargets
         
+        if self.debug:
+            print 'The new sources are:', newSources
+            print 'The new sources are:', newTargets
+            
+        return None    
         
         
         
