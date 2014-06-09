@@ -124,8 +124,9 @@ class Hive():
         values.sort()
         cutoffs = [int(len(values)/self.numAxes)*i for i in range(1,self.numAxes+1)]
         
-        nodeAssignments = {}
-        for n in self.nodeNames:
+        nodeAssignments = {}        
+        
+        for n in self.nodes:
             i = 0
             while i < len(cutoffs):
                 if assignmentValues[n] <= cutoffs[i]:

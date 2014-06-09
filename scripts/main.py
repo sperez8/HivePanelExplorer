@@ -10,6 +10,7 @@ needed to make a hive plot in D3 using Mike Bolstock's D3 hive module
 import os
 import sys
 import getopt
+import string
 
 #hive data imports
 _cur_dir = os.path.dirname(os.path.realpath(__file__))
@@ -23,7 +24,6 @@ from hive import Hive
 # Below are variables which would normally be inputer by the user.
 # For the sake of developing the script I have stored them here for convenience
 #-----------------------
-debug = False
 numAxes = 3
 doubleAxes = True
 axisAssignRule = 'degree'
@@ -41,7 +41,7 @@ def make_html(hive):
     #print htmlContainer
     return None
 
-def make_hive(nodefile, edgefile):
+def make_hive(nodefile, edgefile, debug):
     '''creates a hive instance form user input'''
     
     hive = Hive(debug=debug)
@@ -61,23 +61,27 @@ def main(*argv):
         needed to make the hive plot'''
     nodefile = ''
     edgefile = ''
+    debug = False
     try:
-       opts, args = getopt.getopt(argv,"hn:e:",["nfile=","ofile="])
+       opts, args = getopt.getopt(argv,"hn:e:d",["nfile=","efile=","debug="])
     except getopt.GetoptError:
-       print 'main.py -n <nodefile> -o <edgefile>'
+       print 'main.py -n <nodefile> -e <edgefile> -d'
        sys.exit(2)
     for opt, arg in opts:
-       if opt == '-h':
-          print 'main.py -n <nodefile> -o <edgefile>'
-          sys.exit()
-       elif opt in ("-n", "--nfile"):
-          nodefile = arg
-       elif opt in ("-e", "--efile"):
-          edgefile = arg
+        if opt == '-h':
+            print 'main.py -n <nodefile> -e <edgefile> -d'
+            sys.exit()
+        elif opt in ("-n", "--nfile"):
+            nodefile = arg
+        elif opt in ("-e", "--efile"):
+            edgefile = arg
+        elif opt in ("-d"):
+            debug = True
+
     print '\n\nNode file is "', nodefile, '"'
     print 'Edge file is "', edgefile, '"'
     
-    hive = make_hive(nodefile, edgefile)
+    hive = make_hive(nodefile, edgefile, debug)
     make_html(hive)
     
     print "\n\n"
