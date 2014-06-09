@@ -5,13 +5,13 @@
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/d3.hive.v0.min.js"></script>
 
-<script src="nodesfriends.js"></script>
-<script src="edgesfriends.js"></script>
+<script src="/Users/sperez/git/HivePlotter/tests/nodesfriends.js"></script>
+<script src="/Users/sperez/git/HivePlotter/tests/edgesfriends.js"></script>
 <script>
 var SVGTitle = 'Hive plot : friends'
-
-var angle = [0.0,2.09,4.19]
-var modulecolor = 'purple'
+var num_axis = 3
+var angle = [0.0001,2.09,4.19]
+var color = 'purple'
 </script>
 
 <script>
@@ -37,9 +37,9 @@ var angles = d3.scale.ordinal()
     .domain(d3.range(num_axis))
     .range(angle);
 
-var colors = d3.scale.linear()
-    .domain(d3.range(0,modulecolor.length,1.0))
-    .range(modulecolor);
+//var colors = d3.scale.linear()
+//    .domain(d3.range(0,modulecolor.length,1.0))
+//    .range(modulecolor);
 
 var svg = d3.select("body").append("svg")
     .attr("class", SVGTitle)

@@ -1,5 +1,4 @@
 Source,Target,Property
-Alice,Bob,2
 Bob,Cam,3
 Cam,Fatima,4
 Daniella,Alice,0
@@ -8,3 +7,5 @@ Eric,Bob,1
 Cam,Alice,1
 Fatima,Alice,4
 Alice,George,8
+Bob,George,7
+Bob,Fatima,6

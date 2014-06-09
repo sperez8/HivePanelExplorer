@@ -30,7 +30,7 @@ class Hive():
         '''gets nodes and their properties from csv file'''
         data = np.genfromtxt(inputFile, delimiter=delimiter, skiprows = 1, dtype='str')
         #get all the node data
-        nodes = data[:,0]
+        nodes = list(data[:,0])
         #double the number of nodes when axes are doubled
         if self.doubleAxes:
             self.nodes = [n+".1" for n in nodes]
@@ -55,8 +55,8 @@ class Hive():
         '''gets edges and their properties from csv file'''
         data = np.genfromtxt(inputFile, delimiter=delimiter, skiprows = 1, dtype='str')
         #get all the edge data
-        self.sources = data[:,0]        
-        self.targets = data[:,1]
+        self.sources = list(data[:,0])        
+        self.targets = list(data[:,1])
         edgeProperties = []
         for column in data[:,2:].T:
             edgeProperties.append(list(column))
@@ -92,6 +92,7 @@ class Hive():
             angles = [2.0*pi/float(self.numAxes)*i for i in range(0,self.numAxes)]
 
         angles = [round(a,2) for a in angles]
+        angles = [0.0001 if a == 0 else a for a in angles] #d3 code doesn't work with an angle of exactly zero
         if self.debug:
             print "Axes angles are", angles   
         self.angles = angles
@@ -114,7 +115,7 @@ class Hive():
             properties which need to be calculated. Nodes are partitioned into groups
             depending on their value related to the rule. There are as many groups
             as numAxes'''
-        nodeAssignments = {} 
+        axisAssignment = {} 
         assignmentValues = self.get_assignment_values(self.axisAssignRule)
 
         #only works for numerical variables for now but will be improved for categorical ones
@@ -127,21 +128,21 @@ class Hive():
             i = 0
             while i < len(cutoffValues):
                 if assignmentValues[n] <= cutoffValues[i]:
-                    nodeAssignments[n]=i+1 #want the node group to start at 1, not 0
+                    axisAssignment[n]=i+1 #want the node group to start at 1, not 0
                     break
                 else: i+=1
                 
         if self.doubleAxes:
             #for the case of 3 doubled axis, the axis groups become 2,4,6 below
-            [nodeAssignments.update({n:i*2}) for n,i in nodeAssignments.iteritems()]
+            [axisAssignment.update({n:i*2}) for n,i in axisAssignment.iteritems()]
             #for the node on the first axis, we change its group to 1,2 or 3
             #so that nodes in group 1 are now on axis 1 or 2, group 2 in 3 or 4 and group 3 in 5 or 6.
-            [nodeAssignments.update({n:(i-1)}) if n[-2:] == '.1' else None for n,i in nodeAssignments.iteritems()]
+            [axisAssignment.update({n:(i-1)}) if n[-2:] == '.1' else None for n,i in axisAssignment.iteritems()]
         
-        self.nodeAssignments = nodeAssignments
+        self.axisAssignment = axisAssignment
         
         if self.debug:
-            print 'node assignments to axis:', nodeAssignments
+            print 'node assignments to axis:', axisAssignment
             
         return None
     
@@ -160,6 +161,7 @@ class Hive():
         for n,p in assignmentValues.iteritems():
             nodePositions[n] = round(float(p)/float(maxValue),3)
             
+        self.nodePositions = nodePositions
         if self.debug:
             print 'node positions on axis:', nodePositions
         return None
@@ -194,7 +196,7 @@ class Hive():
         the case of double axis.'''
         newSources = []
         newTargets = []
-        axis = self.nodeAssignments
+        axis = self.axisAssignment
         for s,t in zip(self.sources, self.targets):
             if self.doubleAxes:
                 s1 = s + '.1'
@@ -243,8 +245,7 @@ class Hive():
         self.newTargets = newTargets
         
         if self.debug:
-            print 'The new sources are:', newSources
-            print 'The new sources are:', newTargets
+            print 'The new edges are:', zip(newSources, newTargets)
             
         return None    
         

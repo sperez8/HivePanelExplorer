@@ -54,9 +54,9 @@ var angles = d3.scale.ordinal()
     .domain(d3.range(num_axis))
     .range(angle);
 
-var colors = d3.scale.linear()
-    .domain(d3.range(0,modulecolor.length,1.0))
-    .range(modulecolor);
+//var colors = d3.scale.linear()
+//    .domain(d3.range(0,modulecolor.length,1.0))
+//    .range(modulecolor);
 
 var svg = d3.select("body").append("svg")
     .attr("class", SVGTitle)

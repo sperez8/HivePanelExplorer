@@ -29,7 +29,27 @@ axisAssignRule = 'degree'
 axisPositRule = 2
 color = 'purple'
 
+def write_nodes(file, hive):
+    '''outputs node info to a text file
+        in a javascript variable format'''
+    
+    f = open(file, 'w')
+    f.write('var nodes = [\n')
 
+    for i,n in enumerate(hive.nodes):
+        f.write('  {axis: ' + str(hive.axisAssignment[n]-1) + ', pos: ' + str(hive.nodePositions[n]) + '},\n')
+    f.write('];')
+    
+def write_edges(file, hive):
+    '''outputs node info to a text file
+        in a javascript variable format'''
+    
+    f = open(file, 'w')
+    f.write('var links = [\n')
+    for s, t in zip(hive.sources, hive.targets):
+        f.write('  {source: nodes['+str(hive.nodes.index(s))+'], target: nodes['+str(hive.nodes.index(t))+']},\n')
+    f.write('];')
+    
 def make_html(title, hive):
     '''takes a hive instance and write the
     following files:
@@ -41,15 +61,20 @@ def make_html(title, hive):
     keyOrder = html_items.keyOrder
     
     outputfile = _root_dir + '/tests/' + title + ".html"
+    nodeFile = _root_dir + '/tests/' + 'nodes' + title + '.js'
+    edgeFile = _root_dir + '/tests/' + 'edges' + title + '.js'
+    
+    write_nodes(nodeFile, hive)
+    write_edges(edgeFile, hive)
     
     with open(outputfile, 'w') as f:
         for key in keyOrder:
             text = htmlItems[key]
             #wrap text given user input
             if key == 'nodefile':
-                f.write('<script src="' + 'nodes' + title + '.js'+  '"></script>')
+                f.write('<script src="' + nodeFile +  '"></script>')
             elif key == 'edgefile':
-                f.write('<script src="' + 'edges' + title + '.js'+  '"></script>')
+                f.write('<script src="' + edgeFile +  '"></script>')
             elif key == 'start js parameters':
                 f.write('<script>')
             elif key == 'titleheader':
@@ -57,7 +82,10 @@ def make_html(title, hive):
             elif key == 'angles':
                 f.write('var angle = ['+ ','.join([str(a) for a in hive.angles]) +']')
             elif key == 'color':
-                f.write('var modulecolor = ' + '\'' + color + '\'')
+                #f.write('var modulecolor = ' + '[\'' + color + '\']') #doesn't work yet
+                f.write('var color = ' + '\'' + color + '\'')
+            elif key == 'numAxes':
+                f.write('var num_axis = ' + str(hive.numAxes))
             elif key == 'end js parameters':
                 f.write('</script>')
             else:
