@@ -25,8 +25,8 @@ from hive import Hive
 # For the sake of developing the script I have stored them here for convenience
 numAxes = 3
 doubleAxes = False
-axisAssignRule = 2 #'degree'
-axisPositRule = 1
+axisAssignRule = 'degree'
+axisPositRule = 2
 
 
 def make_html(hive):

@@ -111,33 +111,18 @@ class Hive():
         '''determines on which axis the node should be placed
             depending on the rule. Integer valued rules indicate the use of
             node properties. Rules which are string values denote network 
-            properties which need to be calculated.'''
-        assignmentValues = {}
-        if isinstance(self.axisAssignRule, int):
-            try: 
-                properties = self.nodeProperties[self.axisAssignRule-1]
-            except ValueError:
-                print 'Please choose a node assignment rule which is either a network'
-                print 'feature or one of the {0} column(s) of the node properties in the input file'.format(len(nodeProperties))
-                sys.exit()
-            [assignmentValues.update({n:p}) for n,p in zip(self.nodes, properties)]
-        if isinstance(self.axisAssignRule, str):
-            #Need to make a graph instance using networkx
-            G = self.make_graph()
-            assignmentValues = self.node_analysis(G, self.axisAssignRule)
-        
-        #get values to be used to assign nodes
-        #and partition into groups of nodes
-        #make as many groups as self.numAxes
+            properties which need to be calculated. Nodes are partitioned into groups
+            depending on their value related to the rule. There are as many groups
+            as numAxes'''
+        nodeAssignments = {} 
+        assignmentValues = self.get_assignment_values(self.axisAssignRule)
+
         #only works for numerical variables for now but will be improved for categorical ones
-        
         values = assignmentValues.values()
         values.sort()
         cutoffs = [int(len(values)/self.numAxes)*i for i in range(1,self.numAxes+1)]
         cutoffValues = [values[c] for c in cutoffs] # to prevent nodes with the same value to be in different groups
-        
-        nodeAssignments = {}        
-        
+               
         for n in self.nodes:
             i = 0
             while i < len(cutoffValues):
@@ -145,13 +130,48 @@ class Hive():
                     nodeAssignments[n]=i
                     break
                 else: i+=1
+                
         if self.debug:
             print 'node assignments to axis:', nodeAssignments
+            
         return None
     
     def node_position(self):
+        '''determines where on the axis the node should be placed
+            depending on the rule. Integer valued rules indicate the use of
+            node properties. Rules which are string values denote network 
+            properties which need to be calculated. node positions are scaled
+            equally for all axes'''
+        nodePositions = {}
+        assignmentValues = self.get_assignment_values(self.axisPositRule)
+        
+        #only works for numerical variables for now but will be improved for categorical ones
+        maxValue = max(assignmentValues.values())
+        
+        for n,p in assignmentValues.iteritems():
+            nodePositions[n] = round(float(p)/float(maxValue),3)
+            
+        if self.debug:
+            print 'node positions on axis:', nodePositions
         return None
-    
+
+    def get_assignment_values(self, rule):
+        assignmentValues = {}
+        if isinstance(rule, int):
+            try: 
+                properties = self.nodeProperties[rule-1]
+            except ValueError:
+                print 'Please choose a node assignment rule which is either a network'
+                print 'feature or one of the {0} column(s) of the node properties in the input file'.format(len(nodeProperties))
+                sys.exit()
+            [assignmentValues.update({n:p}) for n,p in zip(self.nodes, properties)]
+        if isinstance(rule, str):
+            #Need to make a graph instance using networkx
+            G = self.make_graph()
+            assignmentValues = self.node_analysis(G, rule)
+        
+        return assignmentValues
+
     def make_edges(self):
         return None
     
