@@ -24,8 +24,8 @@ from hive import Hive
 # Below are variables which would normally be inputer by the user.
 # For the sake of developing the script I have stored them here for convenience
 numAxes = 3
-doubleAxes = True
-axisAssignRule = 'degree'
+doubleAxes = False
+axisAssignRule = 'centrality'
 axisPositRule = 2
 color = 'purple'
 
@@ -142,8 +142,8 @@ def main(*argv):
             debug = True
         elif opt in ("-t", "--title"):
             title = arg
-    print '\nNode file is "', nodefile, '"'
-    print 'Edge file is "', edgefile, '"'
+    print '\n    Node file is "', nodefile, '"'
+    print '    Edge file is "', edgefile, '"'
     
     hive = make_hive(nodefile, edgefile, debug)
     make_html(title, hive)    

@@ -10,7 +10,7 @@ including node position, edge coloring, number of axes etc...
 #library imports
 import numpy as np
 from math import pi
-import networkx as nx
+from graph_uttilities import make_graph, node_analysis, convert_type
 
 class Hive():
     '''contains node and edge, coloring, position, etc...'''
@@ -39,16 +39,15 @@ class Hive():
             self.nodes = nodes
         nodeProperties = []
         for column in data[:,1:].T:
+            print list(column)
             nodeProperties.append(list(column))
-        #if len(nodeProperties) == 1: 
-        #    nodeProperties=nodeProperties[0] #avoid having a list of one list when there is only 1 property 
-        
+
         #transform node names and properties into the numerical types if possible
-        self.nodeProperties = [self.convert_type(p) for p in nodeProperties]
+        self.nodeProperties = [convert_type(p) for p in nodeProperties]
         
         if self.debug:
-            print 'Nodes are: ', self.nodes
-            print 'Node properties are: ', self.nodeProperties
+            print '    Nodes are: ', self.nodes
+            print '    Node properties are: ', self.nodeProperties
         return None
 
     def get_edges(self,inputFile, delimiter = ','):
@@ -61,16 +60,13 @@ class Hive():
         for column in data[:,2:].T:
             edgeProperties.append(list(column))
         
-        if len(edgeProperties) == 1: 
-            edgeProperties=edgeProperties[0] #avoid having a list of one list when there is only 1 property 
-            
         #transform it into the right data type
-        self.edgeProperties = [self.convert_type(p) for p in edgeProperties]
+        self.edgeProperties = [convert_type(p) for p in edgeProperties]
         
         if self.debug:
-            print 'Sources are: ', self.sources
-            print 'Targets are: ', self.targets
-            print 'Edge properties are: ', self.edgeProperties
+            print '    Sources are: ', self.sources
+            print '    Targets are: ', self.targets
+            print '    Edge properties are: ', self.edgeProperties
         return None
 
     def make_axes(self):
@@ -97,17 +93,7 @@ class Hive():
             print "Axes angles are", angles   
         self.angles = angles
         return None
-
-    def make_graph(self):
-        '''Makes a graph using the networkx package Graph instance'''
-        self.check_input()
-        G = nx.Graph()
-        G.add_edges_from(zip(self.sources,self.targets))
-        if self.debug:
-            print 'Graph nodes:', G.nodes()
-            print 'Graph edges:', G.edges()
-        return G
-
+    
     def node_assignment(self):
         '''determines on which axis the node should be placed
             depending on the rule. Integer valued rules indicate the use of
@@ -172,8 +158,8 @@ class Hive():
             try: 
                 properties = self.nodeProperties[rule-1]
             except ValueError:
-                print 'Please choose a node assignment rule which is either a network'
-                print 'feature or one of the {0} column(s) of the node properties in the input file'.format(len(nodeProperties))
+                print '    Please choose a node assignment rule which is either a network'
+                print '    feature or one of the {0} column(s) of the node properties in the input file'.format(len(nodeProperties))
                 sys.exit()
             if self.doubleAxes:
                 [assignmentValues.update({n:p}) for n,p in zip(self.nodes, properties*2)]
@@ -183,15 +169,18 @@ class Hive():
         
         elif isinstance(rule, str):
             #Need to make a graph instance using networkx
-            G = self.make_graph()
-            assignmentValues = self.node_analysis(G, rule)
-            print '\n\n Assignment values (degrees):', assignmentValues
+            G = make_graph(self.sources, self.targets)
+            assignmentValues = node_analysis(G, rule)
+            if self.debug:
+                print '    Assignment values for \'{0}\' property: {1}'.format(rule,assignmentValues)
             if self.doubleAxes:
                 newAssignmentValues = {}
                 for n,v in assignmentValues.iteritems():
                     newAssignmentValues[n +'.1'] = v
                     newAssignmentValues[n +'.2'] = v
                 return newAssignmentValues
+            else:
+                return assignmentValues
         else: 
             print "Rule could not be parsed"
             sys.exit()
@@ -269,35 +258,3 @@ class Hive():
         '''IN DEVELOPMENT
         checks if all edges are connecting nodes which exist in the self.nodes'''
         return True
-
-    @staticmethod
-    def node_analysis(G, rule):
-        if rule == 'degree':
-            return nx.degree(G)
-        elif rule == 'clustering':
-            return nx.clustering(G)
-        elif rule == 'closeness' or rule == 'centrality':
-            return nx.closeness_centrality(G)
-        elif rule == 'betweeness':
-            return nx.betweeness_centrality(G)
-        elif rule == 'average neighbor degree':
-            return nx.average_neighbor_degree(G)
-        else:
-            print "Node assignment rule not recognized."
-            sys.exit()
-        
-
-    @staticmethod
-    def convert_type(data):
-    	def num(s):
-    		'''convert list of strings to corresponding int or float type'''
-    		try:
-    			return int(d)
-    		except ValueError:
-    			return float(d)
-    		
-    	try:
-    		convertedData = [num(d) for d in data]
-    		return convertedData
-    	except ValueError:
-    		return data
