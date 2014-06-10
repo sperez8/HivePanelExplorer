@@ -12,4 +12,4 @@ color = 'green'
 opacity = 0.9
 size = '7'
 edgeColorPalette = ['blue', 'purple']
-edgeColorRule = 1 #'average connecting degree'
+edgeColorRule = 2 #'average connecting degree'

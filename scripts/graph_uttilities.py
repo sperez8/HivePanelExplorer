@@ -54,3 +54,25 @@ def convert_type(data):
     except ValueError:
         return data
 
+def find_categories(data):
+    '''checks if a list of data is categorical 
+        and if so finds to number of categories'''
+    categories = []
+    if isinstance(convert_type(data)[0],str):
+        categories = set(data)
+        if len(categories) < len(data)/2:
+            categories = list(categories)
+            categories.sort()
+            return categories #sort by alphabetical order
+        else:
+            print 'This data is may be categorical but you have many categories!'
+            return None
+    else:
+        print 'This data is not categorical but numerical!?'
+        return None
+    return categories
+
+        
+    
+    
+    

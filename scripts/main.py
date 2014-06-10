@@ -69,7 +69,7 @@ def make_html(title, hive):
             elif key == 'edgefile':
                 f.write('<script src="' + edgeFile +  '"></script>')
             elif key == 'start js parameters':
-                f.write('<script>')
+                f.write('<script> \n//All the user defined parameters')
             elif key == 'titleheader':
                 f.write('var SVGTitle = \'' + 'Hive plot : ' + title + '\'')
             elif key == 'angles':

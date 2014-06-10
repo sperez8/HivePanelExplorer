@@ -11,7 +11,7 @@ including node position, edge coloring, number of axes etc...
 import sys
 import numpy as np
 from math import pi
-from graph_uttilities import make_graph, node_analysis, edge_analysis, convert_type
+from graph_uttilities import *
 
 #hive parameter defaults
 AXIS_ASSIGN_RULE = 'degree', 
@@ -300,25 +300,34 @@ class Hive():
         edgeStyling = {}
         if self.edgeStyleRule != EDGE_STYLE_RULE:
             edgeValues = self.get_edge_properties(self.edgeStyleRule)
-        if self.edgePalette != EDGE_PALETTE:
-            #only works for numerical variables for now but will be improved for categorical ones
             values = edgeValues.values()
-            values.sort()
-            cutoffs = [int(len(values)/len(self.edgePalette))*i for i in range(1,len(self.edgePalette)+1)]
-            cutoffValues = [values[c-1] for c in cutoffs] # to prevent nodes with the same value to be in different groups
-                   
-            for e in self.edges:
-                i = 0
-                while i < len(cutoffValues):
-                    if edgeValues[e] <= cutoffValues[i]:
-                        edgeStyling[e]=i
-                        break
-                    else: i+=1
+            print values
+            if self.edgePalette != EDGE_PALETTE:
+                #check if styling values are numerical, otherwise treat as categorical
+                categories = find_categories(values)
+                print categories
+                if categories:
+                    [edgeStyling.update({e:categories.index(edgeValues[e])}) for e in self.edges ]
+                else:
+                    values.sort()
+                    cutoffs = [int(len(values)/len(self.edgePalette))*i for i in range(1,len(self.edgePalette)+1)]
+                    cutoffValues = [values[c-1] for c in cutoffs] # to prevent nodes with the same value to be in different groups
+                           
+                    for e in self.edges:
+                        i = 0
+                        while i < len(cutoffValues):
+                            if edgeValues[e] <= cutoffValues[i]:
+                                edgeStyling[e]=i
+                                break
+                            else: i+=1
             
+            else:
+                [edgeStyling.update({e:EDGE_PALETTE}) for e in self.edges]
+                print 'No edge coloring palette specified. Will default to palette: \'{0}\'.'.format(EDGE_PALETTE)
         else:
             [edgeStyling.update({e:EDGE_PALETTE}) for e in self.edges]
-            print 'No edge coloring palette specified. Will default to palette: \'{0}\'.'.format(EDGE_PALETTE)
-        
+            print 'No edge coloring rule specified'
+            
         self.edgeStyling = edgeStyling
         
         if self.debug:
