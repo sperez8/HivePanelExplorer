@@ -12,18 +12,33 @@ import numpy as np
 from math import pi
 from graph_uttilities import make_graph, node_analysis, convert_type
 
+#hive parameter defaults
+AXIS_ASSIGN_RULE = 'degree', 
+AXIS_POSIT_RULE = 'closeness',
+EDGE_PALETTE = 'purple',
+EDGE_STYLE_RULE = 'average degree'
+
 class Hive():
     '''contains node and edge, coloring, position, etc...'''
     
-    def __init__(self, numAxes = 3, doubleAxes = False, 
-                 axisAssignRule = 'degree', axisPositRule = 'closeness', 
-                 debug = True):
-        '''Initializing defining parameters of the hive''' 
+    def __init__(self, 
+                 debug = True, 
+                 numAxes = 3, 
+                 doubleAxes = False, 
+                 axisAssignRule = AXIS_ASSIGN_RULE, 
+                 axisPositRule = AXIS_POSIT_RULE,
+                 edgePalette = EDGE_PALETTE,
+                 edgeStyleRule = EDGE_STYLE_RULE):
+        '''Initializing defining parameters of the hive'''
+        self.debug = debug 
         self.numAxes = numAxes
         self.doubleAxes = doubleAxes
         self.axisAssignRule = axisAssignRule
         self.axisPositRule = axisPositRule
-        self.debug = debug
+        self.axisAssignRule = axisAssignRule 
+        self.axisPositRule = axisPositRule
+        self.edgePalette = edgePalette
+        self.edgePalette = edgeStyleRule
         return None
     
     def get_nodes(self,inputFile, delimiter = ','):
@@ -155,6 +170,7 @@ class Hive():
     def get_assignment_values(self, rule):
         assignmentValues = {}
         if isinstance(rule, int):
+            #get assignment values from the column of node properties indicated by the interger "rule"
             try: 
                 properties = self.nodeProperties[rule-1]
             except ValueError:
@@ -252,6 +268,8 @@ class Hive():
         return None
     
     def edge_style(self, opacity = 0.9, color = 'purple', size = '7'):
+        '''determines how the edges will look given different characteristics'''
+        
         return None
 
     def check_input(self):

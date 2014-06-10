@@ -20,14 +20,6 @@ sys.path.insert(0, _root_dir)
 from data import html_items
 from hive import Hive
 
-#-----------------------
-# Below are variables which would normally be inputer by the user.
-# For the sake of developing the script I have stored them here for convenience
-numAxes = 3
-doubleAxes = False
-axisAssignRule = 'centrality'
-axisPositRule = 2
-color = 'purple'
 
 def write_nodes(file, hive):
     '''outputs node info to a text file
@@ -102,11 +94,13 @@ def make_html(title, hive):
 def make_hive(nodefile, edgefile, debug):
     '''creates a hive instance form user input'''
     
-    hive = Hive(numAxes = numAxes, 
+    hive = Hive(debug = debug,
+                numAxes = numAxes, 
                 doubleAxes = doubleAxes, 
                 axisAssignRule = axisAssignRule, 
                 axisPositRule = axisPositRule, 
-                debug = debug)
+                edgePalette = edgeColorPalette, 
+                edgeStyleRule = edgeColorRule)
     hive.get_nodes(nodefile)
     hive.get_edges(edgefile)
     hive.make_axes()
