@@ -119,33 +119,45 @@ class Hive():
             as numAxes'''
         axisAssignment = {} 
         assignmentValues = self.get_assignment_values(self.axisAssignRule)
-
-        #only works for numerical variables for now but will be improved for categorical ones
         values = assignmentValues.values()
-        values.sort()
-        cutoffs = [int(len(values)/self.numAxes)*i for i in range(1,self.numAxes+1)]
-        cutoffValues = [values[c-1] for c in cutoffs] # to prevent nodes with the same value to be in different groups
-               
-        for n in self.nodes:
-            i = 0
-            while i < len(cutoffValues):
-                if assignmentValues[n] <= cutoffValues[i]:
-                    axisAssignment[n]=i+1 #want the node group to start at 1, not 0
-                    break
-                else: i+=1
+        
+        
+        #check if styling values are numerical, otherwise treat as categorical
+        #and recode into numerical variables
+        categories = find_categories(values)
+        if categories:
+            if len(categories) != self.numAxes:
+                print 'The number of node groups using the rule \'{0}\' is different than the number of axes!'
+            else:
+                [axisAssignment.update({n:categories.index(v)}) for n,v in assignmentValues.iteritems()] 
+                [axisAssignment.update({n:i+1}) for n,i in axisAssignment.iteritems()] #want the node group to start at 1, not 0
+                print '\n\n\n', axisAssignment
+        else:            
+            values.sort()
+            cutoffs = [int(len(values)/self.numAxes)*i for i in range(1,self.numAxes+1)]
+            cutoffValues = [values[c-1] for c in cutoffs] # to prevent nodes with the same value to be in different groups
+                   
+            for n in self.nodes:
+                i = 0
+                while i < len(cutoffValues):
+                    if assignmentValues[n] <= cutoffValues[i]:
+                        axisAssignment[n]=i+1 #want the node group to start at 1, not 0
+                        break
+                    else: i+=1
                 
         if self.doubleAxes:
             #for the case of 3 doubled axis, the axis groups become 2,4,6 below
             [axisAssignment.update({n:i*2}) for n,i in axisAssignment.iteritems()]
-            #for the node on the first axis, we change its group to 1,2 or 3
+            #for the node on the 'first' axis, we change its group to 1,2 or 3
             #so that nodes in group 1 are now on axis 1 or 2, group 2 in 3 or 4 and group 3 in 5 or 6.
             [axisAssignment.update({n:(i-1)}) if n[-2:] == '.1' else None for n,i in axisAssignment.iteritems()]
         
         self.axisAssignment = axisAssignment
         
         if self.debug:
+            if categories:
+                print '    Node Categories:', categories
             print '    Node assignments to axis:', axisAssignment
-            
         return None
     
     def node_position(self):
@@ -305,7 +317,6 @@ class Hive():
             if self.edgePalette != EDGE_PALETTE:
                 #check if styling values are numerical, otherwise treat as categorical
                 categories = find_categories(values)
-                print categories
                 if categories:
                     [edgeStyling.update({e:categories.index(edgeValues[e])}) for e in self.edges ]
                 else:
@@ -331,6 +342,8 @@ class Hive():
         self.edgeStyling = edgeStyling
         
         if self.debug:
+            if categories:
+                print '    Edge Categories:', categories
             print '    Edge styling:', edgeStyling
         return None
 

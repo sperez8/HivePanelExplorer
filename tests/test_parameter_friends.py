@@ -3,7 +3,7 @@
 
 numAxes = 3
 doubleAxes = False
-axisAssignRule = 'degree'
+axisAssignRule = 1
 axisPositRule = 2
 
 color = 'green'

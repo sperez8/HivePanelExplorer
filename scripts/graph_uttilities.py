@@ -60,7 +60,7 @@ def find_categories(data):
     categories = []
     if isinstance(convert_type(data)[0],str):
         categories = set(data)
-        if len(categories) < len(data)/2:
+        if len(categories) < len(data):
             categories = list(categories)
             categories.sort()
             return categories #sort by alphabetical order
