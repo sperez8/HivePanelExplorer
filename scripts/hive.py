@@ -8,6 +8,7 @@ including node position, edge coloring, number of axes etc...
 '''
 
 #library imports
+import sys
 import numpy as np
 from math import pi
 from graph_uttilities import make_graph, node_analysis, convert_type
@@ -38,7 +39,7 @@ class Hive():
         self.axisAssignRule = axisAssignRule 
         self.axisPositRule = axisPositRule
         self.edgePalette = edgePalette
-        self.edgePalette = edgeStyleRule
+        self.edgeStyleRule = edgeStyleRule
         return None
     
     def get_nodes(self,inputFile, delimiter = ','):
@@ -173,9 +174,11 @@ class Hive():
             #get assignment values from the column of node properties indicated by the interger "rule"
             try: 
                 properties = self.nodeProperties[rule-1]
-            except ValueError:
+            except IndexError:
+                print '\n\n            ***WARNING***'
                 print '    Please choose a node assignment rule which is either a network'
-                print '    feature or one of the {0} column(s) of the node properties in the input file'.format(len(nodeProperties))
+                print '    feature or one of the {0} column(s) of the node properties in the input file'.format(len(self.nodeProperties))
+                print '\n'
                 sys.exit()
             if self.doubleAxes:
                 [assignmentValues.update({n:p}) for n,p in zip(self.nodes, properties*2)]
@@ -256,20 +259,58 @@ class Hive():
         self.newTargets = newTargets
         
         if self.debug:
-            print 'The new edges are:', zip(newSources, newTargets)
+            print '    The new edges are:', zip(newSources, newTargets)
             
         return None    
         
         
         
         return None
-    
+ 
+    def get_edge_properties(self, rule):
+       values = {}
+       if isinstance(rule, int):
+           try: 
+               properties = self.edgeProperties[rule-1]
+           except IndexError:
+               print '\n\n            ***WARNING***'
+               print '    Please choose a node assignment rule which is either a network'
+               print '    feature or one of the {0} column(s) of the node properties in the input file'.format(len(self.edgeProperties))
+               print '\n'
+               sys.exit()
+           if self.doubleAxes:
+               [values.update({n:p}) for n,p in zip(self.nodes, properties*2)]
+           else:
+               [values.update({n:p}) for n,p in zip(self.nodes, properties)]
+           return values
+       
+       elif isinstance(rule, str):
+           #Need to make a graph instance using networkx
+           G = make_graph(self.sources, self.targets)
+           values = node_analysis(G, rule)
+           if self.debug:
+               print '    Assignment values for \'{0}\' property: {1}'.format(rule,values)
+           if self.doubleAxes:
+               newAssignmentValues = {}
+               for n,v in values.iteritems():
+                   newAssignmentValues[n +'.1'] = v
+                   newAssignmentValues[n +'.2'] = v
+               return newAssignmentValues
+           else:
+               return values
+       else: 
+           print "Rule could not be parsed"
+           sys.exit()
+               
     def node_style(self, opacity = 0.9, color = 'purple', size = '7'):
         return None
     
     def edge_style(self, opacity = 0.9, color = 'purple', size = '7'):
         '''determines how the edges will look given different characteristics'''
-        
+        if self.edgeStyleRule != EDGE_STYLE_RULE:
+            pass
+        if self.edgePalette != EDGE_PALETTE:
+            pass
         return None
 
     def check_input(self):

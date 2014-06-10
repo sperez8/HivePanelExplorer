@@ -5,6 +5,11 @@ numAxes = 3
 doubleAxes = False
 axisAssignRule = 'degree'
 axisPositRule = 2
+
 color = 'green'
+
+#edge styling
+opacity = 0.9
+size = '7'
 edgeColorPalette = ['blue', 'purple']
 edgeColorRule = 2

@@ -12,13 +12,14 @@ import sys
 import getopt
 import string
 
-#hive data imports
+#hive plot specific imports
 _cur_dir = os.path.dirname(os.path.realpath(__file__))
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 
 from data import html_items
 from hive import Hive
+from tests.test_parameter_friends import *
 
 
 def write_nodes(file, hive):
