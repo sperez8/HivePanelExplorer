@@ -8,8 +8,10 @@ contains all the pieces of the html and d3 functions to plot the hive
 
 htmlContainer= {}
 
-keyOrder = ['intro', 'nodefile', 'edgefile','start js parameters','titleheader',
-            'numAxes', 'angles','color', 'end js parameters', 'd3functions']
+keyOrder = ['intro', 'nodefile', 'edgefile',
+            'start js parameters','titleheader',
+            'numAxes', 'angles','color', 'edge_color', 
+            'end js parameters', 'd3functions']
 
 htmlContainer['intro'] = """<!comment This is a hive plot developed using HivePlotter.>
 <!DOCTYPE html>
@@ -27,6 +29,7 @@ htmlContainer['titleheader'] = '' #will be specified by user
 htmlContainer['numAxes'] = '' #will be specified by user
 htmlContainer['angles'] = '' #will be specified by user
 htmlContainer['color'] = '' #will be specified by user
+htmlContainer['edge_color'] = '' #will be specified by user
 htmlContainer['end js parameters'] = '' #will be specified by user
 
 
@@ -54,9 +57,9 @@ var angles = d3.scale.ordinal()
     .domain(d3.range(num_axis))
     .range(angle);
 
-//var colors = d3.scale.linear()
-//    .domain(d3.range(0,modulecolor.length,1.0))
-//    .range(modulecolor);
+var link_color = d3.scale.linear()
+    .domain(d3.range(0,edge_color.length,1.0))
+    .range(edge_color);
 
 var svg = d3.select("body").append("svg")
     .attr("class", SVGTitle)
@@ -85,7 +88,7 @@ svg.selectAll(".link")
     .radius(function(d) { return radius(d.pos); }))
     .style("fill", linkfill)
     .style("stroke-opacity", oplink)
-    .style("stroke", color)
+    .style("stroke", function(d) { return link_color(d.type); })
     .style("stroke-width", linkwidth);
   
 svg.selectAll(".node")

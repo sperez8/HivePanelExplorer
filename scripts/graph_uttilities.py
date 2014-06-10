@@ -11,7 +11,13 @@ import numpy as np
 from math import pi
 import networkx as nx
 
-
+def edge_analysis(G, rule):
+    if rule == 'average connecting degree':
+        #returns the average degree of the nodes connected in an edge e
+        return [ {}.update( {e,np.mean( [G.degree(n) for n in e] )} ) for e in G.edges() ]
+    else:
+        print "Node assignment rule not recognized."
+        sys.exit()
 
 def node_analysis(G, rule):
     if rule == 'degree':

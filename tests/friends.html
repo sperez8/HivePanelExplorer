@@ -12,6 +12,7 @@ var SVGTitle = 'Hive plot : friends'
 var num_axis = 3
 var angle = [0.0001,2.09,4.19]
 var color = 'green'
+var edge_color = ['blue','purple']
 </script>
 
 <script>
@@ -37,9 +38,9 @@ var angles = d3.scale.ordinal()
     .domain(d3.range(num_axis))
     .range(angle);
 
-//var colors = d3.scale.linear()
-//    .domain(d3.range(0,modulecolor.length,1.0))
-//    .range(modulecolor);
+var link_color = d3.scale.linear()
+    .domain(d3.range(0,edge_color.length,1.0))
+    .range(edge_color);
 
 var svg = d3.select("body").append("svg")
     .attr("class", SVGTitle)
@@ -68,7 +69,7 @@ svg.selectAll(".link")
     .radius(function(d) { return radius(d.pos); }))
     .style("fill", linkfill)
     .style("stroke-opacity", oplink)
-    .style("stroke", color)
+    .style("stroke", function(d) { return link_color(d.type); })
     .style("stroke-width", linkwidth);
   
 svg.selectAll(".node")

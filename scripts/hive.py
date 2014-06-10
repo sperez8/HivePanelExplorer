@@ -11,13 +11,13 @@ including node position, edge coloring, number of axes etc...
 import sys
 import numpy as np
 from math import pi
-from graph_uttilities import make_graph, node_analysis, convert_type
+from graph_uttilities import make_graph, node_analysis, edge_analysis, convert_type
 
 #hive parameter defaults
 AXIS_ASSIGN_RULE = 'degree', 
 AXIS_POSIT_RULE = 'closeness',
 EDGE_PALETTE = 'purple',
-EDGE_STYLE_RULE = 'average degree'
+EDGE_STYLE_RULE = 'average connecting degree'
 
 class Hive():
     '''contains node and edge, coloring, position, etc...'''
@@ -124,7 +124,7 @@ class Hive():
         values = assignmentValues.values()
         values.sort()
         cutoffs = [int(len(values)/self.numAxes)*i for i in range(1,self.numAxes+1)]
-        cutoffValues = [values[c] for c in cutoffs] # to prevent nodes with the same value to be in different groups
+        cutoffValues = [values[c-1] for c in cutoffs] # to prevent nodes with the same value to be in different groups
                
         for n in self.nodes:
             i = 0
@@ -191,7 +191,7 @@ class Hive():
             G = make_graph(self.sources, self.targets)
             assignmentValues = node_analysis(G, rule)
             if self.debug:
-                print '    Assignment values for \'{0}\' property: {1}'.format(rule,assignmentValues)
+                print '    Assignment values for \'{0}\' node property: {1}'.format(rule,assignmentValues)
             if self.doubleAxes:
                 newAssignmentValues = {}
                 for n,v in assignmentValues.iteritems():
@@ -255,11 +255,10 @@ class Hive():
                 elif axis[t] == 1 and axis[t] == self.numAxes:
                     newSources.append(s)
                     newTargets.append(t)        
-        self.newSources = newSources
-        self.newTargets = newTargets
+        self.edges = zip(newSources, newTargets)
         
         if self.debug:
-            print '    The new edges are:', zip(newSources, newTargets)
+            print '    The new edges are:', self.edges
             
         return None    
         
@@ -274,32 +273,23 @@ class Hive():
                properties = self.edgeProperties[rule-1]
            except IndexError:
                print '\n\n            ***WARNING***'
-               print '    Please choose a node assignment rule which is either a network'
-               print '    feature or one of the {0} column(s) of the node properties in the input file'.format(len(self.edgeProperties))
+               print '    Please choose a edge grouping rule which is either a network'
+               print '    feature or one of the {0} column(s) of the edge properties in the input file'.format(len(self.edgeProperties))
                print '\n'
                sys.exit()
-           if self.doubleAxes:
-               [values.update({n:p}) for n,p in zip(self.nodes, properties*2)]
-           else:
-               [values.update({n:p}) for n,p in zip(self.nodes, properties)]
+           
+           [values.update({e:p}) for e,p in zip(self.edges, properties)]
            return values
        
        elif isinstance(rule, str):
            #Need to make a graph instance using networkx
            G = make_graph(self.sources, self.targets)
-           values = node_analysis(G, rule)
+           values = edge_analysis(G, rule)
            if self.debug:
-               print '    Assignment values for \'{0}\' property: {1}'.format(rule,values)
-           if self.doubleAxes:
-               newAssignmentValues = {}
-               for n,v in values.iteritems():
-                   newAssignmentValues[n +'.1'] = v
-                   newAssignmentValues[n +'.2'] = v
-               return newAssignmentValues
-           else:
-               return values
+               print '    Assignment values for \'{0}\' edge property: {1}'.format(rule,values)
+           return values
        else: 
-           print "Rule could not be parsed"
+           print "The edge styling rule could not be parsed"
            sys.exit()
                
     def node_style(self, opacity = 0.9, color = 'purple', size = '7'):
@@ -307,13 +297,51 @@ class Hive():
     
     def edge_style(self, opacity = 0.9, color = 'purple', size = '7'):
         '''determines how the edges will look given different characteristics'''
+        edgeStyling = {}
         if self.edgeStyleRule != EDGE_STYLE_RULE:
-            pass
+            edgeValues = self.get_edge_properties(self.edgeStyleRule)
         if self.edgePalette != EDGE_PALETTE:
-            pass
+            #only works for numerical variables for now but will be improved for categorical ones
+            values = edgeValues.values()
+            values.sort()
+            cutoffs = [int(len(values)/len(self.edgePalette))*i for i in range(1,len(self.edgePalette)+1)]
+            cutoffValues = [values[c-1] for c in cutoffs] # to prevent nodes with the same value to be in different groups
+                   
+            for e in self.edges:
+                i = 0
+                while i < len(cutoffValues):
+                    if edgeValues[e] <= cutoffValues[i]:
+                        edgeStyling[e]=i
+                        break
+                    else: i+=1
+            
+        else:
+            [edgeStyling.update({e:EDGE_PALETTE}) for e in self.edges]
+            print 'No edge coloring palette specified. Will default to palette: \'{0}\'.'.format(EDGE_PALETTE)
+        
+        self.edgeStyling = edgeStyling
+        
+        if self.debug:
+            print '    Edge styling:', edgeStyling
         return None
 
     def check_input(self):
         '''IN DEVELOPMENT
         checks if all edges are connecting nodes which exist in the self.nodes'''
         return True
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

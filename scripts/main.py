@@ -39,8 +39,8 @@ def write_edges(file, hive):
     
     f = open(file, 'w')
     f.write('var links = [\n')
-    for s, t in zip(hive.newSources, hive.newTargets):
-        f.write('  {source: nodes['+str(hive.nodes.index(s))+'], target: nodes['+str(hive.nodes.index(t))+']},\n')
+    for s, t in hive.edges:
+        f.write('  {source: nodes['+str(hive.nodes.index(s))+'], target: nodes['+str(hive.nodes.index(t))+'], type: ' + str(hive.edgeStyling[(s,t)]) + '},\n')
     f.write('];')
     
 def make_html(title, hive):
@@ -77,6 +77,8 @@ def make_html(title, hive):
             elif key == 'color':
                 #f.write('var modulecolor = ' + '[\'' + color + '\']') #doesn't work yet
                 f.write('var color = ' + '\'' + color + '\'')
+            elif key == 'edge_color':
+                f.write('var edge_color = [\'' + '\',\''.join([str(c) for c in edgeColorPalette]) +'\']')
             elif key == 'numAxes':
                 if hive.doubleAxes:
                     f.write('var num_axis = ' + str(hive.numAxes*2))
