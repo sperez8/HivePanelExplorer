@@ -85,7 +85,10 @@ def make_html(title, hive):
                 #f.write('var modulecolor = ' + '[\'' + color + '\']') #doesn't work yet
                 f.write('var color = ' + '\'' + color + '\'')
             elif key == 'numAxes':
-                f.write('var num_axis = ' + str(hive.numAxes))
+                if hive.doubleAxes:
+                    f.write('var num_axis = ' + str(hive.numAxes*2))
+                else:
+                    f.write('var num_axis = ' + str(hive.numAxes))
             elif key == 'end js parameters':
                 f.write('</script>')
             else:

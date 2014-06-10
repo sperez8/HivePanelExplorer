@@ -185,6 +185,7 @@ class Hive():
             #Need to make a graph instance using networkx
             G = self.make_graph()
             assignmentValues = self.node_analysis(G, rule)
+            print '\n\n Assignment values (degrees):', assignmentValues
             if self.doubleAxes:
                 newAssignmentValues = {}
                 for n,v in assignmentValues.iteritems():
