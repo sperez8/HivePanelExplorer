@@ -68,7 +68,6 @@ def find_categories(data):
             print 'This data is may be categorical but you have many categories!'
             return None
     else:
-        print 'This data is not categorical but numerical!?'
         return None
     return categories
 

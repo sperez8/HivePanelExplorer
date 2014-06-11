@@ -54,8 +54,7 @@ class Hive():
         else: 
             self.nodes = nodes
         nodeProperties = []
-        for column in data[:,1:].T:
-            print list(column)
+        for column in data[:,1:].T: 
             nodeProperties.append(list(column))
 
         #transform node names and properties into the numerical types if possible
@@ -92,10 +91,9 @@ class Hive():
         if self.doubleAxes:
             #create a total of 3*self.numAxes to make spacing between the doubled axes
             allAngles = [2.0*pi/float(self.numAxes*3)*i for i in range(0,self.numAxes*3)]
-            #re-center the axes for symmetry when the number of axes is odd
-            if self.numAxes % 2 != 0:
-                shiftBy = allAngles[1]/2.0
-                allAngles = [a-shiftBy for a in allAngles]
+            #re-center the axes for symmetry
+            shiftBy = allAngles[1]/2.0
+            allAngles = [a-shiftBy for a in allAngles]
             #remove the "spacer" axes
             for a in allAngles:
                 if (allAngles.index(a)+1) % 3 != 0:
@@ -119,8 +117,7 @@ class Hive():
             as numAxes'''
         axisAssignment = {} 
         assignmentValues = self.get_assignment_values(self.axisAssignRule)
-        values = assignmentValues.values()
-        
+        values = assignmentValues.values()    
         
         #check if styling values are numerical, otherwise treat as categorical
         #and recode into numerical variables
@@ -131,12 +128,11 @@ class Hive():
             else:
                 [axisAssignment.update({n:categories.index(v)}) for n,v in assignmentValues.iteritems()] 
                 [axisAssignment.update({n:i+1}) for n,i in axisAssignment.iteritems()] #want the node group to start at 1, not 0
-                print '\n\n\n', axisAssignment
         else:            
             values.sort()
-            cutoffs = [int(len(values)/self.numAxes)*i for i in range(1,self.numAxes+1)]
+            cutoffs = [int(len(values)/self.numAxes)*i for i in range(1,self.numAxes)]
             cutoffValues = [values[c-1] for c in cutoffs] # to prevent nodes with the same value to be in different groups
-                   
+            cutoffValues.append(values[-1]) #add greatest value as a cutoff
             for n in self.nodes:
                 i = 0
                 while i < len(cutoffValues):
@@ -190,7 +186,6 @@ class Hive():
                 print '\n\n            ***WARNING***'
                 print '    Please choose a node assignment rule which is either a network'
                 print '    feature or one of the {0} column(s) of the node properties in the input file'.format(len(self.nodeProperties))
-                print '\n'
                 sys.exit()
             if self.doubleAxes:
                 [assignmentValues.update({n:p}) for n,p in zip(self.nodes, properties*2)]
@@ -222,8 +217,10 @@ class Hive():
         the case of double axis.'''
         newSources = []
         newTargets = []
+        newProperties = []
         axis = self.axisAssignment
-        for s,t in zip(self.sources, self.targets):
+        reorganizedProperties = zip(*self.edgeProperties)
+        for s,t,p in zip(self.sources, self.targets, reorganizedProperties):
             if self.doubleAxes:
                 s1 = s + '.1'
                 s2 = s + '.2'
@@ -236,21 +233,26 @@ class Hive():
                 if axis[s1] == axis[t1]:
                     newSources.extend([s1,t1])
                     newTargets.extend([t2,s2])
+                    newProperties.append(p)
                 #if nodes from different groups, we make an edge
                 #between the '.1' or '.2' nodes nearest to each other
                 elif axis[s1] == axis[t1] + 2:
                     newSources.append(s1)
                     newTargets.append(t2)
+                    newProperties.append(p)
                 elif axis[s1] + 2 == axis[t1]:
                     newSources.append(s2)
                     newTargets.append(t1)
+                    newProperties.append(p)
                 #the edges below loop back from the highest numbered axis to the first axis
                 elif axis[s1] == 1 and axis[t2] == self.numAxes*2:
                     newSources.append(s1)
                     newTargets.append(t2)
+                    newProperties.append(p)
                 elif axis[t1] == 1 and axis[s2] == self.numAxes*2:
                     newSources.append(s2)
                     newTargets.append(t1)
+                    newProperties.append(p)
                 else:
                     pass
             else:
@@ -260,29 +262,31 @@ class Hive():
                 if abs(axis[s]-axis[t]) == 1:
                     newSources.append(s)
                     newTargets.append(t)
+                    newProperties.append(p)
                 #gets edges that connect nodes on the 1st and last axes
                 elif axis[s] == 1 and axis[t] == self.numAxes:
                     newSources.append(s)
                     newTargets.append(t)
+                    newProperties.append(p)
                 elif axis[t] == 1 and axis[t] == self.numAxes:
                     newSources.append(s)
-                    newTargets.append(t)        
+                    newTargets.append(t)   
+                    newProperties.append(p)     
+        
         self.edges = zip(newSources, newTargets)
+        self.edgeProperties = newProperties
         
         if self.debug:
-            print '    The new edges are:', self.edges
+            print '    The new edges with their properties are:', self.edges
+            print '    ', self.edgeProperties
             
-        return None    
-        
-        
-        
         return None
  
     def get_edge_properties(self, rule):
        values = {}
        if isinstance(rule, int):
-           try: 
-               properties = self.edgeProperties[rule-1]
+           try:
+               properties = zip(*self.edgeProperties)[rule-1] #-1 to accomodate for python indexes starting at 0
            except IndexError:
                print '\n\n            ***WARNING***'
                print '    Please choose a edge grouping rule which is either a network'
@@ -313,7 +317,6 @@ class Hive():
         if self.edgeStyleRule != EDGE_STYLE_RULE:
             edgeValues = self.get_edge_properties(self.edgeStyleRule)
             values = edgeValues.values()
-            print values
             if self.edgePalette != EDGE_PALETTE:
                 #check if styling values are numerical, otherwise treat as categorical
                 categories = find_categories(values)
@@ -323,7 +326,6 @@ class Hive():
                     values.sort()
                     cutoffs = [int(len(values)/len(self.edgePalette))*i for i in range(1,len(self.edgePalette)+1)]
                     cutoffValues = [values[c-1] for c in cutoffs] # to prevent nodes with the same value to be in different groups
-                           
                     for e in self.edges:
                         i = 0
                         while i < len(cutoffValues):
