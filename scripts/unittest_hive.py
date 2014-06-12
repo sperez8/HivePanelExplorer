@@ -31,9 +31,12 @@ class TestHive(unittest.TestCase):
         self.friendsHiveDouble.get_nodes(nodefile)
         self.friendsHiveDouble.get_edges(edgefile)
         
+        self.friendsNodesValuesInt = {'Alice': 4, 'Eric': 2, 'Daniella': 2, 'Fatima': 3, 'Cam': 3, 'Bob': 4, 'George': 2}
+        self.friendsNodesValuesFloat = {'Daniella': 0.8, 'George': 0.9, 'Fatima': 0, 'Cam': 0.9, 'Bob': 0.2, 'Alice': 1.9, 'Eric': 1.6}
+        self.friendsNodesValuesString = {'Daniella': 'girl', 'George': 'alien', 'Fatima': 'girl', 'Cam': 'boy', 'Bob': 'boy', 'Alice': 'girl', 'Eric': 'boy'}
         
+        self.numAxesOptions = [(True, 2), (True, 3), (False, 5), (False, 4), (False, 3), (False, 2)]
         self.axesOptions = {(False,2):[0,pi], (False,3):[0, pi*2/3, pi*4/3], (False,4):[0,pi/2,pi,pi*3/2], (False,5):[0,pi*2/5,pi*4/5,pi*6/5,pi*8/5], (True,2):[-pi/6,pi/6,pi*5/6,pi*7/6], (True,3):[-pi/9,pi/9,pi*5/9,pi*7/9,pi*11/9,pi*13/9]}
-        
         
         self.rules = [(),2,'degree', 'clustering', 'closeness', 'centrality', 'betweeness','average neighbor degree']
 
@@ -47,7 +50,6 @@ class TestHive(unittest.TestCase):
             self.assertListEqual(angles, hive.angles)
 
     def test_get_assignment_values(self):
-        
         hive = self.friendsHive
         values = hive.get_assignment_values(1)
         correctValues = {'Daniella': 'girl', 'George': 'alien', 'Fatima': 'girl', 'Cam': 'boy', 'Bob': 'boy', 'Alice': 'girl', 'Eric': 'boy'}
@@ -77,6 +79,24 @@ class TestHive(unittest.TestCase):
         values = hive.get_assignment_values('degree')
         correctValues = {'Bob.1': 4, 'Cam.2': 3, 'Cam.1': 3, 'Daniella.1': 2, 'Daniella.2': 2, 'George.2': 2, 'Fatima.2': 3, 'Fatima.1': 3, 'Bob.2': 4, 'Alice.1': 4, 'Alice.2': 4, 'Eric.1': 2, 'George.1': 2, 'Eric.2': 2}
         self.assertEqual(values, correctValues)  
+
+    def test_node_assignment(self):
+        hive = self.friendsHive
+        for (double,numAxes),assignmentValues in zip(self.numAxesOptions,(self.friendsNodesValuesString, self.friendsNodesValuesInt, self.friendsNodesValuesFloat)):
+            hive.numAxes = numAxes
+            hive.doubleAxes = double
+            hive.node_assignment(assignmentValues = assignmentValues)
+            assignment = hive.axisAssignment
+            #now we check that the axis assignment variable 
+            #is a dictionary
+            self.assertIsInstance(assignment, dict)
+            #has an entry for every node
+            self.assertEqual(set(assignment.keys()), set(hive.nodes))
+            #that the values are integers corresponding to axes numbers
+            [self.assertIsInstance(v,int) for v in assignment.values()]
+            
+            
+        
 
 if __name__ == '__main__':
     unittest.main()

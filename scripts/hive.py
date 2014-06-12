@@ -108,7 +108,7 @@ class Hive():
         self.angles = angles
         return None
     
-    def node_assignment(self):
+    def node_assignment(self, assignmentValues = None):
         '''determines on which axis the node should be placed
             depending on the rule. Integer valued rules indicate the use of
             node properties. Rules which are string values denote network 
@@ -116,18 +116,18 @@ class Hive():
             depending on their value related to the rule. There are as many groups
             as numAxes'''
         axisAssignment = {} 
-        assignmentValues = self.get_assignment_values(self.axisAssignRule)
-        values = assignmentValues.values()    
-        
+        if not assignmentValues:
+            assignmentValues = self.get_assignment_values(self.axisAssignRule)
+            
+        values = assignmentValues.values()
         #check if styling values are numerical, otherwise treat as categorical
         #and recode into numerical variables
         categories = find_categories(values)
         if categories:
             if len(categories) != self.numAxes:
-                print 'The number of node groups using the rule \'{0}\' is different than the number of axes!'
-            else:
-                [axisAssignment.update({n:categories.index(v)}) for n,v in assignmentValues.iteritems()] 
-                [axisAssignment.update({n:i+1}) for n,i in axisAssignment.iteritems()] #want the node group to start at 1, not 0
+                print 'The number of node groups using the rule \'{0}\' is different than the number of axes ({1})!'.format(self.axisAssignRule, self.numAxes)
+            [axisAssignment.update({n:categories.index(v)}) for n,v in assignmentValues.iteritems()] 
+            [axisAssignment.update({n:i+1}) for n,i in axisAssignment.iteritems()] #want the node group to start at 1, not 0
         else:            
             values.sort()
             cutoffs = [int(len(values)/self.numAxes)*i for i in range(1,self.numAxes)]
