@@ -7,6 +7,7 @@ Contains functions used by hive class to measure things like network properties
 '''
 
 #library imports
+import sys
 import numpy as np
 from math import pi
 import networkx as nx
@@ -31,7 +32,7 @@ def node_analysis(G, rule):
     elif rule == 'average neighbor degree':
         return nx.average_neighbor_degree(G)
     else:
-        print "Node assignment rule not recognized."
+        print "Node assignment rule {0} not recognized.".format(rule)
         sys.exit()
 
 def make_graph(sources, targets):

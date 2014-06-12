@@ -54,6 +54,7 @@ def make_html(title, hive):
     keyOrder = html_items.keyOrder
     
     outputfile = _root_dir + '/tests/' + title + ".html"
+    print '    Making the hive plot \'{0}\''.format(outputfile) 
     nodeFile = _root_dir + '/tests/' + 'nodes' + title + '.js'
     edgeFile = _root_dir + '/tests/' + 'edges' + title + '.js'
     

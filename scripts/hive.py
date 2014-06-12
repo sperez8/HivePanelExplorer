@@ -14,9 +14,9 @@ from math import pi
 from graph_uttilities import *
 
 #hive parameter defaults
-AXIS_ASSIGN_RULE = 'degree', 
-AXIS_POSIT_RULE = 'closeness',
-EDGE_PALETTE = 'purple',
+AXIS_ASSIGN_RULE = 'degree'
+AXIS_POSIT_RULE = 'closeness'
+EDGE_PALETTE = 'purple'
 EDGE_STYLE_RULE = 'average connecting degree'
 
 class Hive():
@@ -34,12 +34,21 @@ class Hive():
         self.debug = debug 
         self.numAxes = numAxes
         self.doubleAxes = doubleAxes
-        self.axisAssignRule = axisAssignRule
-        self.axisPositRule = axisPositRule
         self.axisAssignRule = axisAssignRule 
         self.axisPositRule = axisPositRule
         self.edgePalette = edgePalette
         self.edgeStyleRule = edgeStyleRule
+        
+        try:
+            self.axisAssignRule = int(axisAssignRule)
+        except ValueError: 
+            self.axisAssignRule = axisAssignRule
+        
+        try:
+            self.axisPositRule = int(axisPositRule)
+        except ValueError: 
+            self.axisPositRule = axisPositRule
+        
         return None
     
     def get_nodes(self,inputFile, delimiter = ','):
@@ -234,6 +243,7 @@ class Hive():
                     newSources.extend([s1,t1])
                     newTargets.extend([t2,s2])
                     newProperties.append(p)
+                    newProperties.append(p) #add properties twice for both symmetric edges
                 #if nodes from different groups, we make an edge
                 #between the '.1' or '.2' nodes nearest to each other
                 elif axis[s1] == axis[t1] + 2:

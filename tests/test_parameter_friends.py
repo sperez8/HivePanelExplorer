@@ -1,3 +1,19 @@
+
+numAxes = 3
+doubleAxes = True
+axisAssignRule = 'degree'
+axisPositRule = 3
+
+color = 'green'
+
+#edge styling
+edgeColorPalette = ['red', 'blue']
+edgeColorRule = 1
+
+#python scripts/main.py -n /Users/sperez/git/microbPLSA/MicrobProcessor/D3/hiveplots/Data/WL_Nodes_ALL.csv -e /Users/sperez/git/microbPLSA/MicrobProcessor/D3/hiveplots/Data/WL_EDGES_ALL.csv -t aria -d
+
+
+'''
 # Below are variables which would normally be inputer by the user.
 # For the sake of developing the script I have stored them here for convenience
 
@@ -9,11 +25,10 @@ axisPositRule = 'degree'
 color = 'green'
 
 #edge styling
-opacity = 0.9
-size = '7'
 edgeColorPalette = ['blue', 'purple']
 edgeColorRule = 2 #'average connecting degree'
 
 
 #example command
 #python scripts/main.py -n tests/test_nodes_friends.csv -e tests/test_edges_friends.csv -t friends -d
+'''
