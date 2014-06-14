@@ -12,13 +12,13 @@
 var SVGTitle = 'Hive plot : friends'
 var num_axis = 3
 var angle = [0.0001,2.09,4.19]
-var color = 'green'
+var nodecolor = 'green'
 var edge_color = ['blue','purple']
 </script>
 
 <script>
 
-var nodesize = 7
+var nodesize = 5
     nodestroke = 0.4
     nodestrokecolor = "grey"
     
@@ -82,7 +82,8 @@ svg.selectAll(".node")
     .attr("r", nodesize)
     .attr("stroke-width", nodestroke)
     .attr("stroke", nodestrokecolor)
-    .style("fill-opacity", color);
+    .style("fill-opacity", opnode)
+    .sytle("fill", nodecolor);
 
 function degrees(radians) {
   return radians / Math.PI * 180 - 90;

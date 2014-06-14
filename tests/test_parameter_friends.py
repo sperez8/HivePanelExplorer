@@ -4,11 +4,15 @@ doubleAxes = True
 axisAssignRule = 'degree'
 axisPositRule = 3
 
-color = 'green'
+color = 'white'
 
 #edge styling
-edgeColorPalette = ['red', 'blue']
+edgeColorPalette = ['blue','red']
 edgeColorRule = 1
+
+#node styling
+nodeColorPalette = ['blue', 'red']
+nodeColorRule = 1
 
 #python scripts/main.py -n /Users/sperez/git/microbPLSA/MicrobProcessor/D3/hiveplots/Data/WL_Nodes_ALL.csv -e /Users/sperez/git/microbPLSA/MicrobProcessor/D3/hiveplots/Data/WL_EDGES_ALL.csv -t aria -d
 

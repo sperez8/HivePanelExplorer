@@ -77,7 +77,7 @@ def make_html(title, hive):
                 f.write('var angle = ['+ ','.join([str(a) for a in hive.angles]) +']')
             elif key == 'color':
                 #f.write('var modulecolor = ' + '[\'' + color + '\']') #doesn't work yet
-                f.write('var color = ' + '\'' + color + '\'')
+                f.write('var nodecolor = ' + '\'' + color + '\'')
             elif key == 'edge_color':
                 f.write('var edge_color = [\'' + '\',\''.join([str(c) for c in edgeColorPalette]) +'\']')
             elif key == 'numAxes':
