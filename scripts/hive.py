@@ -159,6 +159,7 @@ class Hive():
         
         self.axisAssignment = axisAssignment
         
+        print set(axisAssignment.values())
         if self.debug:
             if categories:
                 print '    Node Categories:', categories
@@ -229,6 +230,7 @@ class Hive():
         newProperties = []
         axis = self.axisAssignment
         reorganizedProperties = zip(*self.edgeProperties)
+        count = {1:0, 2:0, 3:0, 4:0, 5:0}
         for s,t,p in zip(self.sources, self.targets, reorganizedProperties):
             if self.doubleAxes:
                 s1 = s + '.1'
@@ -238,31 +240,35 @@ class Hive():
                 
                 #if nodes are from same group we add edge
                 #and it's symmetrical edge within the doubled Axes
-                #works for non double axes as well
                 if axis[s1] == axis[t1]:
-                    newSources.extend([s1,t1])
-                    newTargets.extend([t2,s2])
+                    newSources.extend([s1,s2])
+                    newTargets.extend([t2,t1])
                     newProperties.append(p)
                     newProperties.append(p) #add properties twice for both symmetric edges
+                    count[1]+=1
                 #if nodes from different groups, we make an edge
                 #between the '.1' or '.2' nodes nearest to each other
                 elif axis[s1] == axis[t1] + 2:
                     newSources.append(s1)
                     newTargets.append(t2)
                     newProperties.append(p)
+                    count[2]+=1
                 elif axis[s1] + 2 == axis[t1]:
                     newSources.append(s2)
                     newTargets.append(t1)
                     newProperties.append(p)
+                    count[3]+=1
                 #the edges below loop back from the highest numbered axis to the first axis
                 elif axis[s1] == 1 and axis[t2] == self.numAxes*2:
                     newSources.append(s1)
                     newTargets.append(t2)
                     newProperties.append(p)
+                    count[4]+=1
                 elif axis[t1] == 1 and axis[s2] == self.numAxes*2:
                     newSources.append(s2)
                     newTargets.append(t1)
                     newProperties.append(p)
+                    count[5]+=1
                 else:
                     pass
             else:
@@ -285,6 +291,8 @@ class Hive():
         
         self.edges = zip(newSources, newTargets)
         self.edgeProperties = newProperties
+        print count
+        print sum(count.values())
         
         if self.debug:
             print '    The new edges with their properties are:', self.edges
@@ -296,7 +304,7 @@ class Hive():
        values = {}
        if isinstance(rule, int):
            try:
-               properties = zip(*self.edgeProperties)[rule-1] #-1 to accomodate for python indexes starting at 0
+               properties = zip(*self.edgeProperties)[rule-1] #-1 to accommodate for Python indexes starting at 0
            except IndexError:
                print '\n\n            ***WARNING***'
                print '    Please choose a edge grouping rule which is either a network'
