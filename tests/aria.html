@@ -1,39 +1,21 @@
-'''
-created 06/05/2014
-
-by sperez
-
-contains all the pieces of the html and d3 functions to plot the hive
-'''
-
-htmlContainer= {}
-
-keyOrder = ['intro', 'nodefile', 'edgefile',
-            'start js parameters','titleheader',
-            'numAxes', 'angles','color', 'edge_color', 
-            'end js parameters', 'd3functions']
-
-htmlContainer['intro'] = """<!comment This is a hive plot developed using HivePlotter.>
+<!comment This is a hive plot developed using HivePlotter.>
 <!DOCTYPE html>
 <meta charset="utf-8">
 <body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/d3.hive.v0.min.js"></script>
-"""
 
-htmlContainer['nodefile'] = 'nodes.js' #will be specified by user
-htmlContainer['edgefile'] = 'links.js' #will be specified by user
+<script src="/Users/sperez/git/HivePlotter/tests/nodesaria.js"></script>
+<script src="/Users/sperez/git/HivePlotter/tests/edgesaria.js"></script>
+<script> 
+//All the user defined parameters
+var SVGTitle = 'Hive plot : aria'
+var num_axis = 6
+var angle = [-0.35,0.35,1.75,2.44,3.84,4.54]
+var nodecolor = 'white'
+var edge_color = ['blue','red']
+</script>
 
-htmlContainer['start js parameters'] = '' #will be specified by user
-htmlContainer['titleheader'] = '' #will be specified by user
-htmlContainer['numAxes'] = '' #will be specified by user
-htmlContainer['angles'] = '' #will be specified by user
-htmlContainer['color'] = '' #will be specified by user
-htmlContainer['edge_color'] = '' #will be specified by user
-htmlContainer['end js parameters'] = '' #will be specified by user
-
-
-htmlContainer['d3functions'] = """
 <script>
 
 var nodesize = 4
@@ -107,6 +89,4 @@ function degrees(radians) {
   return radians / Math.PI * 180 - 90;
 }
 
-</script>"""
-
-#more to be added
+</script>

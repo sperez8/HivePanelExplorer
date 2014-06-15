@@ -3,6 +3,10 @@ HivePlotter
 
 A Python script that takes a network and writes the HTML and JavaScript files necessary to create hive plots in D3.
 
+
+**Warning:** Please note that the code is under heavy development. A fully functional code will be available in the next few weeks.
+
+
 ## Why hive plots?
 Visualizing large networks is tricky; conventional graph layout such as force directed layouts are inconsistent, often resemble "hair balls" and can even suggest patterns which aren't actually there. Comes in Martin Krzywinski (Genome Science Center, Vancouver, BC) and develops [hive plots](http://www.hiveplot.net/), a coherent network layout algorithm that places nodes using predefined rules. Hive plots facilitate the visualization of structural patterns in a network and the comparison on networks.
 
@@ -19,11 +23,11 @@ HivePlotter was developped using Python version 2.7. The following packages are 
 ####Input
 The network should be stored in two csv input files. The node file should look like:
 
-|Node number| Node name | Property 1 | Property 2|
-|:----:|:----:|:----------:|:----------:|
-|node1 | Alice | girl | ...|
-|node2 | Bob | boy | ...|
-|node 3 | Cam | boy | ...|
+| Node | Property 1 | Property 2|
+|:----:|:----------:|:----------:|
+| Alice | girl | 12 |
+| Bob | boy | 11 |
+| Cam | boy | 13 |
 
 
 The link file needs to specify edges using sources and targets (thought the directionality of the link will be ignored unless specified). The 'Node number' or the 'Node name' as specified in the node input file can be used to specify an edge. The link input file should look like:

@@ -1,0 +1,11 @@
+Source,Target,Property 1,Property2 
+Bob,Cam,3,friends
+Cam,Fatima,4,friends
+Daniella,Alice,0,enemies
+Daniella,Eric,3,enemies
+Eric,Bob,1,friends
+Cam,Alice,1,friends
+Fatima,Alice,4,enemies
+Alice,George,8,enemies
+Bob,George,7,friends
+Bob,Fatima,6,friends
