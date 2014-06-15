@@ -135,7 +135,7 @@ class Hive():
         if self.debug:
             print nodeAssignments
         return None
-    
+   
     def node_position(self, rule):
         return None
     
@@ -184,3 +184,4 @@ class Hive():
     		return convertedData
     	except ValueError:
     		return data
+
