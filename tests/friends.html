@@ -5,20 +5,20 @@
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/d3.hive.v0.min.js"></script>
 
-<script src="/Users/sperez/git/HivePlotter/tests/nodesfriends.js"></script>
-<script src="/Users/sperez/git/HivePlotter/tests/edgesfriends.js"></script>
+<script src="C:\Users\Sarah\git\HivePlotter/tests/nodesfriends.js"></script>
+<script src="C:\Users\Sarah\git\HivePlotter/tests/edgesfriends.js"></script>
 <script> 
 //All the user defined parameters
 var SVGTitle = 'Hive plot : friends'
-var num_axis = 3
-var angle = [0.0001,2.09,4.19]
-var nodecolor = 'green'
-var edge_color = ['blue','purple']
+var num_axis = 6
+var angle = [-0.35,0.35,1.75,2.44,3.84,4.54]
+var nodecolor = 'white'
+var edge_color = ['blue','red']
 </script>
 
 <script>
 
-var nodesize = 5
+var nodesize = 4
     nodestroke = 0.4
     nodestrokecolor = "grey"
     
@@ -28,9 +28,9 @@ var width = 600
     outerRadius = 240;
 
 var linkfill = "none"
-    linkwidth = 0.8
-    oplink = 0.9
-    opnode = 0.9
+    linkwidth = 0.7
+    oplink = 0.6
+    opnode = 0.3
     bkgcolor = "white"
     
 var radius = d3.scale.linear().range([innerRadius, outerRadius]);
@@ -83,7 +83,7 @@ svg.selectAll(".node")
     .attr("stroke-width", nodestroke)
     .attr("stroke", nodestrokecolor)
     .style("fill-opacity", opnode)
-    .sytle("fill", nodecolor);
+    .style("fill", nodecolor);
 
 function degrees(radians) {
   return radians / Math.PI * 180 - 90;

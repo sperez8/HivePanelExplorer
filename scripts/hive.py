@@ -9,6 +9,7 @@ including node position, edge coloring, number of axes etc...
 
 #library imports
 import sys
+import os
 import numpy as np
 from math import pi
 from graph_uttilities import *
@@ -139,9 +140,14 @@ class Hive():
             [axisAssignment.update({n:i+1}) for n,i in axisAssignment.iteritems()] #want the node group to start at 1, not 0
         else:            
             values.sort()
-            cutoffs = [int(len(values)/self.numAxes)*i for i in range(1,self.numAxes)]
-            cutoffValues = [values[c-1] for c in cutoffs] # to prevent nodes with the same value to be in different groups
+            print values
+            print len(values)
+            cutoffIndexes = [int(len(values)/self.numAxes)*i for i in range(1,self.numAxes)]
+            print cutoffIndexes
+            print [values[c] for c in cutoffIndexes]
+            cutoffValues = [values[c] for c in cutoffIndexes] # to prevent nodes with the same value to be in different groups
             cutoffValues.append(values[-1]) #add greatest value as a cutoff
+            #cutoffValues = [1,15,269]
             for n in self.nodes:
                 i = 0
                 while i < len(cutoffValues):
