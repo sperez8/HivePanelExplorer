@@ -140,11 +140,7 @@ class Hive():
             [axisAssignment.update({n:i+1}) for n,i in axisAssignment.iteritems()] #want the node group to start at 1, not 0
         else:            
             values.sort()
-            print values
-            print len(values)
             cutoffIndexes = [int(len(values)/self.numAxes)*i for i in range(1,self.numAxes)]
-            print cutoffIndexes
-            print [values[c] for c in cutoffIndexes]
             cutoffValues = [values[c] for c in cutoffIndexes] # to prevent nodes with the same value to be in different groups
             cutoffValues.append(values[-1]) #add greatest value as a cutoff
             #cutoffValues = [1,15,269]
@@ -164,8 +160,7 @@ class Hive():
             [axisAssignment.update({n:(i-1)}) if n[-2:] == '.1' else None for n,i in axisAssignment.iteritems()]
         
         self.axisAssignment = axisAssignment
-        
-        print set(axisAssignment.values())
+
         if self.debug:
             if categories:
                 print '    Node Categories:', categories
@@ -203,9 +198,9 @@ class Hive():
                 print '    feature or one of the {0} column(s) of the node properties in the input file'.format(len(self.nodeProperties))
                 sys.exit()
             if self.doubleAxes:
-                [assignmentValues.update({n:p}) for n,p in zip(self.nodes, properties*2)]
+                [assignmentValues.update({n:p}) for n,p in zipper(self.nodes, properties*2)]
             else:
-                [assignmentValues.update({n:p}) for n,p in zip(self.nodes, properties)]
+                [assignmentValues.update({n:p}) for n,p in zipper(self.nodes, properties)]
             return assignmentValues
         
         elif isinstance(rule, str):
@@ -235,8 +230,7 @@ class Hive():
         newProperties = []
         axis = self.axisAssignment
         reorganizedProperties = zip(*self.edgeProperties)
-        count = {1:0, 2:0, 3:0, 4:0, 5:0}
-        for s,t,p in zip(self.sources, self.targets, reorganizedProperties):
+        for s,t,p in zipper(self.sources, self.targets, reorganizedProperties):
             if self.doubleAxes:
                 s1 = s + '.1'
                 s2 = s + '.2'
@@ -250,30 +244,25 @@ class Hive():
                     newTargets.extend([t2,t1])
                     newProperties.append(p)
                     newProperties.append(p) #add properties twice for both symmetric edges
-                    count[1]+=1
                 #if nodes from different groups, we make an edge
                 #between the '.1' or '.2' nodes nearest to each other
                 elif axis[s1] == axis[t1] + 2:
                     newSources.append(s1)
                     newTargets.append(t2)
                     newProperties.append(p)
-                    count[2]+=1
                 elif axis[s1] + 2 == axis[t1]:
                     newSources.append(s2)
                     newTargets.append(t1)
                     newProperties.append(p)
-                    count[3]+=1
                 #the edges below loop back from the highest numbered axis to the first axis
                 elif axis[s1] == 1 and axis[t2] == self.numAxes*2:
                     newSources.append(s1)
                     newTargets.append(t2)
                     newProperties.append(p)
-                    count[4]+=1
                 elif axis[t1] == 1 and axis[s2] == self.numAxes*2:
                     newSources.append(s2)
                     newTargets.append(t1)
                     newProperties.append(p)
-                    count[5]+=1
                 else:
                     pass
             else:
@@ -294,10 +283,8 @@ class Hive():
                     newTargets.append(t)   
                     newProperties.append(p)     
         
-        self.edges = zip(newSources, newTargets)
+        self.edges = zipper(newSources, newTargets)
         self.edgeProperties = newProperties
-        print count
-        print sum(count.values())
         
         if self.debug:
             print '    The new edges with their properties are:', self.edges
@@ -317,7 +304,7 @@ class Hive():
                print '\n'
                sys.exit()
            
-           [values.update({e:p}) for e,p in zip(self.edges, properties)]
+           [values.update({e:p}) for e,p in zipper(self.edges, properties)]
            return values
        
        elif isinstance(rule, str):

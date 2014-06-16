@@ -72,6 +72,21 @@ def find_categories(data):
         return None
     return categories
 
+def zipper(x,y,z=[]):
+    if z == []:
+        if len(y) != len(x):
+            raise ValueError('The lists to be zipped aren\'t the same length.')
+        else:
+            return zip(x,y)
+    else:
+        if len(x) != len(y) or len(x) != len(z):
+            raise ValueError('The lists to be zipped aren\'t the same length.')
+        else:
+            return zip(x,y,z)
+            
+            
+    
+
         
     
     

@@ -96,15 +96,7 @@ def make_html(title, hive):
     return None
 
 def make_hive(nodefile, edgefile, debug):
-    '''creates a hive instance form user input'''
-    
-    #TEMPORARY
-    #nodefile = 'C:\Users\Sarah\git\HivePlotter\\tests\\test_nodes_friends.csv'
-    #edgefile = 'C:\Users\Sarah\git\HivePlotter\\tests\\test_edges_friends.csv'
-    
-    nodefile = 'C:\Users\Sarah\Desktop\WL_Nodes_ALL.csv'
-    edgefile = 'C:\Users\Sarah\Desktop\WL_EDGES_ALL.csv'
-    
+    '''creates a hive instance form user input'''  
         
     hive = Hive(debug = debug,
                 numAxes = numAxes, 
