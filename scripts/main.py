@@ -108,7 +108,7 @@ def make_hive(nodefile, edgefile, debug):
     hive.get_nodes(nodefile)
     hive.get_edges(edgefile)
     hive.make_axes()
-    hive.node_assignment()
+    hive.node_assignment(cutoffValues = cutoffValues)
     hive.node_position()
     hive.node_style()
     hive.make_edges()

@@ -1,9 +1,9 @@
 
 numAxes = 3
 doubleAxes = True
+cutoffValues = [1,15,269]
 axisAssignRule = 'degree'
 axisPositRule = 3
-
 color = 'white'
 
 #edge styling

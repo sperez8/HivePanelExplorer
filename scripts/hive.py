@@ -118,7 +118,7 @@ class Hive():
         self.angles = angles
         return None
     
-    def node_assignment(self, assignmentValues = None):
+    def node_assignment(self, assignmentValues = None, cutoffValues = []):
         '''determines on which axis the node should be placed
             depending on the rule. Integer valued rules indicate the use of
             node properties. Rules which are string values denote network 
@@ -128,7 +128,7 @@ class Hive():
         axisAssignment = {} 
         if not assignmentValues:
             assignmentValues = self.get_assignment_values(self.axisAssignRule)
-            
+        
         values = assignmentValues.values()
         #check if styling values are numerical, otherwise treat as categorical
         #and recode into numerical variables
@@ -138,12 +138,14 @@ class Hive():
                 print 'The number of node groups using the rule \'{0}\' is different than the number of axes ({1})!'.format(self.axisAssignRule, self.numAxes)
             [axisAssignment.update({n:categories.index(v)}) for n,v in assignmentValues.iteritems()] 
             [axisAssignment.update({n:i+1}) for n,i in axisAssignment.iteritems()] #want the node group to start at 1, not 0
-        else:            
-            values.sort()
-            cutoffIndexes = [int(len(values)/self.numAxes)*i for i in range(1,self.numAxes)]
-            cutoffValues = [values[c] for c in cutoffIndexes] # to prevent nodes with the same value to be in different groups
-            cutoffValues.append(values[-1]) #add greatest value as a cutoff
-            #cutoffValues = [1,15,269]
+        else:
+            if not cutoffValues:      
+                values.sort()
+                cutoffIndexes = [int(len(values)/self.numAxes)*i for i in range(1,self.numAxes)]
+                cutoffValues = [values[c] for c in cutoffIndexes] # to prevent nodes with the same value to be in different groups
+            if values[-1] not in cutoffValues:
+                cutoffValues.append(values[-1]) #add greatest value as a cutoff
+                
             for n in self.nodes:
                 i = 0
                 while i < len(cutoffValues):
