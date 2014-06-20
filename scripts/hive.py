@@ -178,12 +178,18 @@ class Hive():
         nodePositions = {}
         assignmentValues = self.get_assignment_values(self.axisPositRule)
         
-        #only works for numerical variables for now but will be improved for categorical ones
-        maxValue = max(assignmentValues.values())
-        
-        for n,p in assignmentValues.iteritems():
-            nodePositions[n] = round(float(p)/float(maxValue),3)
-            
+        values = assignmentValues.values()
+        categories = find_categories(values)
+        if categories:
+            categories.sort() # sorts strings alphabetically
+            maxValue = len(categories) #index of last element in categories + 1
+            for n,p in assignmentValues.iteritems():
+                nodePositions[n] = round(float(categories.index(p))/float(maxValue),3)
+        else:    
+            maxValue = max(values)
+            for n,p in assignmentValues.iteritems():
+                nodePositions[n] = round(float(p)/float(maxValue),3)
+                
         self.nodePositions = nodePositions
         if self.debug:
             print '    Node positions on axis:', nodePositions
