@@ -19,6 +19,7 @@ AXIS_ASSIGN_RULE = 'degree'
 AXIS_POSIT_RULE = 'closeness'
 EDGE_PALETTE = 'purple'
 EDGE_STYLE_RULE = 'average connecting degree'
+NODE_COLOR = 'blue'
 
 class Hive():
     '''contains node and edge, coloring, position, etc...'''
@@ -30,7 +31,8 @@ class Hive():
                  axisAssignRule = AXIS_ASSIGN_RULE, 
                  axisPositRule = AXIS_POSIT_RULE,
                  edgePalette = EDGE_PALETTE,
-                 edgeStyleRule = EDGE_STYLE_RULE):
+                 edgeStyleRule = EDGE_STYLE_RULE,
+                 color = NODE_COLOR):
         '''Initializing defining parameters of the hive'''
         self.debug = debug 
         self.numAxes = numAxes
@@ -39,6 +41,7 @@ class Hive():
         self.axisPositRule = axisPositRule
         self.edgePalette = edgePalette
         self.edgeStyleRule = edgeStyleRule
+        self.color = color
         
         try:
             self.axisAssignRule = int(axisAssignRule)
@@ -52,6 +55,21 @@ class Hive():
         
         return None
     
+    
+    def make_hive(self, nodefile, edgefile, cutoffValues = None):
+        '''creates a hive instance from user input'''  
+            
+        self.get_nodes(nodefile)
+        self.get_edges(edgefile)
+        self.make_axes()
+        self.node_assignment(cutoffValues = cutoffValues)
+        self.node_position()
+        self.node_style()
+        self.make_edges()
+        self.edge_style()
+        
+        return None
+
     def get_nodes(self,inputFile, delimiter = ','):
         '''gets nodes and their properties from csv file'''
         data = np.genfromtxt(inputFile, delimiter=delimiter, skiprows = 1, dtype='str')
@@ -332,6 +350,7 @@ class Hive():
     def edge_style(self, opacity = 0.9, color = 'purple', size = '7'):
         '''determines how the edges will look given different characteristics'''
         edgeStyling = {}
+        categories = None
         if self.edgeStyleRule != EDGE_STYLE_RULE:
             edgeValues = self.get_edge_properties(self.edgeStyleRule)
             values = edgeValues.values()
