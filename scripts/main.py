@@ -95,7 +95,13 @@ def make_html(title, hive):
     
     return None
 
-def make_hive(nodefile, edgefile, debug):
+def make_hive(nodefile, edgefile, debug, 
+                numAxes = numAxes,
+                doubleAxes = doubleAxes, 
+                axisAssignRule = axisAssignRule, 
+                axisPositRule = axisPositRule, 
+                edgePalette = edgeColorPalette, 
+                edgeStyleRule = edgeColorRule):
     '''creates a hive instance form user input'''  
         
     hive = Hive(debug = debug,
