@@ -46,6 +46,7 @@ def callback():
                 nodeColor = color
                 )
     hive.make_hive(nodefile, edgefile)
+    hive.make_debug_file()
     make_html(hiveTitle, hive)
     
     
@@ -66,8 +67,8 @@ title = make_entry(app, "Hive Title:", 30) #side = 'left')
 nodes = make_entry(app, "Nodes:", 60, fill = True, bg = 'purple')
 edges = make_entry(app, "Edges:", 60, fill = True, bg = 'purple')
 title.insert(0,"3")
-nodes.insert(0,"C:\Users\Sarah\Desktop\WL_Nodes_ALL.csv")
-edges.insert(0,"C:\Users\Sarah\Desktop\WL_EDGES_ALL.csv")
+nodes.insert(0,"/Users/sperez/git/HivePlotter/tests/test_nodes_friends.csv")
+edges.insert(0,"/Users/sperez/git/HivePlotter/tests/test_edges_friends.csv")
 
 #make different option menus
 debugOpt = make_options(app, 'debug:', debugOptions)

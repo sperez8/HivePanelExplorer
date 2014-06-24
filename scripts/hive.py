@@ -13,6 +13,7 @@ import os
 import numpy as np
 from math import pi
 from graph_uttilities import *
+from time import strftime
 
 #hive parameter defaults
 AXIS_ASSIGN_RULE = 'degree'
@@ -20,12 +21,14 @@ AXIS_POSIT_RULE = 'closeness'
 EDGE_PALETTE = 'purple'
 EDGE_STYLE_RULE = 'average connecting degree'
 NODE_COLOR = 'blue'
+DEBUG_FILE = '/Users/sperez/Desktop/debugLog/debug_'
 
 class Hive():
     '''contains node and edge, coloring, position, etc...'''
     
     def __init__(self, 
                  debug = True, 
+                 debugFile = DEBUG_FILE,
                  numAxes = 3, 
                  doubleAxes = False, 
                  axisAssignRule = AXIS_ASSIGN_RULE, 
@@ -36,6 +39,8 @@ class Hive():
                  ):
         '''Initializing defining parameters of the hive'''
         self.debug = debug 
+        self.debugInfo = []
+        self.debugFile = debugFile
         self.numAxes = numAxes
         self.doubleAxes = doubleAxes
         self.axisAssignRule = axisAssignRule 
@@ -68,7 +73,6 @@ class Hive():
         self.node_style()
         self.make_edges()
         self.edge_style()
-        
         return None
 
     def get_nodes(self,inputFile, delimiter = ','):
@@ -90,8 +94,11 @@ class Hive():
         self.nodeProperties = [convert_type(p) for p in nodeProperties]
         
         if self.debug:
-            print '    Nodes are: ', self.nodes
-            print '    Node properties are: ', self.nodeProperties
+            self.debugInfo.append('    Nodes are: ')
+            self.debugInfo.append(','.join(self.nodes))
+            self.debugInfo.append('    Node properties are: ')
+            for item in self.nodeProperties:
+                self.debugInfo.append(','.join([str(i) for i in item]))
         return None
 
     def get_edges(self,inputFile, delimiter = ','):
@@ -387,6 +394,15 @@ class Hive():
             print '    Edge styling:', edgeStyling
         return None
 
+    def make_debug_file(self):
+        date = strftime("%c")
+        file = self.debugFile + date + '.txt'
+        with open(file,'w') as f:
+            for line in self.debugInfo:
+                f.write(line)
+                f.write('\n')
+        f.close()
+        
     def check_input(self):
         '''IN DEVELOPMENT
         checks if all edges are connecting nodes which exist in the self.nodes'''
