@@ -48,7 +48,7 @@ def convert_type(data):
             return int(d)
         except ValueError:
             return float(d)
-        
+    
     try:
         convertedData = [num(d) for d in data]
         return convertedData

@@ -19,6 +19,7 @@ AXIS_ASSIGN_RULE = 'degree'
 AXIS_POSIT_RULE = 'closeness'
 EDGE_PALETTE = 'purple'
 EDGE_STYLE_RULE = 'average connecting degree'
+NODE_COLOR = 'blue'
 
 class Hive():
     '''contains node and edge, coloring, position, etc...'''
@@ -30,7 +31,9 @@ class Hive():
                  axisAssignRule = AXIS_ASSIGN_RULE, 
                  axisPositRule = AXIS_POSIT_RULE,
                  edgePalette = EDGE_PALETTE,
-                 edgeStyleRule = EDGE_STYLE_RULE):
+                 edgeStyleRule = EDGE_STYLE_RULE,
+                 nodeColor = NODE_COLOR
+                 ):
         '''Initializing defining parameters of the hive'''
         self.debug = debug 
         self.numAxes = numAxes
@@ -39,6 +42,7 @@ class Hive():
         self.axisPositRule = axisPositRule
         self.edgePalette = edgePalette
         self.edgeStyleRule = edgeStyleRule
+        self.nodeColor = nodeColor
         
         try:
             self.axisAssignRule = int(axisAssignRule)
@@ -52,6 +56,21 @@ class Hive():
         
         return None
     
+    
+    def make_hive(self, nodefile, edgefile, cutoffValues = None):
+        '''creates a hive instance from user input'''  
+            
+        self.get_nodes(nodefile)
+        self.get_edges(edgefile)
+        self.make_axes()
+        self.node_assignment(cutoffValues = cutoffValues)
+        self.node_position()
+        self.node_style()
+        self.make_edges()
+        self.edge_style()
+        
+        return None
+
     def get_nodes(self,inputFile, delimiter = ','):
         '''gets nodes and their properties from csv file'''
         data = np.genfromtxt(inputFile, delimiter=delimiter, skiprows = 1, dtype='str')
@@ -178,12 +197,18 @@ class Hive():
         nodePositions = {}
         assignmentValues = self.get_assignment_values(self.axisPositRule)
         
-        #only works for numerical variables for now but will be improved for categorical ones
-        maxValue = max(assignmentValues.values())
-        
-        for n,p in assignmentValues.iteritems():
-            nodePositions[n] = round(float(p)/float(maxValue),3)
-            
+        values = assignmentValues.values()
+        categories = find_categories(values)
+        if categories:
+            categories.sort() # sorts strings alphabetically
+            maxValue = len(categories) #index of last element in categories + 1
+            for n,p in assignmentValues.iteritems():
+                nodePositions[n] = round(float(categories.index(p))/float(maxValue),3)
+        else:    
+            maxValue = max(values)
+            for n,p in assignmentValues.iteritems():
+                nodePositions[n] = round(float(p)/float(maxValue),3)
+                
         self.nodePositions = nodePositions
         if self.debug:
             print '    Node positions on axis:', nodePositions
@@ -326,6 +351,7 @@ class Hive():
     def edge_style(self, opacity = 0.9, color = 'purple', size = '7'):
         '''determines how the edges will look given different characteristics'''
         edgeStyling = {}
+        categories = None
         if self.edgeStyleRule != EDGE_STYLE_RULE:
             edgeValues = self.get_edge_properties(self.edgeStyleRule)
             values = edgeValues.values()
@@ -350,7 +376,7 @@ class Hive():
                 [edgeStyling.update({e:EDGE_PALETTE}) for e in self.edges]
                 print 'No edge coloring palette specified. Will default to palette: \'{0}\'.'.format(EDGE_PALETTE)
         else:
-            [edgeStyling.update({e:EDGE_PALETTE}) for e in self.edges]
+            [edgeStyling.update({e:0}) for e in self.edges]
             print 'No edge coloring rule specified'
             
         self.edgeStyling = edgeStyling
