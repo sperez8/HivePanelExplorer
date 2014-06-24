@@ -14,12 +14,11 @@ fontSize = 16
 
     
 def make_entry(parent, caption, width=None, row = 0, column = 0, **options):
-    print row, column
     Label(parent, text=caption, font = (fontType, int(fontSize))).grid(row=row, column=column)
     entry = Entry(parent, **options)
     if width:
         entry.config(width=width)
-    entry.grid(row=row, column=column+1)
+    entry.grid(row=row, column=column+1, padx = 15)
     return entry
 
 def make_options(parent, caption, row = 0, column = 0, selections = [], **options):

@@ -383,8 +383,8 @@ class Hive():
                 [edgeStyling.update({e:EDGE_PALETTE}) for e in self.edges]
                 print 'No edge coloring palette specified. Will default to palette: \'{0}\'.'.format(EDGE_PALETTE)
         else:
+            #No edge coloring rule specified
             [edgeStyling.update({e:0}) for e in self.edges]
-            print 'No edge coloring rule specified'
             
         self.edgeStyling = edgeStyling
         
