@@ -41,9 +41,9 @@ def callback():
                 doubleAxes = double, 
                 axisAssignRule = assignment, 
                 axisPositRule = position,
-                #edgePalette = edgeColorPalette, 
+                edgePalette = color, 
                 #edgeStyleRule = edgeColorRule,
-                color = color
+                nodeColor = color
                 )
     hive.make_hive(nodefile, edgefile)
     make_html(hiveTitle, hive)
@@ -65,6 +65,9 @@ welcome.pack()
 title = make_entry(app, "Hive Title:", 30) #side = 'left')
 nodes = make_entry(app, "Nodes:", 60, fill = True, bg = 'purple')
 edges = make_entry(app, "Edges:", 60, fill = True, bg = 'purple')
+title.insert(0,"3")
+nodes.insert(0,"C:\Users\Sarah\Desktop\WL_Nodes_ALL.csv")
+edges.insert(0,"C:\Users\Sarah\Desktop\WL_EDGES_ALL.csv")
 
 #make different option menus
 debugOpt = make_options(app, 'debug:', debugOptions)

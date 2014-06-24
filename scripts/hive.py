@@ -32,7 +32,8 @@ class Hive():
                  axisPositRule = AXIS_POSIT_RULE,
                  edgePalette = EDGE_PALETTE,
                  edgeStyleRule = EDGE_STYLE_RULE,
-                 color = NODE_COLOR):
+                 nodeColor = NODE_COLOR
+                 ):
         '''Initializing defining parameters of the hive'''
         self.debug = debug 
         self.numAxes = numAxes
@@ -41,7 +42,7 @@ class Hive():
         self.axisPositRule = axisPositRule
         self.edgePalette = edgePalette
         self.edgeStyleRule = edgeStyleRule
-        self.color = color
+        self.nodeColor = nodeColor
         
         try:
             self.axisAssignRule = int(axisAssignRule)
@@ -375,7 +376,7 @@ class Hive():
                 [edgeStyling.update({e:EDGE_PALETTE}) for e in self.edges]
                 print 'No edge coloring palette specified. Will default to palette: \'{0}\'.'.format(EDGE_PALETTE)
         else:
-            [edgeStyling.update({e:EDGE_PALETTE}) for e in self.edges]
+            [edgeStyling.update({e:0}) for e in self.edges]
             print 'No edge coloring rule specified'
             
         self.edgeStyling = edgeStyling
