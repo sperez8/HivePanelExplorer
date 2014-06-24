@@ -34,8 +34,10 @@ def callback():
     #convert types
     debug = bool(debug)
     axes = int(axes)
-    double = bool(double)
-    
+    if double == 'True':
+        double = True
+    else:
+        double = False
     hive = Hive(debug = debug, 
                 numAxes = axes,
                 doubleAxes = double, 
@@ -66,6 +68,8 @@ welcome.pack()
 title = make_entry(app, "Hive Title:", 30) #side = 'left')
 nodes = make_entry(app, "Nodes:", 60, fill = True, bg = 'purple')
 edges = make_entry(app, "Edges:", 60, fill = True, bg = 'purple')
+
+#for debugging/development purposes
 title.insert(0,"3")
 nodes.insert(0,"/Users/sperez/git/HivePlotter/tests/test_nodes_friends.csv")
 edges.insert(0,"/Users/sperez/git/HivePlotter/tests/test_edges_friends.csv")
