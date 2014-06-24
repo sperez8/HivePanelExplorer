@@ -9,24 +9,23 @@ to make labels, option menus, etc...
 
 from Tkinter import *
 
+fontType = 'Helvetica'
+fontSize = 16
+
     
-def make_entry(parent, caption, width=None, fill=False, side = None, **options):
-    Label(parent, text=caption).pack()#side=LEFT)
+def make_entry(parent, caption, width=None, row = 0, column = 0, **options):
+    print row, column
+    Label(parent, text=caption, font = (fontType, int(fontSize))).grid(row=row, column=column)
     entry = Entry(parent, **options)
     if width:
         entry.config(width=width)
-    if fill:
-        entry.pack(fill=X)
-    elif side == 'left':
-        entry.pack(side=LEFT)
-    else:
-        entry.pack()
+    entry.grid(row=row, column=column+1)
     return entry
 
-def make_options(parent, caption, options):
-    Label(parent, text=caption).pack(side=LEFT)
+def make_options(parent, caption, row = 0, column = 0, selections = [], **options):
+    Label(parent, text=caption, font = (fontType, int(fontSize))).grid(row=row, column=column)
     var = StringVar(parent)
-    var.set(options[0]) #default value
-    w = apply(OptionMenu, (parent, var) + tuple(options))
-    w.pack(side=LEFT)
+    var.set(selections[0]) #default value
+    w = apply(OptionMenu, (parent, var) + tuple(selections))
+    w.grid(row=row, column=column+1, sticky=W)
     return var
