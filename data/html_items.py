@@ -88,7 +88,11 @@ svg.selectAll(".link")
     .radius(function(d) { return radius(d.pos); }))
     .style("fill", linkfill)
     .style("stroke-opacity", oplink)
-    .style("stroke", function(d) { return link_color(d.type); })
+    .style("stroke", function(d) {
+        if (edge_color.length == 1){
+            return edge_color}
+        else {return link_color(d.type)}
+        })
     .style("stroke-width", linkwidth);
   
 svg.selectAll(".node")
