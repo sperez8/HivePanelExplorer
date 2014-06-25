@@ -88,7 +88,7 @@ class Hive():
             
         nodeProperties = {}
         for i, column in enumerate(data[:,1:].T):
-            #transform node names and properties into the numerical types if possible
+            #transform node properties into the numerical types if possible
             values = convert_type(list(column))
             nodeProperties[properties[i]] = values
         self.nodeProperties = nodeProperties
@@ -103,22 +103,25 @@ class Hive():
 
     def get_edges(self,inputFile, delimiter = ','):
         '''gets edges and their properties from csv file'''
-        data = np.genfromtxt(inputFile, delimiter=delimiter, skiprows = 1, dtype='str')
+        data = np.genfromtxt(inputFile, delimiter=delimiter, dtype='str')
+        properties = data[0,2:]
+        data = data[2:,]
         #get all the edge data
         self.sources = list(data[:,0])        
         self.targets = list(data[:,1])
-        edgeProperties = []
-        for column in data[:,2:].T:
-            edgeProperties.append(list(column))
-        
-        #transform it into the right data type
-        self.edgeProperties = [convert_type(p) for p in edgeProperties]
-        
+
+        edgeProperties = {}
+        for i, column in enumerate(data[:,2:].T):
+            #transform edge properties into the numerical types if possible
+            values = convert_type(list(column))
+            edgeProperties[properties[i]] = values
+        self.edgeProperties = edgeProperties
+            
         if self.debug:
             print '    Sources are: ', self.sources
             print '    Targets are: ', self.targets
             print '    Edge properties are: ', self.edgeProperties
-        return None
+        return properties
 
     def make_axes(self):
         '''creates axes and angles given the number of axes desired
@@ -257,7 +260,13 @@ class Hive():
         newTargets = []
         newProperties = []
         axis = self.axisAssignment
-        reorganizedProperties = zip(*self.edgeProperties)
+        keys = []
+        properties = []
+        for k,v in self.edgeProperties.iteritems():
+            keys.append(k)
+            properties.append(v)
+        reorganizedProperties = zip(*properties)
+        self.edgeKeys = keys
         for s,t,p in zipper(self.sources, self.targets, reorganizedProperties):
             if self.doubleAxes:
                 s1 = s + '.1'
@@ -322,16 +331,11 @@ class Hive():
  
     def get_edge_properties(self, rule):
        values = {}
-       if isinstance(rule, int):
-           try:
-               properties = zip(*self.edgeProperties)[rule-1] #-1 to accommodate for Python indexes starting at 0
-           except IndexError:
-               print '\n\n            ***WARNING***'
-               print '    Please choose a edge grouping rule which is either a network'
-               print '    feature or one of the {0} column(s) of the edge properties in the input file'.format(len(self.edgeProperties))
-               print '\n'
-               sys.exit()
-           
+       if rule in self.edgeKeys:
+           print self.edgeProperties
+           i = self.edgeKeys.index(rule)
+           properties = zip(*self.edgeProperties)[i]
+           print properties
            [values.update({e:p}) for e,p in zipper(self.edges, properties)]
            return values
        

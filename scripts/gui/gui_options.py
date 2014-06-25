@@ -11,7 +11,7 @@ debugOptions = ['True', 'False']
 
 axesOptions = [2,3,4,5]
 
-doubleOptions = ['False', 'True']
+doubleOptions = ['True', 'False']
 
 assignmentOptions = ['degree', 'betweeness', 'clustering', 'centrality']
 
@@ -19,4 +19,4 @@ positionOptions = ['degree', 'betweeness', 'clustering', 'centrality']
 
 colorOptions = ['blue', 'purple', 'red', 'green']
 
-paletteOptions = ['None', '1','2']
+edgeStyleOptions = ['uniform']

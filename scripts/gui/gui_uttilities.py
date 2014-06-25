@@ -28,18 +28,3 @@ def make_options(parent, caption, row = 0, column = 0, selections = [], **option
     w = apply(OptionMenu, (parent, var) + tuple(selections))
     w.grid(row=row, column=column+1, sticky=W, padx = 5)
     return w,var
-
-# def reset_option_menu(self, w, var, options, index=None):
-#     '''reset the values in the option menu
-#     
-#     if index is given, set the value of the menu to
-#     the option at the given index
-#     '''
-#     menu = w["menu"]
-#     menu.delete(0, "end")
-#     for string in options:
-#         menu.add_command(label=string, command=lambda value=string: var(value))
-#     if index is not None:
-#         var.set(options[index])
-#     
-#     return var

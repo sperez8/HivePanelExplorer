@@ -72,6 +72,7 @@ class HiveGui(Tk):
         self.axesVar.set('3')
         column += 2
         self.doubleOpt, self.doubleVar = make_options(app2, 'Double axes:', row = row, column = column, selections = doubleOptions)
+        self.doubleVar.set('False')
         row += 1
         column = 0
         self.assignmentOpt, self.assignmentVar = make_options(app2, 'Node Assignment Rule:', row = row, column = column, selections = assignmentOptions)
@@ -82,7 +83,7 @@ class HiveGui(Tk):
         self.colorOpt, self.colorVar = make_options(app2, 'Default Color:', row = row, column = column, selections = colorOptions)
         row += 1
         column = 0
-        self.paletteOpt, self.paletteVar = make_options(app2, 'Edge Color Palette:', row = row, column = column, selections = paletteOptions)
+        self.edgeStyleOpt, self.edgeStyleVar = make_options(app2, 'Edge Style Rule:', row = row, column = column, selections = edgeStyleOptions)
         
         #add button to submit data
         b2 = Button(self)
@@ -119,7 +120,9 @@ class HiveGui(Tk):
         
         properties = list(hive.get_nodes(nodefile)) + positionOptions
         self.positionVar = self.reset_option_menu(self.positionOpt, self.positionVar, properties) 
-    
+
+        properties = list(hive.get_edges(edgefile)) + edgeStyleOptions
+        self.edgeStyleVar = self.reset_option_menu(self.edgeStyleOpt, self.edgeStyleVar, properties)
     
     def callback(self):
         hiveTitle = self.title.get()
@@ -131,7 +134,7 @@ class HiveGui(Tk):
         assignment = self.assignmentVar.get()
         position = self.positionVar.get()
         color = self.colorVar.get()
-        palette = self.paletteVar.get()
+        edgeStyle = self.edgeStyleVar.get()
         
         #convert types
         axes = int(axes)
@@ -146,8 +149,8 @@ class HiveGui(Tk):
         else:
             double = False
         
-        if palette == 'None':
-            palette = None  
+        if edgeStyle == 'uniform':
+            edgeStyle = None
         else: 
             try:
                 palette = int(palette)   
@@ -160,7 +163,7 @@ class HiveGui(Tk):
                     axisAssignRule = assignment, 
                     axisPositRule = position,
                     edgePalette = color, 
-                    edgeStyleRule = palette,
+                    edgeStyleRule = edgeStyle,
                     nodeColor = color
                     )
         hive.make_hive(nodefile, edgefile)
