@@ -10,14 +10,14 @@ import sys
 import os
 from gui_uttilities import *
 from gui_options import *
-from hive import Hive
-from html_uttilities import *
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 
-from tests.test_parameter_friends import *
+from hive import Hive
+from html_uttilities import *
+#from tests.test_parameter_friends import *
 
 def callback():
     hiveTitle = title.get()
@@ -52,6 +52,7 @@ def callback():
         except:
             pass
     
+    print double
     hive = Hive(debug = debug, 
                 numAxes = axes,
                 doubleAxes = double, 
@@ -112,6 +113,7 @@ column = 0
 debugOpt = make_options(app2, 'Debug:', row = row, column = column, selections = debugOptions)
 column += 2
 axesOpt = make_options(app2, 'Number of Axes:', row = row, column = column, selections = axesOptions)
+axesOpt.set('3')
 column += 2
 doubleOpt = make_options(app2, 'Double axes:', row = row, column = column, selections = doubleOptions)
 row += 1
@@ -119,6 +121,7 @@ column = 0
 assignmentOpt = make_options(app2, 'Node Assignment Rule:', row = row, column = column, selections = assignmentOptions)
 column += 2
 positionOpt = make_options(app2, 'Node Position Rule:', row = row, column = column, selections = positionOptions)
+positionOpt.set('clustering')
 column += 2
 colorOpt = make_options(app2, 'Default Color:', row = row, column = column, selections = colorOptions)
 row += 1

@@ -28,7 +28,7 @@ def node_analysis(G, rule):
     elif rule == 'closeness' or rule == 'centrality':
         return nx.closeness_centrality(G)
     elif rule == 'betweeness':
-        return nx.betweeness_centrality(G)
+        return nx.betweenness_centrality(G)
     elif rule == 'average neighbor degree':
         return nx.average_neighbor_degree(G)
     else:

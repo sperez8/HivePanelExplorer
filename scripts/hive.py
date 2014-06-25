@@ -361,10 +361,13 @@ class Hive():
         '''determines how the edges will look given different characteristics'''
         edgeStyling = {}
         categories = None
+        print self.edgeStyleRule
+        print self.edgePalette
         if self.edgeStyleRule != EDGE_STYLE_RULE and self.edgeStyleRule != None:
             edgeValues = self.get_edge_properties(self.edgeStyleRule)
             values = edgeValues.values()
-            if self.edgePalette != EDGE_PALETTE:
+            if self.edgePalette != EDGE_PALETTE and not isinstance(self.edgePalette,str):
+                print values
                 #check if styling values are numerical, otherwise treat as categorical
                 categories = find_categories(values)
                 if categories:
@@ -382,7 +385,7 @@ class Hive():
                             else: i+=1
             
             else:
-                [edgeStyling.update({e:EDGE_PALETTE}) for e in self.edges]
+                [edgeStyling.update({e:0}) for e in self.edges]
                 print 'No edge coloring palette specified. Will default to palette: \'{0}\'.'.format(EDGE_PALETTE)
         else:
             #No edge coloring rule specified

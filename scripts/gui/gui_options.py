@@ -13,9 +13,9 @@ axesOptions = [2,3,4,5]
 
 doubleOptions = ['False', 'True']
 
-assignmentOptions = ['degree', 'clustering', 'betweeness', 'centrality', '1', '2']
+assignmentOptions = ['degree', 'betweeness', 'clustering', 'centrality', '1', '2']
 
-positionOptions = ['degree', 'clustering', 'betweeness', 'centrality', '1', '2']
+positionOptions = ['degree', 'betweeness', 'clustering', 'centrality', '1', '2']
 
 colorOptions = ['blue', 'purple', 'red', 'green']
 
