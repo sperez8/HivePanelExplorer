@@ -29,6 +29,7 @@ def callback():
     assignment = assignmentOpt.get()
     position = positionOpt.get()
     color = colorOpt.get()
+    palette = paletteOpt.get()
     
     #convert types
     axes = int(axes)
@@ -41,15 +42,23 @@ def callback():
     if double == 'True':
         double = True
     else:
-        double = False        
-        
+        double = False
+    
+    if palette == 'None':
+        palette = None  
+    else: 
+        try:
+            palette = int(palette)   
+        except:
+            pass
+    
     hive = Hive(debug = debug, 
                 numAxes = axes,
                 doubleAxes = double, 
                 axisAssignRule = assignment, 
                 axisPositRule = position,
                 edgePalette = color, 
-                #edgeStyleRule = edgeColorRule,
+                edgeStyleRule = palette,
                 nodeColor = color
                 )
     hive.make_hive(nodefile, edgefile)
@@ -60,7 +69,7 @@ def callback():
     
 #create window
 root  = Tk()
-root.title("Hive Plot Maker")
+root.title("Hive Plotter GUI")
 #root.geometry("700x400")
 
 #add a label
@@ -68,7 +77,7 @@ app = Frame(root)
 row = 0
 column = 0
 app.grid()
-welcome = Label(app, text = "Welcome to Hive Maker!", fg = 'slate blue', font = (fontType, int(fontSize*1.5)))
+welcome = Label(app, text = "Welcome to Hive Plotter!", fg = 'slate blue', font = (fontType, int(fontSize*1.5)))
 welcome.grid(row=row, column=column, columnspan = 2)
 
 row += 1
@@ -89,7 +98,7 @@ nodes.insert(0,"/Users/sperez/git/HivePlotter/tests/test_nodes_friends.csv")
 edges.insert(0,"/Users/sperez/git/HivePlotter/tests/test_edges_friends.csv")
 
 row += 1
-input = Label(app, text = "Enter the desired plotting parameters:", fg = 'slate blue', pady = 20, font = (fontType, int(fontSize)))
+input = Label(app, text = "Enter the desired plotting parameters:", fg = 'slate blue', pady = 30, font = (fontType, int(fontSize)))
 input.grid(row=row, column=column)
 
 app2 = Frame(root)
@@ -111,12 +120,14 @@ assignmentOpt = make_options(app2, 'Node Assignment Rule:', row = row, column = 
 column += 2
 positionOpt = make_options(app2, 'Node Position Rule:', row = row, column = column, selections = positionOptions)
 column += 2
-colorOpt = make_options(app2, 'Edge Color:', row = row, column = column, selections = colorOptions)
+colorOpt = make_options(app2, 'Default Color:', row = row, column = column, selections = colorOptions)
 row += 1
+column = 0
+paletteOpt = make_options(app2, 'Edge Color Palette:', row = row, column = column, selections = paletteOptions)
 
 #add button to submit data
 b = Button(root)
-b.grid(sticky=W+E+N+S, padx = 50, pady = 25)
+b.grid(sticky=W+E+N+S, padx = 80, pady = 40)
 b.configure(text = "Submit", width=20, command=callback, font = (fontType, int(fontSize)))
     
     

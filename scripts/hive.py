@@ -22,6 +22,7 @@ EDGE_PALETTE = 'purple'
 EDGE_STYLE_RULE = 'average connecting degree'
 NODE_COLOR = 'blue'
 DEBUG_FILE = '/Users/sperez/Desktop/debugLog/debug_'
+PALETTE = ['blue', 'purple', 'red', 'green', 'orange', 'yellow', 'brown']
 
 class Hive():
     '''contains node and edge, coloring, position, etc...'''
@@ -73,6 +74,7 @@ class Hive():
         self.node_style()
         self.make_edges()
         self.edge_style()
+        self.fix_color_palette()
         return None
 
     def get_nodes(self,inputFile, delimiter = ','):
@@ -359,7 +361,7 @@ class Hive():
         '''determines how the edges will look given different characteristics'''
         edgeStyling = {}
         categories = None
-        if self.edgeStyleRule != EDGE_STYLE_RULE:
+        if self.edgeStyleRule != EDGE_STYLE_RULE and self.edgeStyleRule != None:
             edgeValues = self.get_edge_properties(self.edgeStyleRule)
             values = edgeValues.values()
             if self.edgePalette != EDGE_PALETTE:
@@ -394,6 +396,12 @@ class Hive():
             print '    Edge styling:', edgeStyling
         return None
 
+    def fix_color_palette(self):
+        if not isinstance(self.edgePalette, list) or len(self.edgePalette) < len(set(self.edgeStyling.values())):
+                #use default palettes
+                self.edgePalette  = PALETTE[:len(set(self.edgeStyling.values()))]
+        
+        
     def make_debug_file(self):
         date = strftime("%c")
         file = self.debugFile + date + '.txt'
