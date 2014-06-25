@@ -21,15 +21,13 @@ AXIS_POSIT_RULE = 'closeness'
 EDGE_PALETTE = 'purple'
 EDGE_STYLE_RULE = 'average connecting degree'
 NODE_COLOR = 'blue'
-DEBUG_FILE = '/Users/sperez/Desktop/debugLog/debug_'
 PALETTE = ['blue', 'purple', 'red', 'green', 'orange', 'yellow', 'brown']
 
 class Hive():
     '''contains node and edge, coloring, position, etc...'''
     
     def __init__(self, 
-                 debug = True, 
-                 debugFile = DEBUG_FILE,
+                 debug = True,
                  numAxes = 3, 
                  doubleAxes = False, 
                  axisAssignRule = AXIS_ASSIGN_RULE, 
@@ -39,9 +37,7 @@ class Hive():
                  nodeColor = NODE_COLOR
                  ):
         '''Initializing defining parameters of the hive'''
-        self.debug = debug 
-        self.debugInfo = []
-        self.debugFile = debugFile
+        self.debug = debug
         self.numAxes = numAxes
         self.doubleAxes = doubleAxes
         self.axisAssignRule = axisAssignRule 
@@ -62,7 +58,6 @@ class Hive():
         
         return None
     
-    
     def make_hive(self, nodefile, edgefile, cutoffValues = None):
         '''creates a hive instance from user input'''  
             
@@ -79,7 +74,9 @@ class Hive():
 
     def get_nodes(self,inputFile, delimiter = ','):
         '''gets nodes and their properties from csv file'''
-        data = np.genfromtxt(inputFile, delimiter=delimiter, skiprows = 1, dtype='str')
+        data = np.genfromtxt(inputFile, delimiter=delimiter, dtype='str')
+        properties = data[0,1:]
+        data = data[1:,]
         #get all the node data
         nodes = list(data[:,0])
         #double the number of nodes when axes are doubled
@@ -88,20 +85,21 @@ class Hive():
             self.nodes.extend([n+".2" for n in nodes])
         else: 
             self.nodes = nodes
-        nodeProperties = []
-        for column in data[:,1:].T: 
-            nodeProperties.append(list(column))
-
-        #transform node names and properties into the numerical types if possible
-        self.nodeProperties = [convert_type(p) for p in nodeProperties]
+            
+        nodeProperties = {}
+        for i, column in enumerate(data[:,1:].T):
+            #transform node names and properties into the numerical types if possible
+            values = convert_type(list(column))
+            nodeProperties[properties[i]] = values
+        self.nodeProperties = nodeProperties
         
         if self.debug:
-            self.debugInfo.append('    Nodes are: ')
-            self.debugInfo.append(','.join(self.nodes))
-            self.debugInfo.append('    Node properties are: ')
-            for item in self.nodeProperties:
-                self.debugInfo.append(','.join([str(i) for i in item]))
-        return None
+            print '    Nodes are: '
+            print ','.join(self.nodes)
+            print '    Node properties are: '
+            for k,v in self.nodeProperties.iteritems():
+                print k, v
+        return properties
 
     def get_edges(self,inputFile, delimiter = ','):
         '''gets edges and their properties from csv file'''
@@ -224,15 +222,9 @@ class Hive():
 
     def get_assignment_values(self, rule):
         assignmentValues = {}
-        if isinstance(rule, int):
+        if rule in self.nodeProperties.keys():
             #get assignment values from the column of node properties indicated by the interger "rule"
-            try: 
-                properties = self.nodeProperties[rule-1]
-            except IndexError:
-                print '\n\n            ***WARNING***'
-                print '    Please choose a node assignment rule which is either a network'
-                print '    feature or one of the {0} column(s) of the node properties in the input file'.format(len(self.nodeProperties))
-                sys.exit()
+            properties = self.nodeProperties[rule]
             if self.doubleAxes:
                 [assignmentValues.update({n:p}) for n,p in zipper(self.nodes, properties*2)]
             else:
@@ -403,17 +395,7 @@ class Hive():
         if not isinstance(self.edgePalette, list) or len(self.edgePalette) < len(set(self.edgeStyling.values())):
                 #use default palettes
                 self.edgePalette  = PALETTE[:len(set(self.edgeStyling.values()))]
-        
-        
-    def make_debug_file(self):
-        date = strftime("%c")
-        file = self.debugFile + date + '.txt'
-        with open(file,'w') as f:
-            for line in self.debugInfo:
-                f.write(line)
-                f.write('\n')
-        f.close()
-        
+
     def check_input(self):
         '''IN DEVELOPMENT
         checks if all edges are connecting nodes which exist in the self.nodes'''

@@ -59,6 +59,7 @@ def find_categories(data):
     '''checks if a list of data is categorical 
         and if so finds to number of categories'''
     categories = []
+    print data
     if isinstance(convert_type(data)[0],str):
         categories = set(data)
         if len(categories) < len(data):
