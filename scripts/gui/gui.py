@@ -115,10 +115,6 @@ class HiveGui(Tk):
         row = 0
         column = 0
         app3.grid()
-
-        input = Label(app3, text = "Change the node and edge coloring:", fg = 'slate blue', font = (fontType, int(fontSize)))
-        input.grid(row=row, column=column, padx = 20, pady = 30, sticky = W)
-        row += 1
         
         style = self.edgeStyleVar.get()
         if style == 'uniform':
@@ -130,7 +126,6 @@ class HiveGui(Tk):
             properties = hive.get_edges(edgefile)[style]
             categories = find_categories(properties)
             if categories:
-                print colorOptions
                 colors = ''
                 for c in colorOptions[0:len(categories)]:
                     colors += ' ' + c
@@ -142,6 +137,9 @@ class HiveGui(Tk):
         if self.loaded:
             self.colorVar = self.reset_option_menu(self.colorOpt, self.colorVar, colors)
         else:
+            input = Label(app3, text = "Change the node and edge coloring:", fg = 'slate blue', font = (fontType, int(fontSize)))
+            input.grid(row=row, column=column, padx = 20, pady = 30, sticky = W)
+            row += 1
             self.colorOpt, self.colorVar = make_options(app3, 'Edge Color Palette:', row = row, column = column, selections = colors)
             column += 2
             self.nodeColorOpt, self.nodeColorVar = make_options(app3, 'Node Color:', row = row, column = column, selections = colorOptions)

@@ -1,14 +1,14 @@
 
 numAxes = 3
 doubleAxes = True
-cutoffValues = [1,15,269]
+#cutoffValues = [1,15,269]
 axisAssignRule = 'degree'
-axisPositRule = 1
+axisPositRule = 'Gender'
 color = 'white'
 
 #edge styling
 edgeColorPalette = ['blue','red']
-edgeColorRule = 1
+edgeColorRule = 'relationship'
 
 #node styling
 nodeColorPalette = ['blue', 'red']
