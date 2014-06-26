@@ -17,6 +17,6 @@ assignmentOptions = ['degree', 'betweeness', 'clustering', 'centrality']
 
 positionOptions = ['degree', 'betweeness', 'clustering', 'centrality']
 
-colorOptions = ['blue', 'purple', 'red', 'green']
+colorOptions = ['blue', 'purple', 'red', 'green', 'yellow']
 
 edgeStyleOptions = ['uniform']

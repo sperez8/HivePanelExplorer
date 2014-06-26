@@ -99,7 +99,7 @@ class Hive():
             print '    Node properties are: '
             for k,v in self.nodeProperties.iteritems():
                 print k, v
-        return properties
+        return self.nodeProperties
 
     def get_edges(self,inputFile, delimiter = ','):
         '''gets edges and their properties from csv file'''
@@ -121,7 +121,7 @@ class Hive():
             print '    Sources are: ', self.sources
             print '    Targets are: ', self.targets
             print '    Edge properties are: ', self.edgeProperties
-        return properties
+        return self.edgeProperties
 
     def make_axes(self):
         '''creates axes and angles given the number of axes desired
