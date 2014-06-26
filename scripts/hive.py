@@ -13,7 +13,6 @@ import os
 import numpy as np
 from math import pi
 from graph_uttilities import *
-from gui_options import colors
 from time import strftime
 
 #hive parameter defaults
@@ -22,7 +21,9 @@ AXIS_POSIT_RULE = 'closeness'
 EDGE_PALETTE = 'purple'
 EDGE_STYLE_RULE = 'average connecting degree'
 NODE_COLOR = 'blue'
-PALETTE = ['blue', 'purple', 'red', 'green', 'orange', 'yellow', 'brown']
+PALETTE = ['blue', 'cornflowerblue', 'darkblue', 'deepskyblue', 'darkturquoise',
+               'midnightblue', 'navy', 'dodgerblue', 'lightblue', 'lightskyblue', 'cadetblue', 'teal',
+               'paleturquoise', 'aquamarine', 'azure', 'aqua', 'lightsteelblue', 'powderblue']
 
 class Hive():
     '''contains node and edge, coloring, position, etc...'''
@@ -392,7 +393,7 @@ class Hive():
         #if not isinstance(self.edgePalette, list) or len(self.edgePalette) < len(set(self.edgeStyling.values())):
                 #use default palettes
         print 'Using default color palette'
-        self.edgePalette  = colors['blue'][:len(set(self.edgeStyling.values()))]
+        self.edgePalette  = PALETTE[:len(set(self.edgeStyling.values()))]
 
     def check_input(self):
         '''IN DEVELOPMENT
