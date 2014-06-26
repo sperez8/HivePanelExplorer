@@ -13,6 +13,7 @@ import os
 import numpy as np
 from math import pi
 from graph_uttilities import *
+from gui_options import colors
 from time import strftime
 
 #hive parameter defaults
@@ -46,7 +47,8 @@ class Hive():
         self.edgeStyleRule = edgeStyleRule
         self.nodeColor = nodeColor
         
-        print 'palette', edgePalette
+        print 'p', edgePalette
+        
         try:
             self.axisAssignRule = int(axisAssignRule)
         except ValueError: 
@@ -333,11 +335,10 @@ class Hive():
     def get_edge_properties(self, rule):
        values = {}
        if rule in self.edgeKeys:
-           print self.edgeProperties
            i = self.edgeKeys.index(rule)
            properties = zip(*self.edgeProperties)[i]
-           print properties
            [values.update({e:p}) for e,p in zipper(self.edges, properties)]
+           print values
            return values
        
        else: 
@@ -361,8 +362,9 @@ class Hive():
                     [edgeStyling.update({e:categories.index(edgeValues[e])}) for e in self.edges ]
                 else:
                     values.sort()
-                    cutoffs = [int(len(values)/len(self.edgePalette))*i for i in range(1,len(self.edgePalette)+1)]
+                    cutoffs = [int(len(values)/float(len(self.edgePalette)))*i for i in range(1,len(self.edgePalette))]
                     cutoffValues = [values[c-1] for c in cutoffs] # to prevent nodes with the same value to be in different groups
+                    cutoffValues.append(values[-1])
                     for e in self.edges:
                         i = 0
                         while i < len(cutoffValues):
@@ -387,9 +389,10 @@ class Hive():
         return None
 
     def fix_color_palette(self):
-        if not isinstance(self.edgePalette, list) or len(self.edgePalette) < len(set(self.edgeStyling.values())):
+        #if not isinstance(self.edgePalette, list) or len(self.edgePalette) < len(set(self.edgeStyling.values())):
                 #use default palettes
-                self.edgePalette  = PALETTE[:len(set(self.edgeStyling.values()))]
+        print 'Using default color palette'
+        self.edgePalette  = colors['blue'][:len(set(self.edgeStyling.values()))]
 
     def check_input(self):
         '''IN DEVELOPMENT
