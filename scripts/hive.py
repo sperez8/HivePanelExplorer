@@ -46,6 +46,7 @@ class Hive():
         self.edgeStyleRule = edgeStyleRule
         self.nodeColor = nodeColor
         
+        print 'palette', edgePalette
         try:
             self.axisAssignRule = int(axisAssignRule)
         except ValueError: 

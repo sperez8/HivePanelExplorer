@@ -8,6 +8,7 @@ to make labels, option menus, etc...
 '''
 
 from Tkinter import *
+from gui_options import colors
 
 fontType = 'Helvetica'
 fontSize = 16
@@ -28,3 +29,11 @@ def make_options(parent, caption, row = 0, column = 0, selections = [], **option
     w = apply(OptionMenu, (parent, var) + tuple(selections))
     w.grid(row=row, column=column+1, sticky=W, padx = 5)
     return w,var
+
+def get_palette(hue,number):
+    if hue in colors.keys():        
+        
+        return colors[hue][:number]
+    else:
+        print "Desired hue not found. Defaulted to blue palette"
+        return colors['blue'][:number]

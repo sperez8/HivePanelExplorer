@@ -90,7 +90,7 @@ class HiveGui(Tk):
         b2.configure(text = "Load parameters", width=20, command=self.load_parameters, bg = 'aliceblue', font = (fontType, int(fontSize)))
 
 
-    def reset_option_menu(self, w, variable, options, index=None):
+    def reset_option_menu(self, w, variable, options, index=None, caption = None):
         '''reset the values in the option menu
 
         if index is given, set the value of the menu to
@@ -117,32 +117,23 @@ class HiveGui(Tk):
         app3.grid()
         
         style = self.edgeStyleVar.get()
-        if style == 'uniform':
-            colors = colorOptions
-        
-        else:
-            edgefile = self.edges.get()
-            hive = Hive(debug = True)
-            properties = hive.get_edges(edgefile)[style]
-            categories = find_categories(properties)
-            if categories:
-                colors = ''
-                for c in colorOptions[0:len(categories)]:
-                    colors += ' ' + c
-                colors = [colors]
-        
-            else:
-                colors = [0,1,2,3,4,5]
+        numColors = self.get_num_colors(style)
         
         if self.loaded:
-            self.colorVar = self.reset_option_menu(self.colorOpt, self.colorVar, colors)
+            self.colorVar = self.reset_option_menu(self.colorOpt, self.colorVar, numColors)
         else:
             input = Label(app3, text = "Change the node and edge coloring:", fg = 'slate blue', font = (fontType, int(fontSize)))
             input.grid(row=row, column=column, padx = 20, pady = 30, sticky = W)
+            
             row += 1
-            self.colorOpt, self.colorVar = make_options(app3, 'Edge Color Palette:', row = row, column = column, selections = colors)
+            self.colorOpt, self.colorVar = make_options(app3, 'Number of colors to draw edges:', row = row, column = column, selections = numColors)
+            
             column += 2
             self.nodeColorOpt, self.nodeColorVar = make_options(app3, 'Node Color:', row = row, column = column, selections = colorOptions)
+            
+            row += 1
+            column = 0
+            self.paletteOpt, self.paletteVar = make_options(app3, 'Hue of color palette:', row = row, column = column, selections = colorOptions)
             
             #add button to create hive
             b2 = Button(app3)
@@ -174,9 +165,10 @@ class HiveGui(Tk):
         double = self.doubleVar.get()
         assignment = self.assignmentVar.get()
         position = self.positionVar.get()
-        edgeColor = self.colorVar.get()
         edgeStyle = self.edgeStyleVar.get()
         nodeColor = self.nodeColorVar.get()
+        paletteHue = self.paletteVar.get()
+        numColors = self.colorVar.get()
         
         #convert types
         axes = int(axes)
@@ -193,23 +185,39 @@ class HiveGui(Tk):
         
         if edgeStyle == 'uniform':
             edgeStyle = None
-        else: 
-            try:
-                palette = int(palette)   
-            except:
-                pass
+        
+        palette = get_palette(paletteHue,int(numColors))
+        print 'p', palette
         
         hive = Hive(debug = debug, 
                     numAxes = axes,
                     doubleAxes = double, 
                     axisAssignRule = assignment, 
                     axisPositRule = position,
-                    edgePalette = edgeColor, 
+                    edgePalette = palette, 
                     edgeStyleRule = edgeStyle,
                     nodeColor = nodeColor
                     )
         hive.make_hive(nodefile, edgefile)
         make_html(hiveTitle, hive)
+
+    def get_num_colors(self, style):
+        if style == 'uniform':
+            colors = [1]
+        else:
+            edgefile = self.edges.get()
+            hive = Hive(debug = True)
+            properties = hive.get_edges(edgefile)[style]
+            categories = find_categories(properties)
+            if categories:
+                colors = [len(categories)]
+#                 colors = ''
+#                 for c in colorOptions[0:len(categories)]:
+#                     colors += ' ' + c
+#                 colors = [colors]
+            else:
+                colors = [i for i in range(1,10)]
+        return colors
 
 if __name__ == "__main__":
     app = HiveGui()
