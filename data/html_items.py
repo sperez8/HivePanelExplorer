@@ -46,9 +46,9 @@ var width = 600
     outerRadius = 240;
 
 var linkfill = "none"
-    linkwidth = 0.7
-    oplink = 0.6
-    opnode = 0.3
+    linkwidth = 0.9
+    oplink = 0.9
+    opnode = 0.8
     bkgcolor = "white"
     
 var radius = d3.scale.linear().range([innerRadius, outerRadius]);
