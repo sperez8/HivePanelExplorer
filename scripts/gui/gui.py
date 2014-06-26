@@ -115,6 +115,10 @@ class HiveGui(Tk):
         row = 0
         column = 0
         app3.grid()
+
+        input = Label(app3, text = "Change the node and edge coloring:", fg = 'slate blue', font = (fontType, int(fontSize)))
+        input.grid(row=row, column=column, padx = 20, pady = 30, sticky = W)
+        row += 1
         
         style = self.edgeStyleVar.get()
         if style == 'uniform':
@@ -144,8 +148,8 @@ class HiveGui(Tk):
             
             #add button to create hive
             b2 = Button(app3)
-            b2.grid(padx = 80, pady = 40, columnspan = 2)
-            b2.configure(text = "Create Hive", width=20, command=self.callback, bg = 'aliceblue', font = (fontType, int(fontSize)))
+            b2.grid(padx = 80, pady = 40, columnspan = 4)
+            b2.configure(text = "Create Hive", width=80, command=self.callback, bg = 'aliceblue', font = (fontType, int(fontSize)))
             
         self.loaded = True
 

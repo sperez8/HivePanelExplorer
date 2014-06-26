@@ -339,13 +339,6 @@ class Hive():
            [values.update({e:p}) for e,p in zipper(self.edges, properties)]
            return values
        
-       elif isinstance(rule, str):
-           #Need to make a graph instance using networkx
-           G = make_graph(self.sources, self.targets)
-           values = edge_analysis(G, rule)
-           if self.debug:
-               print '    Assignment values for \'{0}\' edge property: {1}'.format(rule,values)
-           return values
        else: 
            print "The edge styling rule could not be parsed"
            sys.exit()
@@ -362,7 +355,7 @@ class Hive():
         if self.edgeStyleRule != EDGE_STYLE_RULE and self.edgeStyleRule != None:
             edgeValues = self.get_edge_properties(self.edgeStyleRule)
             values = edgeValues.values()
-            if self.edgePalette != EDGE_PALETTE and not isinstance(self.edgePalette,str):
+            if self.edgePalette != EDGE_PALETTE:
                 print values
                 #check if styling values are numerical, otherwise treat as categorical
                 categories = find_categories(values)
