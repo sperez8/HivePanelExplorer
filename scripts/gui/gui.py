@@ -24,7 +24,7 @@ class HiveGui(Tk):
         Tk.__init__(self, *args, **kwargs)
         #create window
         self.title("Hive Plotter GUI")
-        
+        self.loaded = False
         #add a label
         app = Frame(self)
         row = 0
@@ -116,13 +116,9 @@ class HiveGui(Tk):
         column = 0
         app3.grid()
         
-        self.nodeColorOpt, self.nodeColorVar = make_options(app3, 'Node Color:', row = row, column = column, selections = colorOptions)
-        column += 2
-        
         style = self.edgeStyleVar.get()
         if style == 'uniform':
             colors = colorOptions
-            self.colorOpt, self.colorVar = make_options(app3, 'Edge Color Palette:', row = row, column = column, selections = colors)
         
         else:
             edgefile = self.edges.get()
@@ -135,17 +131,23 @@ class HiveGui(Tk):
                 for c in colorOptions[0:len(categories)]:
                     colors += ' ' + c
                 colors = [colors]
-                self.colorOpt, self.colorVar = make_options(app3, 'Edge Color Palette:', row = row, column = column, selections = colors)
         
             else:
                 colors = [0,1,2,3,4,5]
-                self.colorOpt, self.colorVar = make_options(app3, 'Edge Color Palette:', row = row, column = column, selections = colors)
-            
-        #add button to create hive
-        b2 = Button(app3)
-        b2.grid(padx = 80, pady = 40, columnspan = 2)
-        b2.configure(text = "Create Hive", width=20, command=self.callback, bg = 'aliceblue', font = (fontType, int(fontSize)))
         
+        if self.loaded:
+            self.colorVar = self.reset_option_menu(self.colorOpt, self.colorVar, colors)
+        else:
+            self.colorOpt, self.colorVar = make_options(app3, 'Edge Color Palette:', row = row, column = column, selections = colors)
+            column += 2
+            self.nodeColorOpt, self.nodeColorVar = make_options(app3, 'Node Color:', row = row, column = column, selections = colorOptions)
+            
+            #add button to create hive
+            b2 = Button(app3)
+            b2.grid(padx = 80, pady = 40, columnspan = 2)
+            b2.configure(text = "Create Hive", width=20, command=self.callback, bg = 'aliceblue', font = (fontType, int(fontSize)))
+            
+        self.loaded = True
 
     def update(self):
         nodefile = self.nodes.get()
