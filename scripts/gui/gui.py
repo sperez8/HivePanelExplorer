@@ -196,6 +196,7 @@ class HiveGui(Tk):
         if edgeStyle == 'uniform':
             edgeStyle = None
         
+        print paletteHue, numColors
         palette = get_palette(paletteHue,int(numColors))
         print 'p', palette
         

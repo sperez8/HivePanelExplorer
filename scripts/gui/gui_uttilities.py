@@ -57,8 +57,8 @@ def get_num_colors(edges, style):
     return colors
 
 def get_palette(hue,number):
-    if hue in colors.keys():        
-        
+    if hue in colors.keys():
+        print 'h', hue, colors[hue]
         return colors[hue][:number]
     else:
         print "Desired hue not found. Defaulted to blue palette"

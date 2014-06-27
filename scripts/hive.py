@@ -48,8 +48,6 @@ class Hive():
         self.edgeStyleRule = edgeStyleRule
         self.nodeColor = nodeColor
         
-        print 'p', edgePalette
-        
         try:
             self.axisAssignRule = int(axisAssignRule)
         except ValueError: 
@@ -390,10 +388,9 @@ class Hive():
         return None
 
     def fix_color_palette(self):
-        #if not isinstance(self.edgePalette, list) or len(self.edgePalette) < len(set(self.edgeStyling.values())):
-                #use default palettes
-        print 'Using default color palette'
-        self.edgePalette  = PALETTE[:len(set(self.edgeStyling.values()))]
+        if not isinstance(self.edgePalette, list) or len(self.edgePalette) < len(set(self.edgeStyling.values())):
+            print 'Using default color palette'
+            self.edgePalette  = PALETTE[:len(set(self.edgeStyling.values()))]
 
     def check_input(self):
         '''IN DEVELOPMENT
