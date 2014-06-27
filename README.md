@@ -48,28 +48,6 @@ $ cd ~/.../git/scripts
 $ python gui.py
 '''
 
-You should see a window like this:
+See an example of using the GUI in the wiki.
 
-XX
-
-By default, the interface loads the path to input files for the test network called 'friends' and calls the hive plot 'hive1'. For this example, I choose to use 3 axes, not double. 
-
-Next we need to choose how to assign nodes to axes and place the nodes on axes. Since we would like the node assignment and positioning rules to be based on node properties, we click "Submit Network" to update the rule menus. The node properties labelled in the input csv file (much like the one above) are now options for node assignment and positioning rules.
-
-XX
-
-In the 'friends' network I chose to place the nodes on axis given their degree. I then chose to position the nodes on each axis given their gender. Sorter by alphabetical order, the nodes which are 'alien' will apear at the center, 'boy' in the middle and 'girl' towards the ends of the axes. Finally we select how we want to color the edges: either all the same color ('uniform') or using an edge property. In this example, I choose to color them by 'relationship'. Once you have made your choices, click 'Load Parameters'.
-
-XX
-
-Since there are two kinds of relationships, the number of colors is automatically set to 2. If 'relationship' were a numerical variable you would change 'Number of Colors' to however many bins you want to use to categories these values and color the edges accordingly. Last but not least, select the node color and the edge color palette hue.
-
-Click "Create Hive". Now open the file 'hive1.html' in the 'tests' folder in the github repository using a browser (modern browsers preferred). It should look like the image below. The interface window remains for you to try different placing and coloring rules. Don't forget the 'Load Parameters' before you change the color scheme.
-
-Happy hive making!
-
-
-
-
-
-Once we have selecte
+Happy hive plot making
