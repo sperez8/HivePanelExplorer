@@ -19,9 +19,6 @@ from hive import Hive
 from html_uttilities import *
 from graph_uttilities import *
 
-TEXT_ENTRY_WIDTH = 70
-
-
 class HiveGui(Tk):
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
@@ -33,11 +30,11 @@ class HiveGui(Tk):
         row = 0
         column = 0
         self.app.grid()
-        welcome = Label(self.app, text = "Welcome to Hive Plotter!", fg = 'slate blue', font = (fontType, int(fontSize*1.5)))
+        welcome = Label(self.app, text = "Welcome to Hive Plotter!", fg = 'slate blue', font = (FONT_TYPE, int(FONT_SIZE*1.5)))
         welcome.grid(row=row, column=column, columnspan = 2, pady = 20)
         
         row += 1
-        input = Label(self.app, text = "Please enter the path to the input files:", fg = 'slate blue', font = (fontType, int(fontSize)))
+        input = Label(self.app, text = "Please enter the path to the input files:", fg = 'slate blue', font = (FONT_TYPE, int(FONT_SIZE)))
         input.grid(row=row, column=column, padx = 10, pady = 30, sticky = W, columnspan = 2)
         row += 1
         
@@ -57,14 +54,14 @@ class HiveGui(Tk):
         #add button to update parameters data
         bSubmit = Button(self)
         bSubmit.grid(row=row, column=column, padx = 10, pady = 30)
-        bSubmit.configure(text = "Submit network", width=30, command=self.update, fg = 'blue', font = (fontType, int(fontSize)))
+        bSubmit.configure(text = "Submit network", width=30, command=self.update, fg = 'blue', font = (FONT_TYPE, int(FONT_SIZE)))
         
         self.app2 = Frame(self)
         row = 0
         column = 0
         self.app2.grid()
         
-        input = Label(self.app2, text = "Enter the plotting parameters:", fg = 'slate blue', font = (fontType, int(fontSize)))
+        input = Label(self.app2, text = "Enter the plotting parameters:", fg = 'slate blue', font = (FONT_TYPE, int(FONT_SIZE)))
         input.grid(row=row, column=column, padx = 0, pady = 30, columnspan = 2, sticky = W+S)
         column += 1
         
@@ -90,13 +87,13 @@ class HiveGui(Tk):
         #add button to submit parameters
         bLoad = Button(self)
         bLoad.grid(padx = 10, pady = 40, columnspan = 2)
-        bLoad.configure(text = "Load parameters", width=20, command=self.load_parameters, font = (fontType, int(fontSize)))
+        bLoad.configure(text = "Load parameters", width=20, command=self.load_parameters, font = (FONT_TYPE, int(FONT_SIZE)))
 
         
         #add button to close window
         self.bClose = Button(self)
         self.bClose.grid(padx = 10, pady = 20, columnspan = 4, sticky = E)
-        self.bClose.configure(text = "Close window", width=10, command=self.close_window, font = (fontType, int(0.8*fontSize)))
+        self.bClose.configure(text = "Close window", width=10, command=self.close_window, font = (FONT_TYPE, int(0.8*FONT_SIZE)))
 
 
     def reset_option_menu(self, w, variable, options, index=None, caption = None):
@@ -126,13 +123,13 @@ class HiveGui(Tk):
         self.app3.grid()
         
         style = self.edgeStyleVar.get()
-        numColors = self.get_num_colors(style)
+        numColors = get_num_colors(self.edges, style)
         
         if self.loaded:
             self.colorVar = self.reset_option_menu(self.colorOpt, self.colorVar, numColors)
         else:
             self.bClose.grid_forget()
-            input = Label(self.app3, text = "Change the node and edge coloring:", fg = 'slate blue', font = (fontType, int(fontSize)))
+            input = Label(self.app3, text = "Change the node and edge coloring:", fg = 'slate blue', font = (FONT_TYPE, int(FONT_SIZE)))
             input.grid(row=row, column=column, padx = 20, pady = 30, sticky = W)
             
             row += 1
@@ -148,7 +145,7 @@ class HiveGui(Tk):
             #add button to create hive
             bCreate = Button(self.app3)
             bCreate.grid(padx = 80, pady = 40, columnspan = 4)
-            bCreate.configure(text = "Create Hive", width=80, command=self.callback, bg = 'aliceblue', font = (fontType, int(1.2*fontSize)))
+            bCreate.configure(text = "Create Hive", width=90, command=self.callback, bg = 'aliceblue', font = (FONT_TYPE, int(1.2*FONT_SIZE)))
             
             row+=1
             self.bClose.grid(padx = 10, pady = 20, columnspan = 4, sticky = E)
@@ -213,24 +210,6 @@ class HiveGui(Tk):
                     )
         hive.make_hive(nodefile, edgefile)
         make_html(hiveTitle, hive)
-
-    def get_num_colors(self, style):
-        if style == 'uniform':
-            colors = [1]
-        else:
-            edgefile = self.edges.get()
-            hive = Hive(debug = True)
-            properties = hive.get_edges(edgefile)[style]
-            categories = find_categories(properties)
-            if categories:
-                colors = [len(categories)]
-#                 colors = ''
-#                 for c in colorOptions[0:len(categories)]:
-#                     colors += ' ' + c
-#                 colors = [colors]
-            else:
-                colors = [i for i in range(1,10)]
-        return colors
 
     def close_window(self):
         print 'Closing window...'
