@@ -13,11 +13,11 @@ colors['blue'] = ['blue', 'cornflowerblue', 'darkblue', 'deepskyblue', 'darkturq
 colors['green'] = ['lightseagreen', 'limegreen', 'lawngreen', 'olivedrab', 'chartreuse', 'mediumturquoise',
                        'mediumspringgreen', 'forestgreen', 'seagreen', 'palegreen', 'olive', 'darkcyan',
                        'yellowgreen', 'darkolivegreen', 'darkgreen', 'darkseagreen', 'lime']
-colors['red'] = ['orangered', 'tomato', 'orange', 'gold', 'firebrick', 'sandybrown',
-                     'lightcoral', 'crimson', 'coral', 'darkred', 'indianred', 'maroon']
-colors['purple'] = ['darkslategrey', 'orchid', 'magenta', 'purple', 'blueviolet', 'darkviolet',
+colors['red'] = ['tomato', 'gold', 'orange', 'firebrick', 'sandybrown',
+                     'lightcoral', 'crimson', 'coral', 'darkred', 'indianred', 'maroon', 'orangered']
+colors['purple'] = ['plum', 'purple', 'magenta', 'blueviolet', 'darkviolet',
                    'pink', 'mediumslateblue', 'lightpink', 'deeppink', 'indigo', 'lavenderblush',
-                   'violet', 'mediumorchid', 'mediumpurple', 'thistle', 'darkmagenta', 'plum']
+                   'violet', 'mediumorchid', 'mediumpurple', 'thistle', 'darkmagenta', 'orchid']
 
 colorOptions = colors.keys()
 
