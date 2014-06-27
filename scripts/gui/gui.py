@@ -19,6 +19,10 @@ from hive import Hive
 from html_uttilities import *
 from graph_uttilities import *
 
+_root_dir = os.path.dirname(_root_dir)
+NODES = _root_dir + "/tests/test_nodes_friends.csv"
+EDGES = _root_dir + "/tests/test_edges_friends.csv"
+
 class HiveGui(Tk):
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
@@ -47,8 +51,8 @@ class HiveGui(Tk):
         
         #for debugging/development purposes
         self.title.insert(0,"hive1")
-        self.nodes.insert(0,"/Users/sperez/git/HivePlotter/tests/test_nodes_friends.csv")
-        self.edges.insert(0,"/Users/sperez/git/HivePlotter/tests/test_edges_friends.csv")
+        self.nodes.insert(0,NODES)
+        self.edges.insert(0,EDGES)
         
         row += 1
         #add button to update parameters data
@@ -158,6 +162,7 @@ class HiveGui(Tk):
         
         hive = Hive(debug = False)
         properties = list(hive.get_nodes(nodefile).keys()) + assignmentOptions
+        print properties
         self.assignmentVar = self.reset_option_menu(self.assignmentOpt, self.assignmentVar, properties, index = 2) 
         
         properties = list(hive.get_nodes(nodefile).keys()) + positionOptions
