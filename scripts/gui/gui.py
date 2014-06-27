@@ -19,6 +19,9 @@ from hive import Hive
 from html_uttilities import *
 from graph_uttilities import *
 
+TEXT_ENTRY_WIDTH = 70
+
+
 class HiveGui(Tk):
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
@@ -26,24 +29,24 @@ class HiveGui(Tk):
         self.title("Hive Plotter GUI")
         self.loaded = False
         #add a label
-        app = Frame(self)
+        self.app = Frame(self)
         row = 0
         column = 0
-        app.grid()
-        welcome = Label(app, text = "Welcome to Hive Plotter!", fg = 'slate blue', font = (fontType, int(fontSize*1.5)))
-        welcome.grid(row=row, column=column, columnspan = 2)
+        self.app.grid()
+        welcome = Label(self.app, text = "Welcome to Hive Plotter!", fg = 'slate blue', font = (fontType, int(fontSize*1.5)))
+        welcome.grid(row=row, column=column, columnspan = 2, pady = 20)
         
         row += 1
-        input = Label(app, text = "Please provide the path to the input files:", fg = 'slate blue', font = (fontType, int(fontSize)))
-        input.grid(row=row, column=column, padx = 10, pady = 30, sticky = W)
+        input = Label(self.app, text = "Please enter the path to the input files:", fg = 'slate blue', font = (fontType, int(fontSize)))
+        input.grid(row=row, column=column, padx = 10, pady = 30, sticky = W, columnspan = 2)
         row += 1
         
         #get node and edge file
-        self.title = make_entry(app, "Hive Title:", width = 50, row = row, column = column, bg = 'aliceblue')
+        self.title = make_entry(self.app, "Hive Title:", width = TEXT_ENTRY_WIDTH, row = row, column = column, bg = 'aliceblue')
         row +=1
-        self.nodes = make_entry(app, "Nodes:", width = 50, row = row, column = column, bg = 'aliceblue')
+        self.nodes = make_entry(self.app, "Nodes:", width = TEXT_ENTRY_WIDTH, row = row, column = column, bg = 'aliceblue')
         row += 1 
-        self.edges = make_entry(app, "Edges:", width = 50, row = row, column = column, bg = 'aliceblue')
+        self.edges = make_entry(self.app, "Edges:", width = TEXT_ENTRY_WIDTH, row = row, column = column, bg = 'aliceblue')
         
         #for debugging/development purposes
         self.title.insert(0,"hive1")
@@ -52,42 +55,48 @@ class HiveGui(Tk):
         
         row += 1
         #add button to update parameters data
-        b1 = Button(self)
-        b1.grid(row=row, column=column, padx = 10, pady = 30)
-        b1.configure(text = "Submit network", width=30, command=self.update, fg = 'blue', font = (fontType, int(fontSize)))
+        bSubmit = Button(self)
+        bSubmit.grid(row=row, column=column, padx = 10, pady = 30)
+        bSubmit.configure(text = "Submit network", width=30, command=self.update, fg = 'blue', font = (fontType, int(fontSize)))
         
-        app2 = Frame(self)
+        self.app2 = Frame(self)
         row = 0
         column = 0
-        app2.grid()
+        self.app2.grid()
         
-        input = Label(app2, text = "Enter the plotting parameters:", fg = 'slate blue', font = (fontType, int(fontSize)))
-        input.grid(row=row, column=column, padx = 20, pady = 30, sticky = W)
+        input = Label(self.app2, text = "Enter the plotting parameters:", fg = 'slate blue', font = (fontType, int(fontSize)))
+        input.grid(row=row, column=column, padx = 0, pady = 30, columnspan = 2, sticky = W+S)
+        column += 1
         
         #make different option menus
         row += 1
-        column = 0
-        self.debugOpt, self.debugVar = make_options(app2, 'Debug:', row = row, column = column, selections = debugOptions)
-        column += 2
-        self.axesOpt, self.axesVar = make_options(app2, 'Number of Axes:', row = row, column = column, selections = axesOptions)
+        self.debugOpt, self.debugVar = make_options(self.app2, 'Debug:', row = row, column = column, selections = debugOptions)
+        row += 1
+        self.axesOpt, self.axesVar = make_options(self.app2, 'Number of Axes:', row = row, column = column, selections = axesOptions)
         self.axesVar.set('3')
         column += 2
-        self.doubleOpt, self.doubleVar = make_options(app2, 'Double axes:', row = row, column = column, selections = doubleOptions)
+        self.doubleOpt, self.doubleVar = make_options(self.app2, 'Double axes:', row = row, column = column, selections = doubleOptions)
         self.doubleVar.set('False')
         row += 1
-        column = 0
-        self.assignmentOpt, self.assignmentVar = make_options(app2, 'Node Assignment Rule:', row = row, column = column, selections = assignmentOptions)
+        column = 1
+        self.assignmentOpt, self.assignmentVar = make_options(self.app2, 'Node Assignment Rule:', row = row, column = column, selections = assignmentOptions)
         column += 2
-        self.positionOpt, self.positionVar = make_options(app2, 'Node Position Rule:', row = row, column = column, selections = positionOptions)
+        self.positionOpt, self.positionVar = make_options(self.app2, 'Node Position Rule:', row = row, column = column, selections = positionOptions)
         self.positionVar.set('clustering')
         row += 1
-        column = 0
-        self.edgeStyleOpt, self.edgeStyleVar = make_options(app2, 'Edge Style Rule:', row = row, column = column, selections = edgeStyleOptions)
+        column = 1
+        self.edgeStyleOpt, self.edgeStyleVar = make_options(self.app2, 'Edge Style Rule:', row = row, column = column, selections = edgeStyleOptions)
         
         #add button to submit parameters
-        b2 = Button(self)
-        b2.grid(padx = 10, pady = 40, columnspan = 2)
-        b2.configure(text = "Load parameters", width=20, command=self.load_parameters, bg = 'aliceblue', font = (fontType, int(fontSize)))
+        bLoad = Button(self)
+        bLoad.grid(padx = 10, pady = 40, columnspan = 2)
+        bLoad.configure(text = "Load parameters", width=20, command=self.load_parameters, font = (fontType, int(fontSize)))
+
+        
+        #add button to close window
+        self.bClose = Button(self)
+        self.bClose.grid(padx = 10, pady = 20, columnspan = 4, sticky = E)
+        self.bClose.configure(text = "Close window", width=10, command=self.close_window, font = (fontType, int(0.8*fontSize)))
 
 
     def reset_option_menu(self, w, variable, options, index=None, caption = None):
@@ -111,10 +120,10 @@ class HiveGui(Tk):
 
     def load_parameters(self):
         #create some optional parameters for some styling
-        app3 = Frame(self)
+        self.app3 = Frame(self)
         row = 0
         column = 0
-        app3.grid()
+        self.app3.grid()
         
         style = self.edgeStyleVar.get()
         numColors = self.get_num_colors(style)
@@ -122,23 +131,27 @@ class HiveGui(Tk):
         if self.loaded:
             self.colorVar = self.reset_option_menu(self.colorOpt, self.colorVar, numColors)
         else:
-            input = Label(app3, text = "Change the node and edge coloring:", fg = 'slate blue', font = (fontType, int(fontSize)))
+            self.bClose.grid_forget()
+            input = Label(self.app3, text = "Change the node and edge coloring:", fg = 'slate blue', font = (fontType, int(fontSize)))
             input.grid(row=row, column=column, padx = 20, pady = 30, sticky = W)
             
             row += 1
-            self.colorOpt, self.colorVar = make_options(app3, 'Number of colors to draw edges:', row = row, column = column, selections = numColors)
+            self.colorOpt, self.colorVar = make_options(self.app3, 'Number of colors to draw edges:', row = row, column = column, selections = numColors)
             
             column += 2
-            self.nodeColorOpt, self.nodeColorVar = make_options(app3, 'Node Color:', row = row, column = column, selections = colorOptions)
+            self.nodeColorOpt, self.nodeColorVar = make_options(self.app3, 'Node Color:', row = row, column = column, selections = colorOptions)
             
             row += 1
             column = 0
-            self.paletteOpt, self.paletteVar = make_options(app3, 'Hue of color palette:', row = row, column = column, selections = colorOptions)
+            self.paletteOpt, self.paletteVar = make_options(self.app3, 'Hue of color palette:', row = row, column = column, selections = colorOptions)
             
             #add button to create hive
-            b2 = Button(app3)
-            b2.grid(padx = 80, pady = 40, columnspan = 4)
-            b2.configure(text = "Create Hive", width=80, command=self.callback, bg = 'aliceblue', font = (fontType, int(fontSize)))
+            bCreate = Button(self.app3)
+            bCreate.grid(padx = 80, pady = 40, columnspan = 4)
+            bCreate.configure(text = "Create Hive", width=80, command=self.callback, bg = 'aliceblue', font = (fontType, int(1.2*fontSize)))
+            
+            row+=1
+            self.bClose.grid(padx = 10, pady = 20, columnspan = 4, sticky = E)
             
         self.loaded = True
 
@@ -218,6 +231,10 @@ class HiveGui(Tk):
             else:
                 colors = [i for i in range(1,10)]
         return colors
+
+    def close_window(self):
+        print 'Closing window...'
+        self.destroy()
 
 if __name__ == "__main__":
     app = HiveGui()
