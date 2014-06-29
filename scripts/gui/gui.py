@@ -34,12 +34,12 @@ class HiveGui(Tk):
         row = 0
         column = 0
         self.app.grid()
-        welcome = Label(self.app, text = "Welcome to Hive Plotter!", fg = 'slate blue', font = (FONT_TYPE, int(FONT_SIZE*1.5)))
-        welcome.grid(row=row, column=column, columnspan = 2, pady = 20)
+        welcome = Label(self.app, text = "Welcome to Hive Plotter", fg = 'slate blue', font = (FONT_TYPE, int(FONT_SIZE*1.5)))
+        welcome.grid(row=row, column=column, columnspan = 2, pady = PADDING*2)
         
         row += 1
         input = Label(self.app, text = "Please enter the path to the input files:", fg = 'slate blue', font = (FONT_TYPE, int(FONT_SIZE)))
-        input.grid(row=row, column=column, padx = 10, pady = 30, sticky = W, columnspan = 2)
+        input.grid(row=row, column=column, padx = PADDING, pady = PADDING*2, sticky = W, columnspan = 2)
         row += 1
         
         #get node and edge file
@@ -57,7 +57,7 @@ class HiveGui(Tk):
         row += 1
         #add button to update parameters data
         bSubmit = Button(self)
-        bSubmit.grid(row=row, column=column, padx = 10, pady = 30)
+        bSubmit.grid(row=row, column=column, padx = PADDING, pady = PADDING*2)
         bSubmit.configure(text = "Submit network", width=30, command=self.update, fg = 'blue', font = (FONT_TYPE, int(FONT_SIZE)))
         
         self.app2 = Frame(self)
@@ -66,8 +66,8 @@ class HiveGui(Tk):
         self.app2.grid()
         
         input = Label(self.app2, text = "Enter the plotting parameters:", fg = 'slate blue', font = (FONT_TYPE, int(FONT_SIZE)))
-        input.grid(row=row, column=column, padx = 0, pady = 30, columnspan = 2, sticky = W+S)
-        column += 1
+        input.grid(row=row, column=column, padx = PADDING, pady = PADDING*2, columnspan = 2, sticky = W)
+        #column += 1
         
         #make different option menus
         row += 1
@@ -79,24 +79,24 @@ class HiveGui(Tk):
         self.doubleOpt, self.doubleVar = make_options(self.app2, 'Double axes:', row = row, column = column, selections = doubleOptions)
         self.doubleVar.set('False')
         row += 1
-        column = 1
+        column = 0
         self.assignmentOpt, self.assignmentVar = make_options(self.app2, 'Node Assignment Rule:', row = row, column = column, selections = assignmentOptions)
         column += 2
         self.positionOpt, self.positionVar = make_options(self.app2, 'Node Position Rule:', row = row, column = column, selections = positionOptions)
         self.positionVar.set('clustering')
         row += 1
-        column = 1
+        column = 0
         self.edgeStyleOpt, self.edgeStyleVar = make_options(self.app2, 'Edge Style Rule:', row = row, column = column, selections = edgeStyleOptions)
         
         #add button to submit parameters
         bLoad = Button(self)
         bLoad.grid(padx = 10, pady = 40, columnspan = 2)
-        bLoad.configure(text = "Load parameters", width=20, command=self.load_parameters, font = (FONT_TYPE, int(FONT_SIZE)))
+        bLoad.configure(text = "Load parameters", width=20, command=self.load_parameters, font = (FONT_TYPE, int(0.9*FONT_SIZE)))
 
         
         #add button to close window
         self.bClose = Button(self)
-        self.bClose.grid(padx = 10, pady = 20, columnspan = 4, sticky = E)
+        self.bClose.grid(padx = PADDING*2, pady = PADDING*2, columnspan = 4, sticky = E)
         self.bClose.configure(text = "Close window", width=10, command=self.close_window, font = (FONT_TYPE, int(0.8*FONT_SIZE)))
 
 
@@ -134,7 +134,7 @@ class HiveGui(Tk):
         else:
             self.bClose.grid_forget()
             input = Label(self.app3, text = "Change the node and edge coloring:", fg = 'slate blue', font = (FONT_TYPE, int(FONT_SIZE)))
-            input.grid(row=row, column=column, padx = 20, pady = 30, sticky = W)
+            input.grid(row=row, column=column, padx = PADDING*2, pady = PADDING, columnspan = 2, sticky = W)
             
             row += 1
             self.colorOpt, self.colorVar = make_options(self.app3, 'Number of colors to draw edges:', row = row, column = column, selections = numColors)
@@ -148,11 +148,11 @@ class HiveGui(Tk):
             
             #add button to create hive
             bCreate = Button(self.app3)
-            bCreate.grid(padx = 80, pady = 40, columnspan = 4)
-            bCreate.configure(text = "Create Hive", width=90, command=self.callback, bg = 'aliceblue', font = (FONT_TYPE, int(1.2*FONT_SIZE)))
+            bCreate.grid(padx = PADDING*2, pady = PADDING*2, columnspan = 4)
+            bCreate.configure(text = "Create Hive", width=60, command=self.callback, bg = 'aliceblue', font = (FONT_TYPE, int(1.2*FONT_SIZE)))
             
             row+=1
-            self.bClose.grid(padx = 10, pady = 20, columnspan = 4, sticky = E)
+            self.bClose.grid(padx = PADDING*2, pady = PADDING*2, columnspan = 4, sticky = E)
             
         self.loaded = True
 

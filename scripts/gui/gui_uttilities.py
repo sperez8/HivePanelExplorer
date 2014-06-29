@@ -19,17 +19,18 @@ from hive import Hive
 from graph_uttilities import *
 
 FONT_TYPE = 'Helvetica'
-FONT_SIZE = 16
+FONT_SIZE = 13
 TEXT_ENTRY_WIDTH = 70
 MENU_WIDTH = 13
+PADDING = int(FONT_SIZE*0.5)
 
     
 def make_entry(parent, caption, width=None, row = 0, column = 0, **options):
-    Label(parent, text=caption, font = (FONT_TYPE, int(FONT_SIZE))).grid(row=row, column=column, sticky = E, ipadx = 20)
+    Label(parent, text=caption, font = (FONT_TYPE, int(FONT_SIZE))).grid(row=row, column=column, sticky = E, ipadx = PADDING*2)
     entry = Entry(parent, **options)
     if width:
         entry.config(width=width)
-    entry.grid(row=row, column=column+1, padx = 15)
+    entry.grid(row=row, column=column+1, padx = PADDING)
     return entry
 
 def make_options(parent, caption, row = 0, column = 0, selections = [], width = MENU_WIDTH, **options):
@@ -39,7 +40,7 @@ def make_options(parent, caption, row = 0, column = 0, selections = [], width = 
     var.set(selections[0]) #default value    
     w = apply(OptionMenu, (parent, var) + tuple(selections))
     w.configure(width = width)
-    w.grid(row=row, column=column+1, sticky=W, padx = 8)
+    w.grid(row=row, column=column+1, sticky=W, padx = PADDING)
     return w,var
 
 def get_num_colors(edges, style):
