@@ -8,9 +8,15 @@ Contains functions used by hive class to measure things like network properties
 
 #library imports
 import sys
+import os
 import numpy as np
 from math import pi
-import networkx as nx
+
+_cur_dir = os.path.dirname(os.path.realpath(__file__))
+_root_dir = os.path.dirname(_cur_dir)
+sys.path.insert(0, _root_dir)
+
+import networkx_copy as nx
 
 def edge_analysis(G, rule):
     if rule == 'average connecting degree':
