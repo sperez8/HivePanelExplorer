@@ -93,4 +93,4 @@ def make_html(title, hive):
         
     f.close()
     
-    return None
+    return outputfile
