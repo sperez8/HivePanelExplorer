@@ -9,6 +9,7 @@ to make labels, option menus, etc...
 import os
 import sys
 from Tkinter import *
+import tkFileDialog
 from gui_options import colors
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))
@@ -19,7 +20,7 @@ from hive import Hive
 from graph_uttilities import *
 
 FONT_TYPE = 'Helvetica'
-FONT_SIZE = 13
+FONT_SIZE = 15
 TEXT_ENTRY_WIDTH = 70
 MENU_WIDTH = 13
 PADDING = int(FONT_SIZE*0.5)
@@ -59,7 +60,6 @@ def get_num_colors(edges, style):
 
 def get_palette(hue,number):
     if hue in colors.keys():
-        print 'h', hue, colors[hue]
         return colors[hue][:number]
     else:
         print "Desired hue not found. Defaulted to blue palette"

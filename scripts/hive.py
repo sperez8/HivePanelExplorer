@@ -337,7 +337,6 @@ class Hive():
            i = self.edgeKeys.index(rule)
            properties = zip(*self.edgeProperties)[i]
            [values.update({e:p}) for e,p in zipper(self.edges, properties)]
-           print values
            return values
        
        else: 

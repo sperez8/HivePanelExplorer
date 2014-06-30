@@ -29,11 +29,18 @@ class HiveGui(Tk):
         #create window
         self.title("Hive Plotter GUI")
         self.loaded = False
-        #add a label
+        
+        self.minsize(300,300)
+        self.geometry("930x750")
+        
         self.app = Frame(self)
+        
         row = 0
         column = 0
         self.app.grid()
+        
+        
+        
         welcome = Label(self.app, text = "Welcome to Hive Plotter", fg = 'slate blue', font = (FONT_TYPE, int(FONT_SIZE*1.5)))
         welcome.grid(row=row, column=column, columnspan = 2, pady = PADDING*2)
         
@@ -46,18 +53,27 @@ class HiveGui(Tk):
         self.title = make_entry(self.app, "Hive Title:", width = TEXT_ENTRY_WIDTH, row = row, column = column, bg = 'aliceblue')
         row +=1
         self.nodes = make_entry(self.app, "Nodes:", width = TEXT_ENTRY_WIDTH, row = row, column = column, bg = 'aliceblue')
+        column += 2
+        self.bnodes = Button(self.app, text="Browse", command=self.load_node_file, width=MENU_WIDTH)
+        self.bnodes.grid(row=row, column=column, sticky=W)        
+        
+        column = 0
         row += 1 
         self.edges = make_entry(self.app, "Edges:", width = TEXT_ENTRY_WIDTH, row = row, column = column, bg = 'aliceblue')
+        column += 2
+        self.bedges = Button(self.app, text="Browse", command=self.load_edge_file, width=MENU_WIDTH)
+        self.bedges.grid(row=row, column=column, sticky=W)       
         
         #for debugging/development purposes
         self.title.insert(0,"hive1")
         self.nodes.insert(0,NODES)
         self.edges.insert(0,EDGES)
         
+        column -=1
         row += 1
         #add button to update parameters data
-        bSubmit = Button(self)
-        bSubmit.grid(row=row, column=column, padx = PADDING, pady = PADDING*2)
+        bSubmit = Button(self.app)
+        bSubmit.grid(row=row, column=column, padx = PADDING, pady = PADDING*2, columnspan = 4)
         bSubmit.configure(text = "Submit network", width=30, command=self.update, fg = 'blue', font = (FONT_TYPE, int(FONT_SIZE)))
         
         self.app2 = Frame(self)
@@ -89,8 +105,9 @@ class HiveGui(Tk):
         self.edgeStyleOpt, self.edgeStyleVar = make_options(self.app2, 'Edge Style Rule:', row = row, column = column, selections = edgeStyleOptions)
         
         #add button to submit parameters
-        bLoad = Button(self)
-        bLoad.grid(padx = 10, pady = 40, columnspan = 2)
+        column +=1
+        bLoad = Button(self.app2)
+        bLoad.grid(padx = 10, pady = 40, columnspan = 5)
         bLoad.configure(text = "Load parameters", width=20, command=self.load_parameters, font = (FONT_TYPE, int(0.9*FONT_SIZE)))
 
         
@@ -119,6 +136,22 @@ class HiveGui(Tk):
         
         return variable
 
+    def load_node_file(self):
+        fname = tkFileDialog.askopenfilename(filetypes = (("CSV files", "*.csv")
+                                                     ,("Tab delimited files", "*.txt") ))
+        if fname:
+            self.nodes.delete(0, "end")
+            self.nodes.insert(0,fname)
+            return
+
+    def load_edge_file(self):
+        fname = tkFileDialog.askopenfilename(filetypes = (("CSV files", "*.csv")
+                                                     ,("Tab delimited files", "*.txt") ))
+        if fname:
+            self.edges.delete(0, "end")
+            self.edges.insert(0,fname)
+            return
+         
     def load_parameters(self):
         #create some optional parameters for some styling
         self.app3 = Frame(self)
@@ -162,7 +195,6 @@ class HiveGui(Tk):
         
         hive = Hive(debug = False)
         properties = list(hive.get_nodes(nodefile).keys()) + assignmentOptions
-        print properties
         self.assignmentVar = self.reset_option_menu(self.assignmentOpt, self.assignmentVar, properties, index = 2) 
         
         properties = list(hive.get_nodes(nodefile).keys()) + positionOptions
@@ -201,9 +233,7 @@ class HiveGui(Tk):
         if edgeStyle == 'uniform':
             edgeStyle = None
         
-        print paletteHue, numColors
         palette = get_palette(paletteHue,int(numColors))
-        print 'p', palette
         
         hive = Hive(debug = debug, 
                     numAxes = axes,
