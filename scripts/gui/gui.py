@@ -8,6 +8,7 @@ Template for GUI
 
 import sys
 import os
+import webbrowser
 from gui_uttilities import *
 from gui_options import *
 
@@ -37,9 +38,7 @@ class HiveGui(Tk):
         
         row = 0
         column = 0
-        self.app.grid()
-        
-        
+        self.app.grid()        
         
         welcome = Label(self.app, text = "Welcome to Hive Plotter", fg = 'slate blue', font = (FONT_TYPE, int(FONT_SIZE*1.5)))
         welcome.grid(row=row, column=column, columnspan = 2, pady = PADDING*2)
@@ -245,7 +244,9 @@ class HiveGui(Tk):
                     nodeColor = nodeColor
                     )
         hive.make_hive(nodefile, edgefile)
-        make_html(hiveTitle, hive)
+        url = make_html(hiveTitle, hive)
+        
+        webbrowser.open("file://"+url, new=2)
 
     def close_window(self):
         print 'Closing window...'
