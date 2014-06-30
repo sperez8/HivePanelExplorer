@@ -101,7 +101,7 @@ class HiveGui(Tk):
         self.positionVar.set('clustering')
         row += 1
         column = 0
-        self.edgeStyleOpt, self.edgeStyleVar = make_options(self.app2, 'Edge Style Rule:', row = row, column = column, selections = edgeStyleOptions)
+        self.edgeStyleOpt, self.edgeStyleVar = make_options(self.app2, 'Edge Style Rule:', row = row, column = column, selections = edgeStyleOptions, command = self.load_parameters)
         
         #add button to submit parameters
         column +=1
@@ -112,9 +112,10 @@ class HiveGui(Tk):
         
         #add button to close window
         self.bClose = Button(self)
-        self.bClose.grid(padx = PADDING*2, pady = PADDING*2, columnspan = 4, sticky = E)
+        #self.bClose.grid(padx = PADDING*2, pady = PADDING*2, columnspan = 4, sticky = E)
         self.bClose.configure(text = "Close window", width=10, command=self.close_window, font = (FONT_TYPE, int(0.8*FONT_SIZE)))
 
+        self.load_parameters()
 
     def reset_option_menu(self, w, variable, options, index=None, caption = None):
         '''reset the values in the option menu
@@ -135,6 +136,9 @@ class HiveGui(Tk):
         
         return variable
 
+    def test(self):
+        print 'woohoo'
+        
     def load_node_file(self):
         fname = tkFileDialog.askopenfilename(filetypes = (("CSV files", "*.csv")
                                                      ,("Tab delimited files", "*.txt") ))
@@ -161,10 +165,7 @@ class HiveGui(Tk):
         style = self.edgeStyleVar.get()
         numColors = get_num_colors(self.edges, style)
         
-        if self.loaded:
-            self.colorVar = self.reset_option_menu(self.colorOpt, self.colorVar, numColors)
-        else:
-            self.bClose.grid_forget()
+        if not self.loaded:
             input = Label(self.app3, text = "Change the node and edge coloring:", fg = 'slate blue', font = (FONT_TYPE, int(FONT_SIZE)))
             input.grid(row=row, column=column, padx = PADDING*2, pady = PADDING, columnspan = 2, sticky = W)
             
@@ -187,6 +188,8 @@ class HiveGui(Tk):
             self.bClose.grid(padx = PADDING*2, pady = PADDING*2, columnspan = 4, sticky = E)
             
         self.loaded = True
+        
+        self.colorVar = self.reset_option_menu(self.colorOpt, self.colorVar, numColors)
 
     def update(self):
         nodefile = self.nodes.get()
