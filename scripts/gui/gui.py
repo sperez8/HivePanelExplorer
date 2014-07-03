@@ -53,15 +53,15 @@ class HiveGui(Tk):
         row +=1
         self.nodes = make_entry(self.app, "Nodes:", width = TEXT_ENTRY_WIDTH, row = row, column = column, bg = 'aliceblue')
         column += 2
-        self.bnodes = Button(self.app, text="Browse", command=self.load_node_file, width=MENU_WIDTH)
-        self.bnodes.grid(row=row, column=column, sticky=W)        
+        self.bNodes = Button(self.app, text="Browse", command=self.load_node_file, width=MENU_WIDTH)
+        self.bNodes.grid(row=row, column=column, sticky=W)        
         
         column = 0
         row += 1 
         self.edges = make_entry(self.app, "Edges:", width = TEXT_ENTRY_WIDTH, row = row, column = column, bg = 'aliceblue')
         column += 2
-        self.bedges = Button(self.app, text="Browse", command=self.load_edge_file, width=MENU_WIDTH)
-        self.bedges.grid(row=row, column=column, sticky=W)       
+        self.bEdges = Button(self.app, text="Browse", command=self.load_edge_file, width=MENU_WIDTH)
+        self.bEdges.grid(row=row, column=column, sticky=W)       
         
         #for debugging/development purposes
         self.title.insert(0,"hive1")

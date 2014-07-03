@@ -34,7 +34,7 @@ def make_entry(parent, caption, width=None, row = 0, column = 0, **options):
     entry.grid(row=row, column=column+1, padx = PADDING)
     return entry
 
-def make_options(parent, caption, row = 0, column = 0, selections = [], width = MENU_WIDTH, **options):
+def make_options(parent, caption, row = 0, column = 0, selections = [], width = MENU_WIDTH, command = None, **options):
     label = Label(parent, text=caption, font = (FONT_TYPE, int(FONT_SIZE*0.9)))
     label.grid(row=row, column=column, sticky=W)
     var = StringVar(parent)
@@ -42,6 +42,10 @@ def make_options(parent, caption, row = 0, column = 0, selections = [], width = 
     w = apply(OptionMenu, (parent, var) + tuple(selections))
     w.configure(width = width)
     w.grid(row=row, column=column+1, sticky=W, padx = PADDING)
+    if command:
+        w['menu'].delete(0, "end")
+        for option in selections:
+            w['menu'].add_command(label = option, command=command)
     return w,var
 
 def get_num_colors(edges, style):
