@@ -101,13 +101,14 @@ class HiveGui(Tk):
         self.positionVar.set('clustering')
         row += 1
         column = 0
+        print 'go'
         self.edgeStyleOpt, self.edgeStyleVar = make_options(self.app2, 'Edge Style Rule:', row = row, column = column, selections = edgeStyleOptions, command = self.load_parameters)
         
         #add button to submit parameters
-        column +=1
-        bLoad = Button(self.app2)
-        bLoad.grid(padx = 10, pady = 40, columnspan = 5)
-        bLoad.configure(text = "Load parameters", width=20, command=self.load_parameters, font = (FONT_TYPE, int(0.9*FONT_SIZE)))
+        #column +=1
+        #bLoad = Button(self.app2)
+        #bLoad.grid(padx = 10, pady = 40, columnspan = 5)
+        #bLoad.configure(text = "Load parameters", width=20, command=self.load_parameters, font = (FONT_TYPE, int(0.9*FONT_SIZE)))
 
         
         #add button to close window
@@ -115,7 +116,7 @@ class HiveGui(Tk):
         #self.bClose.grid(padx = PADDING*2, pady = PADDING*2, columnspan = 4, sticky = E)
         self.bClose.configure(text = "Close window", width=10, command=self.close_window, font = (FONT_TYPE, int(0.8*FONT_SIZE)))
 
-        self.load_parameters()
+        #self.load_parameters()
 
     def reset_option_menu(self, w, variable, options, index=None, caption = None):
         '''reset the values in the option menu
@@ -129,15 +130,11 @@ class HiveGui(Tk):
             menu.add_command(label=string, 
                              command=lambda value=string:
                                   variable.set(value))
+                
         if index is not None:
             variable.set(options[index])
-        else:
-            variable.set(options[0])
         
         return variable
-
-    def test(self):
-        print 'woohoo'
         
     def load_node_file(self):
         fname = tkFileDialog.askopenfilename(filetypes = (("CSV files", "*.csv")
@@ -155,8 +152,9 @@ class HiveGui(Tk):
             self.edges.insert(0,fname)
             return
          
-    def load_parameters(self):
+    def load_parameters(self, *args):
         #create some optional parameters for some styling
+        #print 'here', self.edgeStyleVar.get()
         self.app3 = Frame(self)
         row = 0
         column = 0

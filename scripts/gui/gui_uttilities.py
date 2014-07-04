@@ -38,14 +38,13 @@ def make_options(parent, caption, row = 0, column = 0, selections = [], width = 
     label = Label(parent, text=caption, font = (FONT_TYPE, int(FONT_SIZE*0.9)))
     label.grid(row=row, column=column, sticky=W)
     var = StringVar(parent)
-    var.set(selections[0]) #default value    
+    print selections
+    var.set(selections[0]) #default value   
     w = apply(OptionMenu, (parent, var) + tuple(selections))
     w.configure(width = width)
-    w.grid(row=row, column=column+1, sticky=W, padx = PADDING)
     if command:
-        w['menu'].delete(0, "end")
-        for option in selections:
-            w['menu'].add_command(label = option, command=command)
+        var.trace('r',command) 
+    w.grid(row=row, column=column+1, sticky=W, padx = PADDING)
     return w,var
 
 def get_num_colors(edges, style):
