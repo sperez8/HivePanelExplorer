@@ -19,6 +19,7 @@ sys.path.insert(0, _root_dir)
 from hive import Hive
 from graph_uttilities import *
 
+ACCEPTED_FILETYPES = (("CSV files", "*.csv"),("Tab delimited files", "*.txt"))
 FONT_TYPE = 'Helvetica'
 FONT_SIZE = 15
 TEXT_ENTRY_WIDTH = 70
@@ -37,13 +38,12 @@ def make_entry(parent, caption, width=None, row = 0, column = 0, **options):
 def make_options(parent, caption, row = 0, column = 0, selections = [], width = MENU_WIDTH, command = None, **options):
     label = Label(parent, text=caption, font = (FONT_TYPE, int(FONT_SIZE*0.9)))
     label.grid(row=row, column=column, sticky=W)
-    var = StringVar(parent)
-    print selections
+    var = StringVar(parent)    
     var.set(selections[0]) #default value   
     w = apply(OptionMenu, (parent, var) + tuple(selections))
     w.configure(width = width)
     if command:
-        var.trace('r',command) 
+        var.trace('w',command) 
     w.grid(row=row, column=column+1, sticky=W, padx = PADDING)
     return w,var
 
