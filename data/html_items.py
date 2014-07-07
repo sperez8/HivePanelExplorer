@@ -111,6 +111,9 @@ function degrees(radians) {
   return radians / Math.PI * 180 - 90;
 }
 
-</script>"""
+</script>
+</body>
+</html>
+"""
 
 #more to be added
