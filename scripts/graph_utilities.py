@@ -44,7 +44,7 @@ def node_analysis(G, rule):
 def make_graph(sources, targets):
     '''Makes a graph using the networkx package Graph instance'''
     G = nx.Graph()
-    G.add_edges_from(zip(sources,targets))
+    G.add_edges_from(zipper(sources,targets))
     return G
         
 def convert_type(data):
@@ -78,17 +78,15 @@ def find_categories(data):
         return None
     return categories
 
-def zipper(x,y,z=[]):
-    if z == []:
-        if len(y) != len(x):
+def zipper(*args):
+    '''a revamped version of zip() method that checks that lists
+    to be zipped are the same length'''
+    print args
+    for i,item in enumerate(args):
+        if len(item) != len(args[0]):
             raise ValueError('The lists to be zipped aren\'t the same length.')
-        else:
-            return zip(x,y)
-    else:
-        if len(x) != len(y) or len(x) != len(z):
-            raise ValueError('The lists to be zipped aren\'t the same length.')
-        else:
-            return zip(x,y,z)
+    
+    return zip(*args)
             
             
     
