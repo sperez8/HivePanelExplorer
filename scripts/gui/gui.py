@@ -9,7 +9,7 @@ Template for GUI
 import sys
 import os
 import webbrowser
-from gui_uttilities import *
+from gui_utilities import *
 from gui_options import *
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))
@@ -17,8 +17,8 @@ _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 
 from hive import Hive
-from html_uttilities import *
-from graph_uttilities import *
+from html_utilities import *
+from graph_utilities import *
 
 _root_dir = os.path.dirname(_root_dir)
 NODES = _root_dir + "/tests/test_nodes_friends.csv"

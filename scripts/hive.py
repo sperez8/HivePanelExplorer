@@ -12,7 +12,7 @@ import sys
 import os
 import numpy as np
 from math import pi
-from graph_uttilities import *
+from graph_utilities import *
 from time import strftime
 
 #hive parameter defaults
