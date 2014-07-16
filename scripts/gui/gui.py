@@ -128,16 +128,23 @@ class HiveGui(Tk):
         column = 0
         self.paletteOpt, self.paletteVar = make_options(self.app3, 'Hue of color palette:', row = row, column = column, selections = colorOptions)
         
-        #-----------------------------#
-        ### CREATE AND CLOSE BUTTON ###
-        #-----------------------------#
+        #-----------------------------------#
+        ### CREATE, SAVE AND CLOSE BUTTON ###
+        #-----------------------------------#
+        row+=1
         bCreate = Button(self.app3)
-        bCreate.grid(padx = PADDING*2, pady = PADDING*2, columnspan = 4)
-        bCreate.configure(text = "Create and open Hive", width=60, command=self.create_hive, bg = 'aliceblue', font = (FONT_TYPE, int(1.2*FONT_SIZE)))
+        bCreate.grid(row = row, column = column, padx = PADDING, pady = PADDING*2, columnspan = 2)
+        bCreate.configure(text = "Create and open Hive", width=30, command=self.create_hive, bg = 'aliceblue', font = (FONT_TYPE, int(1.2*FONT_SIZE)))
+        
+        column += 2
+        bSave = Button(self.app3)
+        bSave.grid(row = row, column = column, padx = PADDING, pady = PADDING*2, columnspan = 2)
+        bSave.configure(text = "Save Hive", width=30, command=self.save_hive, bg = 'aliceblue', font = (FONT_TYPE, int(1.2*FONT_SIZE)))
+        
         
         row+=1
         self.bClose = Button(self)
-        self.bClose.grid(padx = PADDING*2, pady = PADDING*2, columnspan = 4, sticky = E)
+        self.bClose.grid(padx = PADDING*2, pady = PADDING, columnspan = 4, sticky = SE)
         self.bClose.configure(text = "Close window", width=10, command=self.close_window, font = (FONT_TYPE, int(0.8*FONT_SIZE)))
 
     def reset_option_menu(self, w, variable, options, index=None, caption = None):
@@ -194,6 +201,27 @@ class HiveGui(Tk):
         self.edgeStyleVar = self.reset_option_menu(self.edgeStyleOpt, self.edgeStyleVar, properties)
     
     def create_hive(self):
+        hive = self.get_hive()
+        hiveTitle = self.title.get()
+        url = make_html(hiveTitle, hive)
+        
+        webbrowser.open("file://"+url, new=2)
+
+    def save_hive(self):
+        hiveTitle = self.title.get()
+        hive = self.get_hive()
+        filePath = tkFileDialog.asksaveasfilename(defaultextension = '.html')
+        if filePath:
+            hiveTitle = os.path.basename(filePath)
+            folder = os.path.dirname(filePath)
+            url = make_html(hiveTitle, hive, folder = folder)
+            webbrowser.open("file://"+url, new=2)
+
+    def close_window(self):
+        print 'Closing window...'
+        self.destroy()
+
+    def get_hive(self):
         hiveTitle = self.title.get()
         nodefile = self.nodes.get()
         edgefile = self.edges.get()
@@ -235,13 +263,7 @@ class HiveGui(Tk):
                     nodeColor = nodeColor
                     )
         hive.make_hive(nodefile, edgefile)
-        url = make_html(hiveTitle, hive)
-        
-        webbrowser.open("file://"+url, new=2)
-
-    def close_window(self):
-        print 'Closing window...'
-        self.destroy()
+        return hive
 
 if __name__ == "__main__":
     app = HiveGui()

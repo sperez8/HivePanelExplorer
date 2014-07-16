@@ -18,7 +18,7 @@ sys.path.insert(0, _root_dir)
 from data import html_items
 
 TEMP_FOLDER = _root_dir + '/tmp/'
-
+print TEMP_FOLDER
 def write_nodes(file, hive):
     '''outputs node info to a text file
         in a javascript variable format'''
@@ -41,7 +41,7 @@ def write_edges(file, hive):
     f.write('];')
 
 
-def make_html(title, hive):
+def make_html(title, hive, folder = TEMP_FOLDER):
     '''takes a hive instance and write the
     following files:
         nodes.js - contains nodes, position and coloring
@@ -51,10 +51,10 @@ def make_html(title, hive):
     htmlItems = html_items.htmlContainer
     keyOrder = html_items.keyOrder
     
-    outputfile = os.path.join(TEMP_FOLDER, title + ".html")
+    outputfile = os.path.join(folder, title + ".html")
     print '    Making the hive plot \'{0}\''.format(outputfile) 
-    nodeFile = os.path.join(TEMP_FOLDER, 'nodes' + title + '.js')
-    edgeFile = os.path.join(TEMP_FOLDER,'edges' + title + '.js')
+    nodeFile = os.path.join(folder, 'nodes' + title + '.js')
+    edgeFile = os.path.join(folder,'edges' + title + '.js')
     
     write_nodes(nodeFile, hive)
     write_edges(edgeFile, hive)
