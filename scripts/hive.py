@@ -143,7 +143,11 @@ class Hive():
             angles = [2.0*pi/float(self.numAxes)*i for i in range(0,self.numAxes)]
 
         angles = [round(a,2) for a in angles]
-        angles = [0.0001 if a == 0 else a for a in angles] #d3 code doesn't work with an angle of exactly zero
+        angles = [0.0001 if a == 0 else a for a in angles] #d3 code won't work with an angle of zero...
+        
+        if self.numAxes==2: #hive plots with 2 axis are better viewed horizontally so we rotate them
+            angles = [a-pi/2 for a in angles]
+        
         if self.debug:
             print "Axes angles are", angles   
         self.angles = angles
@@ -257,7 +261,7 @@ class Hive():
     def make_edges(self):
         '''takes sources and edges and makes a list of 
         edges while assignment nodes to the correct axis in 
-        the case of double axis.'''
+        the case of double axis. also keeps track of edge properties.'''
         newSources = []
         newTargets = []
         newProperties = []
@@ -289,10 +293,18 @@ class Hive():
                     newSources.append(s1)
                     newTargets.append(t2)
                     newProperties.append(p)
+                    if self.numAxes == 2 and self.doubleAxes: #need symmetry for 2 axes plots
+                        newSources.append(t1)
+                        newTargets.append(s2)
+                        newProperties.append(p) 
                 elif axis[s1] + 2 == axis[t1]:
                     newSources.append(s2)
                     newTargets.append(t1)
                     newProperties.append(p)
+                    if self.numAxes == 2 and self.doubleAxes: #need symmetry for 2 axes plots
+                        newSources.append(s1)
+                        newTargets.append(t2)
+                        newProperties.append(p) 
                 #the edges below loop back from the highest numbered axis to the first axis
                 elif axis[s1] == 1 and axis[t2] == self.numAxes*2:
                     newSources.append(s1)
