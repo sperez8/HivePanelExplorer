@@ -17,7 +17,7 @@ _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 
 from hive import Hive
-from graph_uttilities import *
+from graph_utilities import *
 
 ACCEPTED_FILETYPES = (("CSV files", "*.csv"),("Tab delimited files", "*.txt"))
 FONT_TYPE = 'Helvetica'
