@@ -10,7 +10,7 @@ htmlContainer= {}
 
 keyOrder = ['intro', 'nodefile', 'edgefile',
             'start js parameters','titleheader',
-            'numAxes', 'angles','color', 'edge_color', 
+            'numAxes', 'angles','color', 'edge_color', 'printName',
             'end js parameters', 'd3functions']
 
 htmlContainer['intro'] = """<!comment This is a hive plot developed using HivePlotter.>
@@ -31,6 +31,7 @@ htmlContainer['numAxes'] = '' #will be specified by user
 htmlContainer['angles'] = '' #will be specified by user
 htmlContainer['color'] = '' #will be specified by user
 htmlContainer['edge_color'] = '' #will be specified by user
+htmlContainer['printName'] = '' #will be specified by user
 htmlContainer['end js parameters'] = '' #will be specified by user
 
 
@@ -61,10 +62,6 @@ var angles = d3.scale.ordinal()
 var link_color = d3.scale.linear()
     .domain(d3.range(0,edge_color.length,1.0))
     .range(edge_color);
-
-var printName = function(pos){
-        d3.select("body").select("p").text(pos)
-    };
 
 var svg = d3.select("body").select("div").append("svg")
     .attr("class", SVGTitle)
@@ -146,7 +143,7 @@ svg.selectAll(".node")
                 .attr("r", nodesize);
             })
     .on("click", function(d){
-        printName(d.pos);
+        printName(d);
     })
        .append("title").text(function(d){
             return "Position: " + d.pos;

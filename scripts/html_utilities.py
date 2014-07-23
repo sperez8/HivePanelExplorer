@@ -24,10 +24,20 @@ def write_nodes(file, hive):
         in a javascript variable format'''
     
     f = open(file, 'w')
+
     f.write('var nodes = [\n')
     
     for i,n in enumerate(hive.nodes):
-        f.write('  {axis: ' + str(hive.axisAssignment[n]-1) + ', pos: ' + str(hive.nodePositions[n]) + '},\n')
+        line  = '  {axis: ' + str(hive.axisAssignment[n]-1) + ', pos: ' + str(hive.nodePositions[n])
+        line += ', name: \'' + str(n) +'\''
+        for property,values in hive.nodeProperties.iteritems():
+            if i < len(values):
+                index = i
+            else:
+                index = i - len(values) #for doubled axes
+            line  += ', '+str(property) + ': \'' + str(values[index]) +'\''
+        line += '},\n'
+        f.write(line)
     f.write('];')
     
 def write_edges(file, hive):
@@ -86,6 +96,13 @@ def make_html(title, hive, folder = TEMP_FOLDER):
                     f.write('var num_axis = ' + str(hive.numAxes*2))
                 else:
                     f.write('var num_axis = ' + str(hive.numAxes))
+            elif key == 'printName':
+                    f.write('var printName = function(d){\n')
+                    f.write('    d3.select("body").select("p").text(')
+                    f.write('\"Name: \" + d.name')
+                    for p in hive.nodeProperties.keys():
+                        f.write('+\"' + p + ': \" + d.' + p + '    ')
+                    f.write(')};')
             elif key == 'end js parameters':
                 f.write('</script>')
             else:
