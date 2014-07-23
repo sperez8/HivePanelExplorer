@@ -30,7 +30,7 @@ class HiveGui(Tk):
         #create window
         self.title("Hive Plotter GUI")
         self.minsize(300,300)
-        self.geometry("900x700")
+        self.geometry("830x670")
         
     def create_interface(self):
         '''creates and places on the grid all the menus, inputs,

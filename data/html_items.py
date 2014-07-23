@@ -19,6 +19,7 @@ htmlContainer['intro'] = """<!comment This is a hive plot developed using HivePl
 <body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/d3.hive.v0.min.js"></script>
+<div id="hive" style="height:500px;width:600px;float:left;"></div>
 """
 
 htmlContainer['nodefile'] = 'nodes.js' #will be specified by user
@@ -61,7 +62,11 @@ var link_color = d3.scale.linear()
     .domain(d3.range(0,edge_color.length,1.0))
     .range(edge_color);
 
-var svg = d3.select("body").append("svg")
+var printName = function(pos){
+        d3.select("body").select("p").text(pos)
+    };
+
+var svg = d3.select("body").select("div").append("svg")
     .attr("class", SVGTitle)
     .attr("width", width)
     .attr("height", height)
@@ -93,7 +98,17 @@ svg.selectAll(".link")
             return edge_color}
         else {return link_color(d.type)}
         })
-    .style("stroke-width", linkwidth);
+    .style("stroke-width", linkwidth)
+    .on("mouseover", function(d){
+            d3.select(this)
+                .style("stroke-opacity", 1)
+                .style("stroke-width", linkwidth*2)})
+    .on("mouseout", function(d){
+            d3.select(this)
+                .transition()
+                .duration(800)
+                .style("stroke-opacity", oplink)
+                .style("stroke-width", linkwidth)});
   
 svg.selectAll(".node")
     .data(nodes)
@@ -105,13 +120,44 @@ svg.selectAll(".node")
     .attr("stroke-width", nodestroke)
     .attr("stroke", nodestrokecolor)
     .style("fill-opacity", opnode)
-    .style("fill", nodecolor);
+    .style("fill", nodecolor)
+    .on("mouseover", function(d){
+            d3.select(this)
+                .style("fill-opacity", 1)
+                .attr("stroke-width", nodestroke*3)
+                .attr("stroke", 'black')
+                .attr("r", nodesize*1.5) 
+//             var cxPos = parseFloat(d3.select(this).attr("x"))        
+//             var transPos = parseFloat(d3.select(this).attr("transform"))
+//             svg.append("text")
+//                 .attr("id", "tooltip")
+//                 .attr("cx", cxPos)
+//                 .attr("transform", transPos)
+//                 .attr("r", nodesize)
+//                 .text(d.pos);
+            })
+    .on("mouseout", function(d){
+            d3.select(this)
+                .transition()
+                .duration(800)
+                .style("fill-opacity", opnode)
+                .attr("stroke-width", nodestroke)
+                .attr("stroke", nodestrokecolor)
+                .attr("r", nodesize);
+            })
+    .on("click", function(d){
+        printName(d.pos);
+    })
+       .append("title").text(function(d){
+            return "Position: " + d.pos;
+    });
 
 function degrees(radians) {
   return radians / Math.PI * 180 - 90;
 }
-
 </script>
+
+<p id="print area" style="background-color:#EEEEEE;height:500px;width:300px;float:left;"></p>
 </body>
 </html>
 """

@@ -1,4 +1,4 @@
-Source,Target,friendship strength,relationship 
+Source,Target,friendshipstrength,relationship
 Bob,Cam,3,friends
 Cam,Fatima,4,friends
 Daniella,Alice,0,enemies
@@ -9,3 +9,10 @@ Fatima,Alice,4,enemies
 Alice,George,8,enemies
 Bob,George,7,friends
 Bob,Fatima,6,friends
+Jack,Isabelle,10,enemies
+Harry,Jack,11,enemies
+Harry,George,2,enemies
+George,Isabelle,6,enemies
+Isabelle,Alice,4,friends
+Isabelle,Fatima,4,friends
+Fatima,Jack,2,friends
