@@ -16,23 +16,19 @@ var SVGTitle = 'Hive plot : hive1'
 var num_axis = 3
 var angle = [0.0001,2.09,4.19]
 var nodecolor = 'blue'
-var edge_color = ['blue','cornflowerblue']
-var printName = function(d){
-    d3.select("body").select("#print").append("p").text("Name: " + d.name+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)};
+var edge_color = ['blue']
+var revealName = function(d){
+    d3.select("body").select("#reveal").append("p").html("<br><br><b>Name: " + d.name +"</b>"+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)
+	.style("color", nodecolor)
+	};
 </script>
 
 <script>
 
-var revealName = function(d){
-    d3.select("body").select("#reveal").append("p")
-        .style("color", nodecolor)
-        .html("<br><br><b>Name: " + d.name + "<b><br>");
-    };
-
 var removeName = function(d){
     d3.select("body").select("#reveal").selectAll("p")
         .transition()
-        .duration(250)
+        .duration(400)
         .remove();
     };
     
@@ -133,13 +129,7 @@ svg.selectAll(".node")
                 .attr("stroke", nodestrokecolor)
                 .attr("r", nodesize);
             removeName();
-            })
-    .on("click", function(d){
-        printName(d);
-    })
-       .append("title").text(function(d){
-            return "Position: " + d.pos;
-    });
+            });
 
 function degrees(radians) {
   return radians / Math.PI * 180 - 90;

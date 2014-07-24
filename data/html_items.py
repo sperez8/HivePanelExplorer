@@ -10,7 +10,7 @@ htmlContainer= {}
 
 keyOrder = ['intro', 'nodefile', 'edgefile',
             'start js parameters','titleheader',
-            'numAxes', 'angles','color', 'edge_color', 'printName',
+            'numAxes', 'angles','color', 'edge_color', 'revealName',
             'end js parameters', 'd3functions']
 
 htmlContainer['intro'] = """<!comment This is a hive plot developed using HivePlotter.>
@@ -33,23 +33,17 @@ htmlContainer['numAxes'] = '' #will be specified by user
 htmlContainer['angles'] = '' #will be specified by user
 htmlContainer['color'] = '' #will be specified by user
 htmlContainer['edge_color'] = '' #will be specified by user
-htmlContainer['printName'] = '' #will be specified by user
+htmlContainer['revealName'] = '' #will be specified by user
 htmlContainer['end js parameters'] = '' #will be specified by user
 
 
 htmlContainer['d3functions'] = """
 <script>
 
-var revealName = function(d){
-    d3.select("body").select("#reveal").append("p")
-        .style("color", nodecolor)
-        .html("<br><br><b>Name: " + d.name + "<b><br>");
-    };
-
 var removeName = function(d){
     d3.select("body").select("#reveal").selectAll("p")
         .transition()
-        .duration(250)
+        .duration(400)
         .remove();
     };
     
@@ -150,13 +144,7 @@ svg.selectAll(".node")
                 .attr("stroke", nodestrokecolor)
                 .attr("r", nodesize);
             removeName();
-            })
-    .on("click", function(d){
-        printName(d);
-    })
-       .append("title").text(function(d){
-            return "Position: " + d.pos;
-    });
+            });
 
 function degrees(radians) {
   return radians / Math.PI * 180 - 90;
