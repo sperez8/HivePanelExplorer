@@ -20,6 +20,8 @@ htmlContainer['intro'] = """<!comment This is a hive plot developed using HivePl
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/d3.hive.v0.min.js"></script>
 <div id="hive" style="height:500px;width:600px;float:left;"></div>
+<div id="reveal" style="height:60px;width:300px;float:left;"></div>
+<div id="print" style="height:440px;width:300px;float:left;"></div>
 """
 
 htmlContainer['nodefile'] = 'nodes.js' #will be specified by user
@@ -38,6 +40,19 @@ htmlContainer['end js parameters'] = '' #will be specified by user
 htmlContainer['d3functions'] = """
 <script>
 
+var revealName = function(d){
+    d3.select("body").select("#reveal").append("p")
+        .style("color", nodecolor)
+        .html("<br><br><b>Name: " + d.name + "<b><br>");
+    };
+
+var removeName = function(d){
+    d3.select("body").select("#reveal").selectAll("p")
+        .transition()
+        .duration(250)
+        .remove();
+    };
+    
 var nodesize = 4
     nodestroke = 0.4
     nodestrokecolor = "grey"
@@ -124,14 +139,7 @@ svg.selectAll(".node")
                 .attr("stroke-width", nodestroke*3)
                 .attr("stroke", 'black')
                 .attr("r", nodesize*1.5) 
-//             var cxPos = parseFloat(d3.select(this).attr("x"))        
-//             var transPos = parseFloat(d3.select(this).attr("transform"))
-//             svg.append("text")
-//                 .attr("id", "tooltip")
-//                 .attr("cx", cxPos)
-//                 .attr("transform", transPos)
-//                 .attr("r", nodesize)
-//                 .text(d.pos);
+               revealName(d);
             })
     .on("mouseout", function(d){
             d3.select(this)
@@ -141,6 +149,7 @@ svg.selectAll(".node")
                 .attr("stroke-width", nodestroke)
                 .attr("stroke", nodestrokecolor)
                 .attr("r", nodesize);
+            removeName();
             })
     .on("click", function(d){
         printName(d);
@@ -153,8 +162,6 @@ function degrees(radians) {
   return radians / Math.PI * 180 - 90;
 }
 </script>
-
-<p id="print area" style="background-color:#EEEEEE;height:500px;width:300px;float:left;"></p>
 </body>
 </html>
 """

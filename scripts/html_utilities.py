@@ -98,10 +98,10 @@ def make_html(title, hive, folder = TEMP_FOLDER):
                     f.write('var num_axis = ' + str(hive.numAxes))
             elif key == 'printName':
                     f.write('var printName = function(d){\n')
-                    f.write('    d3.select("body").select("p").text(')
+                    f.write('    d3.select("body").select("#print").append("p").text(')
                     f.write('\"Name: \" + d.name')
                     for p in hive.nodeProperties.keys():
-                        f.write('+\"' + p + ': \" + d.' + p + '    ')
+                        f.write('+\',\'+\"    ' + p + ': \" + d.' + p)
                     f.write(')};')
             elif key == 'end js parameters':
                 f.write('</script>')
