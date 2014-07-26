@@ -43,7 +43,8 @@ htmlContainer['d3functions'] = """
 var removeName = function(d){
     d3.select("body").select("#reveal").selectAll("p")
         .transition()
-        .duration(400)
+        .duration(hoverOverTime)
+        .style("opacity", 0)
         .remove();
     };
     
@@ -57,11 +58,13 @@ var width = 600
     outerRadius = 240;
 
 var linkfill = "none"
-    linkwidth = 1.2
+    linkwidth = 1.3
     oplink = 0.9
     opnode = 0.6
     bkgcolor = "white"
-    
+
+var hoverOverTime = 1000
+
 var radius = d3.scale.linear().range([innerRadius, outerRadius]);
 
 var angles = d3.scale.ordinal()
@@ -134,16 +137,36 @@ svg.selectAll(".node")
                 .attr("stroke", 'black')
                 .attr("r", nodesize*1.5) 
                revealName(d);
+            d3.selectAll(".link")
+                .transition()
+                .duration(hoverOverTime*0.1)
+                .style("stroke-opacity", function(l){
+                    if (l.source.name == d.name || l.target.name == d.name){
+                        return 1}
+                    else {
+                        return oplink}
+                })
+                .style("stroke-width", function(l){
+                    if (l.source.name == d.name || l.target.name == d.name){
+                        return linkwidth*2.5}
+                    else {
+                        return linkwidth}
+                })
             })
     .on("mouseout", function(d){
             d3.select(this)
                 .transition()
-                .duration(800)
+                .duration(hoverOverTime)
                 .style("fill-opacity", opnode)
                 .attr("stroke-width", nodestroke)
                 .attr("stroke", nodestrokecolor)
                 .attr("r", nodesize);
             removeName();
+            d3.selectAll(".link")
+                .transition()
+                .duration(hoverOverTime)
+                .style("stroke-opacity", oplink)
+                .style("stroke-width", linkwidth)
             });
 
 function degrees(radians) {

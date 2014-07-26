@@ -28,8 +28,11 @@ def write_nodes(file, hive):
     f.write('var nodes = [\n')
     
     for i,n in enumerate(hive.nodes):
+        if n[-2:] == '.1' or n[-2:] == '.2':
+            name = n[:-2]
+        else: name = n
         line  = '  {axis: ' + str(hive.axisAssignment[n]-1) + ', pos: ' + str(hive.nodePositions[n])
-        line += ', name: \'' + str(n) +'\''
+        line += ', name: \'' + str(name) +'\''
         for property,values in hive.nodeProperties.iteritems():
             if i < len(values):
                 index = i
