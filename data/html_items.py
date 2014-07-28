@@ -63,7 +63,7 @@ var linkfill = "none"
     opnode = 0.6
     bkgcolor = "white"
 
-var hoverOverTime = 1000
+var hoverOverTime = 900
 
 var radius = d3.scale.linear().range([innerRadius, outerRadius]);
 
@@ -139,7 +139,8 @@ svg.selectAll(".node")
                revealName(d);
             d3.selectAll(".link")
                 .transition()
-                .duration(hoverOverTime*0.1)
+                .delay(hoverOverTime*0.1)
+                .duration(hoverOverTime*0.2)
                 .style("stroke-opacity", function(l){
                     if (l.source.name == d.name || l.target.name == d.name){
                         return 1}
@@ -152,6 +153,35 @@ svg.selectAll(".node")
                     else {
                         return linkwidth}
                 })
+            d3.selectAll(".node")
+                .transition()
+                .delay(hoverOverTime*0.1)
+                .duration(hoverOverTime*0.2)
+                .style("fill-opacity", function(n){
+                    if (n.name == d.name){
+                        return 1}
+                    else {
+                        return opnode}
+                })
+                .style("stroke-width", function(n){
+                    if (n.name == d.name){
+                        return nodestroke*3}
+                    else {
+                        return nodestroke}
+                })
+                .attr("stroke", function(n){
+                    if (n.name == d.name){
+                        return 'black'}
+                    else {
+                        return nodestrokecolor}
+                })
+                .attr("r", function(n){
+                    if (n.name == d.name){
+                        return nodesize*1.5}
+                    else {
+                        return nodesize}
+                })
+
             })
     .on("mouseout", function(d){
             d3.select(this)
@@ -167,6 +197,13 @@ svg.selectAll(".node")
                 .duration(hoverOverTime)
                 .style("stroke-opacity", oplink)
                 .style("stroke-width", linkwidth)
+            d3.selectAll(".node")
+                .transition()
+                .duration(hoverOverTime)
+                .attr("r", nodesize)
+                .attr("stroke-width", nodestroke)
+                .attr("stroke", nodestrokecolor)
+                .style("fill-opacity", opnode)
             });
 
 function degrees(radians) {
