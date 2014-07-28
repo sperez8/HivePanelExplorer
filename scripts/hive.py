@@ -74,8 +74,9 @@ class Hive():
         self.fix_color_palette()
         return None
 
-    def get_nodes(self,inputFile, delimiter = ','):
+    def get_nodes(self,inputFile):
         '''gets nodes and their properties from csv file'''
+        delimiter = self.get_delimiter(inputFile)
         data = np.genfromtxt(inputFile, delimiter=delimiter, dtype='str')
         properties = data[0,1:]
         data = data[1:,]
@@ -103,8 +104,9 @@ class Hive():
                 print k, v
         return self.nodeProperties
 
-    def get_edges(self,inputFile, delimiter = ','):
+    def get_edges(self,inputFile):
         '''gets edges and their properties from csv file'''
+        delimiter = self.get_delimiter(inputFile)
         data = np.genfromtxt(inputFile, delimiter=delimiter, dtype='str')
         properties = data[0,2:]
         data = data[2:,]
@@ -406,3 +408,26 @@ class Hive():
     def check_input(self):
         '''IN DEVELOPMENT
         checks if all edges are connecting nodes which exist in the self.nodes'''
+        
+    @staticmethod
+    def get_delimiter(inputFile):
+        '''returns correct delimiter for tab or comma seperated file'''
+        ext = os.path.splitext(os.path.basename(inputFile))[1]
+        
+        if 'tab' in ext or 'tsv' in ext:
+            return '\t'
+        elif 'csv' in ext:
+            return ','
+        elif 'txt' in ext:
+            #detects delimeter by counting the number of tabs and commas in the first line
+            f = open(inputFile, 'r')
+            first = f.read()
+            if first.count(',') > first.count('\t'):
+                return ','
+            else:
+                return '\t'
+        else:
+            print "Couldn't detect a valid file extension: ", inputFile
+            return ','
+        
+        

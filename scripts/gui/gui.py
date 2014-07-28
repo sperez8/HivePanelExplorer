@@ -21,8 +21,8 @@ from html_utilities import *
 from graph_utilities import *
 
 _root_dir = os.path.dirname(_root_dir)
-NODES = _root_dir + "/tests/test_nodes_friends.csv"
-EDGES = _root_dir + "/tests/test_edges_friends.csv"
+NODES = _root_dir + "/tests/test_nodes_friends.txt"
+EDGES = _root_dir + "/tests/test_edges_friends.txt"
 
 class HiveGui(Tk):
     def __init__(self, *args, **kwargs):
@@ -212,7 +212,7 @@ class HiveGui(Tk):
         hive = self.get_hive()
         filePath = tkFileDialog.asksaveasfilename(defaultextension = '.html')
         if filePath:
-            hiveTitle = os.path.basename(filePath)
+            hiveTitle = os.path.splitext(os.path.basename(filePath))[0]
             folder = os.path.dirname(filePath)
             url = make_html(hiveTitle, hive, folder = folder)
             webbrowser.open("file://"+url, new=2)
