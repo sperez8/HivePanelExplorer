@@ -19,9 +19,11 @@ htmlContainer['intro'] = """<!comment This is a hive plot developed using HivePl
 <body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/d3.hive.v0.min.js"></script>
+<div id="container" style="width:900px">
+<div id="title" style="height:50px;width:600px;float:left;"></div>
 <div id="hive" style="height:500px;width:600px;float:left;"></div>
-<div id="reveal" style="height:60px;width:300px;float:left;"></div>
-<div id="print" style="height:440px;width:300px;float:left;"></div>
+<div id="rules" style="height:100px;width:300px;float:left;"></div>
+<div id="reveal" style="height:60px;width:300px;float:left;"></div></div>
 """
 
 htmlContainer['nodefile'] = 'nodes.js' #will be specified by user
@@ -39,7 +41,10 @@ htmlContainer['end js parameters'] = '' #will be specified by user
 
 htmlContainer['d3functions'] = """
 <script>
-
+d3.select("body").select("#title")
+    .append("h2").html('<center>'+SVGTitle+'</center>')
+    .style("color", nodecolor)
+    
 var removeName = function(d){
     d3.select("body").select("#reveal").selectAll("p")
         .transition()
@@ -75,7 +80,7 @@ var link_color = d3.scale.linear()
     .domain(d3.range(0,edge_color.length,1.0))
     .range(edge_color);
 
-var svg = d3.select("body").select("div").append("svg")
+var svg = d3.select("body").select("#container").select("#hive").append("svg")
     .attr("class", SVGTitle)
     .attr("width", width)
     .attr("height", height)
@@ -137,25 +142,8 @@ svg.selectAll(".node")
                 .attr("stroke", 'black')
                 .attr("r", nodesize*1.5) 
                revealName(d);
-            d3.selectAll(".link")
-                .transition()
-                .delay(hoverOverTime*0.1)
-                .duration(hoverOverTime*0.2)
-                .style("stroke-opacity", function(l){
-                    if (l.source.name == d.name || l.target.name == d.name){
-                        return 1}
-                    else {
-                        return oplink}
-                })
-                .style("stroke-width", function(l){
-                    if (l.source.name == d.name || l.target.name == d.name){
-                        return linkwidth*2.5}
-                    else {
-                        return linkwidth}
-                })
             d3.selectAll(".node")
                 .transition()
-                .delay(hoverOverTime*0.1)
                 .duration(hoverOverTime*0.2)
                 .style("fill-opacity", function(n){
                     if (n.name == d.name){
@@ -181,7 +169,22 @@ svg.selectAll(".node")
                     else {
                         return nodesize}
                 })
-
+            d3.selectAll(".link")
+                .transition()
+                .delay(hoverOverTime*0.1)
+                .duration(hoverOverTime*0.2)
+                .style("stroke-opacity", function(l){
+                    if (l.source.name == d.name || l.target.name == d.name){
+                        return 1}
+                    else {
+                        return oplink}
+                })
+                .style("stroke-width", function(l){
+                    if (l.source.name == d.name || l.target.name == d.name){
+                        return linkwidth*2.5}
+                    else {
+                        return linkwidth}
+                })
             })
     .on("mouseout", function(d){
             d3.select(this)

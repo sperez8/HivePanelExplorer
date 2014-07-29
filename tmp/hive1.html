@@ -4,10 +4,11 @@
 <body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/d3.hive.v0.min.js"></script>
+<div id="container" style="width:900px">
+<div id="title" style="height:50px;width:600px;float:left;"></div>
 <div id="hive" style="height:500px;width:600px;float:left;"></div>
-<div id="reveal" style="height:60px;width:300px;float:left;"></div>
-<div id="print" style="height:440px;width:300px;float:left;"></div>
-
+<div id="rules" style="height:100px;width:300px;float:left;"></div>
+<div id="reveal" style="height:60px;width:300px;float:left;"></div></div>
 <script src="/Users/sperez/git/HivePlotter/tmp/hive1_nodes.js"></script>
 <script src="/Users/sperez/git/HivePlotter/tmp/hive1_edges.js"></script>
 <script> 
@@ -16,9 +17,14 @@ var SVGTitle = 'Hive plot : hive1'
 var num_axis = 6
 var angle = [-0.35,0.35,1.75,2.44,3.84,4.54]
 var nodecolor = 'blue'
-var edge_color = ['plum','purple']
+var edge_color = ['blue']
+
+d3.select("body").select("#title")
+	.append("h2").html('<center>'+SVGTitle+'</center>')
+	.style("color", nodecolor)
+	
 var revealName = function(d){
-    d3.select("body").select("#reveal").append("p").html("<br><br><b>Name: " + d.name +"</b>"+','+"    READCOUNT: " + d.READCOUNT+','+"    INDMRT: " + d.INDMRT+','+"    multiind: " + d.multiind+','+"    multiinf: " + d.multiinf+','+"    Group: " + d.Group+','+"    Degree: " + d.Degree+','+"    ModFinal: " + d.ModFinal+','+"    Degreegroup: " + d.Degreegroup+','+"    Indagainsecond: " + d.Indagainsecond+','+"    TAX: " + d.TAX+','+"    unNamedPropertyone: " + d.unNamedPropertyone+','+"    Value: " + d.Value+','+"    DEPTH: " + d.DEPTH+','+"    IndAgain: " + d.IndAgain+','+"    Indagain: " + d.Indagain+','+"    OUT: " + d.OUT)
+    d3.select("body").select("#reveal").append("p").html("<br><br><b>Name: " + d.name +"</b>"+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)
 	.style("color", nodecolor)
 	};
 </script>
@@ -60,7 +66,7 @@ var link_color = d3.scale.linear()
     .domain(d3.range(0,edge_color.length,1.0))
     .range(edge_color);
 
-var svg = d3.select("body").select("div").append("svg")
+var svg = d3.select("body").select("#container").select("#hive").append("svg")
     .attr("class", SVGTitle)
     .attr("width", width)
     .attr("height", height)
