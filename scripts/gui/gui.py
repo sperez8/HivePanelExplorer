@@ -21,8 +21,10 @@ from html_utilities import *
 from graph_utilities import *
 
 _root_dir = os.path.dirname(_root_dir)
-NODES = _root_dir + "/tests/test_nodes_friends.txt"
-EDGES = _root_dir + "/tests/test_edges_friends.txt"
+#NODES = _root_dir + "/tests/test_nodes_friends.txt"
+#EDGES = _root_dir + "/tests/test_edges_friends.txt"
+NODES = "/Users/sperez/Documents/Aria/Hive/WLSpearman_nodes_annotated_more.txt"
+EDGES = "/Users/sperez/Documents/Aria/Hive/WLSpearman_edges.txt"
 
 class HiveGui(Tk):
     def __init__(self, *args, **kwargs):

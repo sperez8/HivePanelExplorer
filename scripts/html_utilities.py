@@ -108,6 +108,7 @@ def make_html(title, hive, folder = TEMP_FOLDER):
                     f.write(')')
                     f.write('\n\t.style("color", nodecolor)')
                     f.write('\n\t};')
+                    
             elif key == 'end js parameters':
                 f.write('</script>')
             else:

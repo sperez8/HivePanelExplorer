@@ -16,9 +16,9 @@ var SVGTitle = 'Hive plot : hive1'
 var num_axis = 6
 var angle = [-0.35,0.35,1.75,2.44,3.84,4.54]
 var nodecolor = 'blue'
-var edge_color = ['blue']
+var edge_color = ['plum','purple']
 var revealName = function(d){
-    d3.select("body").select("#reveal").append("p").html("<br><br><b>Name: " + d.name +"</b>"+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)
+    d3.select("body").select("#reveal").append("p").html("<br><br><b>Name: " + d.name +"</b>"+','+"    READCOUNT: " + d.READCOUNT+','+"    INDMRT: " + d.INDMRT+','+"    multiind: " + d.multiind+','+"    multiinf: " + d.multiinf+','+"    Group: " + d.Group+','+"    Degree: " + d.Degree+','+"    ModFinal: " + d.ModFinal+','+"    Degreegroup: " + d.Degreegroup+','+"    Indagainsecond: " + d.Indagainsecond+','+"    TAX: " + d.TAX+','+"    unNamedPropertyone: " + d.unNamedPropertyone+','+"    Value: " + d.Value+','+"    DEPTH: " + d.DEPTH+','+"    IndAgain: " + d.IndAgain+','+"    Indagain: " + d.Indagain+','+"    OUT: " + d.OUT)
 	.style("color", nodecolor)
 	};
 </script>
@@ -48,7 +48,7 @@ var linkfill = "none"
     opnode = 0.6
     bkgcolor = "white"
 
-var hoverOverTime = 1000
+var hoverOverTime = 900
 
 var radius = d3.scale.linear().range([innerRadius, outerRadius]);
 

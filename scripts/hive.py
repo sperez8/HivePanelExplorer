@@ -11,9 +11,10 @@ including node position, edge coloring, number of axes etc...
 import sys
 import os
 import numpy as np
+
 from math import pi
 from graph_utilities import *
-from time import strftime
+import string
 
 #hive parameter defaults
 AXIS_ASSIGN_RULE = 'degree'
@@ -79,6 +80,7 @@ class Hive():
         delimiter = self.get_delimiter(inputFile)
         data = np.genfromtxt(inputFile, delimiter=delimiter, dtype='str')
         properties = data[0,1:]
+        properties = self.format_properties(properties)
         data = data[1:,]
         #get all the node data
         nodes = list(data[:,0])
@@ -109,6 +111,7 @@ class Hive():
         delimiter = self.get_delimiter(inputFile)
         data = np.genfromtxt(inputFile, delimiter=delimiter, dtype='str')
         properties = data[0,2:]
+        properties = self.format_properties(properties)
         data = data[2:,]
         #get all the edge data
         self.sources = list(data[:,0])        
@@ -430,4 +433,30 @@ class Hive():
             print "Couldn't detect a valid file extension: ", inputFile
             return ','
         
+    @staticmethod
+    def format_properties(properties):
+        '''takes a list of property names and removes all punctuation and numbers'''
+        numbers = {1:'one', 2:'two', 3:'three', 4:'four', 5:'five', 6:'six', 7:'seven', 8:'eight', 9:'nine', 10:'ten'}
+        def convert_word(word):
+            w = word
+            for c in string.punctuation + string.digits:
+                word = word.replace(c,'')
+            if w != word:
+                print "The property \'{0}\' contained punctuation or digits which were removed".format(w)
+            return word
+             
+        newProperties = []
+        i = 1
+        for prop in properties:
+            newProp = convert_word(prop)
+            print "\n\n\n\nHAHAHA", prop, newProp
+            if not newProp:
+                #if property isn't named, we give it one
+                newProperties.append('unNamedProperty' + numbers[i] + '')
+                i += 1
+            elif newProp in newProperties:
+                newProperties.append(newProp + 'second')
+            else:
+                newProperties.append(newProp)
+        return newProperties
         
