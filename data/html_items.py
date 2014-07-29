@@ -9,7 +9,7 @@ contains all the pieces of the html and d3 functions to plot the hive
 htmlContainer= {}
 
 keyOrder = ['intro', 'nodefile', 'edgefile',
-            'start js parameters','titleheader',
+            'start js parameters','titleheader', 'rules',
             'numAxes', 'angles','color', 'edge_color', 'revealName',
             'end js parameters', 'd3functions']
 
@@ -31,6 +31,7 @@ htmlContainer['edgefile'] = 'links.js' #will be specified by user
 
 htmlContainer['start js parameters'] = '' #will be specified by user
 htmlContainer['titleheader'] = '' #will be specified by user
+htmlContainer['rules'] = '' #will be specified by user
 htmlContainer['numAxes'] = '' #will be specified by user
 htmlContainer['angles'] = '' #will be specified by user
 htmlContainer['color'] = '' #will be specified by user

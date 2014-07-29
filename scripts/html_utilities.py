@@ -54,7 +54,7 @@ def write_edges(file, hive):
     f.write('];')
 
 
-def make_html(title, hive, folder = TEMP_FOLDER):
+def make_html(title, hive, folder = TEMP_FOLDER, rules = None):
     '''takes a hive instance and write the
     following files:
         nodes.js - contains nodes, position and coloring
@@ -84,6 +84,14 @@ def make_html(title, hive, folder = TEMP_FOLDER):
                 f.write('<script> \n//All the user defined parameters')
             elif key == 'titleheader':
                 f.write('var SVGTitle = \'' + 'Hive plot : ' + title + '\'')
+            elif key == 'rules':
+                if rules:
+                    f.write('d3.select("body").select("#rules").append("p")\n\t.html(')
+                    f.write('\"Node assignment property: '+ rules['assignment'])
+                    f.write(' <br><br>Node positioning property: '+ rules['position'])
+                    f.write(' <br><br>Edge coloring property: '+ rules['edges'])
+                    f.write('\")')
+                    f.write('\n\t.style("color", "black")')
             elif key == 'angles':
                 f.write('var angle = ['+ ','.join([str(a) for a in hive.angles]) +']')
             elif key == 'color':

@@ -205,7 +205,11 @@ class HiveGui(Tk):
     def create_hive(self):
         hive = self.get_hive()
         hiveTitle = self.title.get()
-        url = make_html(hiveTitle, hive)
+        rules = {}
+        rules['assignment'] = self.assignmentVar.get()
+        rules['position'] = self.positionVar.get()
+        rules['edges'] = self.edgeStyleVar.get()
+        url = make_html(hiveTitle, hive, rules = rules)
         
         webbrowser.open("file://"+url, new=2)
 

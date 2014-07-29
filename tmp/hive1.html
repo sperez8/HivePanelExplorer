@@ -9,20 +9,19 @@
 <div id="hive" style="height:500px;width:600px;float:left;"></div>
 <div id="rules" style="height:100px;width:300px;float:left;"></div>
 <div id="reveal" style="height:60px;width:300px;float:left;"></div></div>
+
 <script src="/Users/sperez/git/HivePlotter/tmp/hive1_nodes.js"></script>
 <script src="/Users/sperez/git/HivePlotter/tmp/hive1_edges.js"></script>
 <script> 
 //All the user defined parameters
 var SVGTitle = 'Hive plot : hive1'
-var num_axis = 6
-var angle = [-0.35,0.35,1.75,2.44,3.84,4.54]
+d3.select("body").select("#rules").append("p")
+	.html("Node assignment property: degree <br><br>Node positioning property: clustering <br><br>Edge coloring property: uniform")
+	.style("color", nodecolor)
+var num_axis = 3
+var angle = [0.0001,2.09,4.19]
 var nodecolor = 'blue'
 var edge_color = ['blue']
-
-d3.select("body").select("#title")
-	.append("h2").html('<center>'+SVGTitle+'</center>')
-	.style("color", nodecolor)
-	
 var revealName = function(d){
     d3.select("body").select("#reveal").append("p").html("<br><br><b>Name: " + d.name +"</b>"+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)
 	.style("color", nodecolor)
@@ -30,7 +29,10 @@ var revealName = function(d){
 </script>
 
 <script>
-
+d3.select("body").select("#title")
+    .append("h2").html('<center>'+SVGTitle+'</center>')
+    .style("color", nodecolor)
+    
 var removeName = function(d){
     d3.select("body").select("#reveal").selectAll("p")
         .transition()
@@ -128,25 +130,8 @@ svg.selectAll(".node")
                 .attr("stroke", 'black')
                 .attr("r", nodesize*1.5) 
                revealName(d);
-            d3.selectAll(".link")
-                .transition()
-                .delay(hoverOverTime*0.1)
-                .duration(hoverOverTime*0.2)
-                .style("stroke-opacity", function(l){
-                    if (l.source.name == d.name || l.target.name == d.name){
-                        return 1}
-                    else {
-                        return oplink}
-                })
-                .style("stroke-width", function(l){
-                    if (l.source.name == d.name || l.target.name == d.name){
-                        return linkwidth*2.5}
-                    else {
-                        return linkwidth}
-                })
             d3.selectAll(".node")
                 .transition()
-                .delay(hoverOverTime*0.1)
                 .duration(hoverOverTime*0.2)
                 .style("fill-opacity", function(n){
                     if (n.name == d.name){
@@ -172,7 +157,22 @@ svg.selectAll(".node")
                     else {
                         return nodesize}
                 })
-
+            d3.selectAll(".link")
+                .transition()
+                .delay(hoverOverTime*0.1)
+                .duration(hoverOverTime*0.2)
+                .style("stroke-opacity", function(l){
+                    if (l.source.name == d.name || l.target.name == d.name){
+                        return 1}
+                    else {
+                        return oplink}
+                })
+                .style("stroke-width", function(l){
+                    if (l.source.name == d.name || l.target.name == d.name){
+                        return linkwidth*2.5}
+                    else {
+                        return linkwidth}
+                })
             })
     .on("mouseout", function(d){
             d3.select(this)
