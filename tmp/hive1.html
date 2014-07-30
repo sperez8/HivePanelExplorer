@@ -16,15 +16,19 @@
 //All the user defined parameters
 var SVGTitle = 'Hive plot : hive1'
 d3.select("body").select("#rules").append("p")
-	.html("Node assignment property: degree <br><br>Node positioning property: clustering <br><br>Edge coloring property: uniform")
-	.style("color", nodecolor)
+	.html("Node assignment property: degree <br><br>Node positioning property: Gender <br><br>Edge coloring property: friendshipstrength")
+	.style("color", "black")
 var num_axis = 3
 var angle = [0.0001,2.09,4.19]
 var nodecolor = 'blue'
 var edge_color = ['blue']
-var revealName = function(d){
+var revealNode = function(d){
     d3.select("body").select("#reveal").append("p").html("<br><br><b>Name: " + d.name +"</b>"+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)
-	.style("color", nodecolor)
+		.style("color", nodecolor)
+	};
+var revealLink = function(d){
+    d3.select("body").select("#reveal").append("p").html("<br><br><b>Source: " + d.source.name + ", Target: " + d.target.name +"</b>"+','+"    friendshipstrength: " + d.friendshipstrength+','+"    relationship: " + d.relationship)
+		.style("color", d.style("fill"))
 	};
 </script>
 
@@ -33,7 +37,7 @@ d3.select("body").select("#title")
     .append("h2").html('<center>'+SVGTitle+'</center>')
     .style("color", nodecolor)
     
-var removeName = function(d){
+var removeReveal = function(d){
     d3.select("body").select("#reveal").selectAll("p")
         .transition()
         .duration(hoverOverTime)
@@ -102,10 +106,12 @@ svg.selectAll(".link")
         })
     .style("stroke-width", linkwidth)
     .on("mouseover", function(d){
+            revealLink(d);
             d3.select(this)
                 .style("stroke-opacity", 1)
                 .style("stroke-width", linkwidth*2)})
     .on("mouseout", function(d){
+            removeReveal();
             d3.select(this)
                 .transition()
                 .duration(800)
@@ -129,7 +135,7 @@ svg.selectAll(".node")
                 .attr("stroke-width", nodestroke*3)
                 .attr("stroke", 'black')
                 .attr("r", nodesize*1.5) 
-               revealName(d);
+               revealNode(d);
             d3.selectAll(".node")
                 .transition()
                 .duration(hoverOverTime*0.2)
@@ -182,7 +188,7 @@ svg.selectAll(".node")
                 .attr("stroke-width", nodestroke)
                 .attr("stroke", nodestrokecolor)
                 .attr("r", nodesize);
-            removeName();
+            removeReveal();
             d3.selectAll(".link")
                 .transition()
                 .duration(hoverOverTime)

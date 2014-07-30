@@ -123,6 +123,7 @@ class Hive():
             values = convert_type(list(column))
             edgeProperties[properties[i]] = values
         self.edgeProperties = edgeProperties
+        self.edgePropertyList = edgeProperties.keys()
             
         if self.debug:
             print '    Sources are: ', self.sources

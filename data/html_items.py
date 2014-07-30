@@ -10,7 +10,7 @@ htmlContainer= {}
 
 keyOrder = ['intro', 'nodefile', 'edgefile',
             'start js parameters','titleheader', 'rules',
-            'numAxes', 'angles','color', 'edge_color', 'revealName',
+            'numAxes', 'angles','color', 'edge_color', 'revealNode', 'revealLink',
             'end js parameters', 'd3functions']
 
 htmlContainer['intro'] = """<!comment This is a hive plot developed using HivePlotter.>
@@ -36,7 +36,8 @@ htmlContainer['numAxes'] = '' #will be specified by user
 htmlContainer['angles'] = '' #will be specified by user
 htmlContainer['color'] = '' #will be specified by user
 htmlContainer['edge_color'] = '' #will be specified by user
-htmlContainer['revealName'] = '' #will be specified by user
+htmlContainer['revealNode'] = '' #will be specified by user
+htmlContainer['revealLink'] = '' #will be specified by user
 htmlContainer['end js parameters'] = '' #will be specified by user
 
 
@@ -46,7 +47,7 @@ d3.select("body").select("#title")
     .append("h2").html('<center>'+SVGTitle+'</center>')
     .style("color", nodecolor)
     
-var removeName = function(d){
+var removeReveal = function(d){
     d3.select("body").select("#reveal").selectAll("p")
         .transition()
         .duration(hoverOverTime)
@@ -115,10 +116,12 @@ svg.selectAll(".link")
         })
     .style("stroke-width", linkwidth)
     .on("mouseover", function(d){
+            revealLink();
             d3.select(this)
                 .style("stroke-opacity", 1)
                 .style("stroke-width", linkwidth*2)})
     .on("mouseout", function(d){
+            removeReveal();
             d3.select(this)
                 .transition()
                 .duration(800)
@@ -142,7 +145,7 @@ svg.selectAll(".node")
                 .attr("stroke-width", nodestroke*3)
                 .attr("stroke", 'black')
                 .attr("r", nodesize*1.5) 
-               revealName(d);
+               revealNode(d);
             d3.selectAll(".node")
                 .transition()
                 .duration(hoverOverTime*0.2)
@@ -195,7 +198,7 @@ svg.selectAll(".node")
                 .attr("stroke-width", nodestroke)
                 .attr("stroke", nodestrokecolor)
                 .attr("r", nodesize);
-            removeName();
+            removeReveal();
             d3.selectAll(".link")
                 .transition()
                 .duration(hoverOverTime)

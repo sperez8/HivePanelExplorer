@@ -46,11 +46,17 @@ def write_nodes(file, hive):
 def write_edges(file, hive):
     '''outputs node info to a text file
         in a javascript variable format'''
+    properties = hive.edgePropertyList
     
     f = open(file, 'w')
     f.write('var links = [\n')
     for s, t in hive.edges:
-        f.write('  {source: nodes['+str(hive.nodes.index(s))+'], target: nodes['+str(hive.nodes.index(t))+'], type: ' + str(hive.edgeStyling[(s,t)]) + '},\n')
+        ###HELLLDODUDHDOOP HELP
+        line = '  {source: nodes['+str(hive.nodes.index(s))+'], target: nodes['+str(hive.nodes.index(t))+'], type: ' + str(hive.edgeStyling[(s,t)])
+        for i, values in enumerate(hive.edgeProperties):
+            for value in values:
+                line  += ', '+str(properties[i]) + ': \'' + str(values) +'\''
+                line += '},\n'
     f.write('];')
 
 
@@ -107,16 +113,24 @@ def make_html(title, hive, folder = TEMP_FOLDER, rules = None):
                     f.write('var num_axis = ' + str(hive.numAxes*2))
                 else:
                     f.write('var num_axis = ' + str(hive.numAxes))
-            elif key == 'revealName':
-                    f.write('var revealName = function(d){\n')
+            elif key == 'revealNode':
+                    f.write('var revealNode = function(d){\n')
                     f.write('    d3.select("body").select("#reveal").append("p").html(')
-                    f.write('\"<br><br><b>Name: \" + d.name +"</b>"')
+                    f.write('"<br><br><b>Name: " + d.name +"</b>"')
                     for p in hive.nodeProperties.keys():
+                        f.write('+\',\'+"    ' + p + ': " + d.' + p) 
+                    f.write(')')
+                    f.write('\n\t.style("color", d.style("fill"))')
+                    f.write('\n\t};')
+            elif key == 'revealLink':
+                    f.write('var revealLink = function(d){\n')
+                    f.write('    d3.select("body").select("#reveal").append("p").html(')
+                    f.write('"<br><br><b>Source: " + d.source.name + ", Target: " + d.target.name +"</b>"')
+                    for p in hive.edgePropertyList:
                         f.write('+\',\'+\"    ' + p + ': \" + d.' + p) 
                     f.write(')')
-                    f.write('\n\t.style("color", nodecolor)')
+                    f.write('\n\t.style("color", d.style("fill"))')
                     f.write('\n\t};')
-                    
             elif key == 'end js parameters':
                 f.write('</script>')
             else:
