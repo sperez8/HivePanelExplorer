@@ -89,7 +89,7 @@ var svg = d3.select("body").select("#container").select("#hive").append("svg")
     .style("background-color", bkgcolor)
   .append("g")
     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-
+    
 svg.selectAll(".axis")
     .data(angle)
   .enter().append("line")
@@ -116,7 +116,7 @@ svg.selectAll(".link")
         })
     .style("stroke-width", linkwidth)
     .on("mouseover", function(d){
-            revealLink();
+            revealLink(d, d3.select(this).style("stroke"));
             d3.select(this)
                 .style("stroke-opacity", 1)
                 .style("stroke-width", linkwidth*2)})
@@ -145,7 +145,7 @@ svg.selectAll(".node")
                 .attr("stroke-width", nodestroke*3)
                 .attr("stroke", 'black')
                 .attr("r", nodesize*1.5) 
-               revealNode(d);
+               revealNode(d, d3.select(this).style("fill"));
             d3.selectAll(".node")
                 .transition()
                 .duration(hoverOverTime*0.2)
