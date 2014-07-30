@@ -20,9 +20,9 @@ htmlContainer['intro'] = """<!comment This is a hive plot developed using HivePl
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/d3.hive.v0.min.js"></script>
 <div id="container" style="width:900px">
-<div id="title" style="height:50px;width:600px;float:left;"></div>
-<div id="hive" style="height:500px;width:600px;float:left;"></div>
-<div id="rules" style="height:100px;width:300px;float:left;"></div>
+<div id="title" style="height:70px;width:550px;float:left;"></div>
+<div id="hive" style="height:550px;width:550px;float:left;"></div>
+<div id="rules" style="height:120px;width:300px;float:left;border-bottom:2px solid #5C5C5C"></div>
 <div id="reveal" style="height:60px;width:300px;float:left;"></div></div>
 """
 
@@ -45,7 +45,7 @@ htmlContainer['d3functions'] = """
 <script>
 d3.select("body").select("#title")
     .append("h2").html('<center>'+SVGTitle+'</center>')
-    .style("color", nodecolor)
+    .style("color", "#5C5C5C")
     
 var removeReveal = function(d){
     d3.select("body").select("#reveal").selectAll("p")
@@ -59,8 +59,8 @@ var nodesize = 4
     nodestroke = 0.4
     nodestrokecolor = "grey"
     
-var width = 600
-    height = 500
+var width = document.getElementById("hive").offsetWidth
+    height = document.getElementById("hive").offsetHeight
     innerRadius = 40,
     outerRadius = 240;
 

@@ -16,9 +16,13 @@ _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 
 from data import html_items
+import string
 
 TEMP_FOLDER = _root_dir + '/tmp/'
-print TEMP_FOLDER
+NEUTRAL_COLOR = "#5C5C5C"
+
+
+
 def write_nodes(file, hive):
     '''outputs node info to a text file
         in a javascript variable format'''
@@ -88,15 +92,15 @@ def make_html(title, hive, folder = TEMP_FOLDER, rules = None):
             elif key == 'start js parameters':
                 f.write('<script> \n//All the user defined parameters')
             elif key == 'titleheader':
-                f.write('var SVGTitle = \'' + 'Hive plot : ' + title + '\'')
+                f.write('var SVGTitle = \'' + 'Hive plot : ' + string.capitalize(title) + '\'')
             elif key == 'rules':
                 if rules:
                     f.write('d3.select("body").select("#rules").append("p")\n\t.html(')
-                    f.write('\"Node assignment property: '+ rules['assignment'])
-                    f.write(' <br><br>Node positioning property: '+ rules['position'])
-                    f.write(' <br><br>Edge coloring property: '+ rules['edges'])
+                    f.write('\"Node assignment property: '+ string.capitalize(rules['assignment']))
+                    f.write(' <br><br>Node positioning property: '+ string.capitalize(rules['position']))
+                    f.write(' <br><br>Edge coloring property: '+ string.capitalize(rules['edges']))
                     f.write('\")')
-                    f.write('\n\t.style("color", "black")')
+                    f.write('\n\t.style("color", "' + NEUTRAL_COLOR + '")')
             elif key == 'angles':
                 f.write('var angle = ['+ ','.join([str(a) for a in hive.angles]) +']')
             elif key == 'color':
@@ -117,7 +121,7 @@ def make_html(title, hive, folder = TEMP_FOLDER, rules = None):
                     f.write('    d3.select("body").select("#reveal").append("p")\n\t\t.html(')
                     f.write('"<br><br><b>Name: " + d.name +"</b>"')
                     for p in hive.nodeProperties.keys():
-                        f.write('+\',\'+"    ' + p + ': " + d.' + p) 
+                        f.write('+\',\'+"    ' + string.capitalize(p) + ': " + d.' + p) 
                     f.write(')')
                     f.write('\n\t\t.style("color", color)')
                     f.write('\n\t};')
@@ -126,7 +130,7 @@ def make_html(title, hive, folder = TEMP_FOLDER, rules = None):
                     f.write('    d3.select("body").select("#reveal").append("p")\n\t\t.html(')
                     f.write('"<br><br><b>Source: " + d.source.name + ", Target: " + d.target.name +"</b>"')
                     for p in hive.edgePropertyList:
-                        f.write('+\',\'+\"    ' + p + ': \" + d.' + p) 
+                        f.write('+\',\'+\"    ' + string.capitalize(p) + ': \" + d.' + p) 
                     f.write(')')
                     f.write('\n\t\t.style("color", color)')
                     f.write('\n\t};')

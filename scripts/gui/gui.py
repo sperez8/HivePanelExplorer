@@ -21,6 +21,7 @@ from html_utilities import *
 from graph_utilities import *
 
 _root_dir = os.path.dirname(_root_dir)
+TITLE = "friends"
 NODES = _root_dir + "/tests/test_nodes_friends.txt"
 EDGES = _root_dir + "/tests/test_edges_friends.txt"
 #NODES = "/Users/sperez/Documents/Aria/Hive/WLSpearman_nodes_annotated_more.txt"
@@ -68,7 +69,7 @@ class HiveGui(Tk):
         self.bEdges.grid(row=row, column=column, sticky=W)       
         
         #default inputs for testing
-        self.title.insert(0,"hive1")
+        self.title.insert(0,TITLE)
         self.nodes.insert(0,NODES)
         self.edges.insert(0,EDGES)
         
