@@ -16,7 +16,7 @@ from math import pi
 from graph_utilities import *
 import string
 
-#hive parameter defaults
+#hive parameter defaults when not using GUI
 AXIS_ASSIGN_RULE = 'degree'
 AXIS_POSIT_RULE = 'closeness'
 EDGE_PALETTE = 'purple'
@@ -40,6 +40,7 @@ class Hive():
                  nodeColor = NODE_COLOR
                  ):
         '''Initializing defining parameters of the hive'''
+        
         self.debug = debug
         self.numAxes = numAxes
         self.doubleAxes = doubleAxes
@@ -60,9 +61,10 @@ class Hive():
             self.axisPositRule = axisPositRule
         
         return None
+ 
     
     def make_hive(self, nodefile, edgefile, cutoffValues = None):
-        '''creates a hive instance from user input'''  
+        '''runs Hive methods to create an instance from user input'''  
             
         self.get_nodes(nodefile)
         self.get_edges(edgefile)
@@ -75,25 +77,33 @@ class Hive():
         self.fix_color_palette()
         return None
 
+
     def get_nodes(self,inputFile):
         '''gets nodes and their properties from csv file'''
+        
         delimiter = self.get_delimiter(inputFile)
         data = np.genfromtxt(inputFile, delimiter=delimiter, dtype='str')
+        
+        #get properties and format as strings
         properties = data[0,1:]
         properties = self.format_properties(properties)
+        
+        #remove first row with column names
         data = data[1:,]
+        
         #get all the node data
         nodes = list(data[:,0])
+        
         #double the number of nodes when axes are doubled
         if self.doubleAxes:
             self.nodes = [n+".1" for n in nodes]
             self.nodes.extend([n+".2" for n in nodes])
         else: 
             self.nodes = nodes
-            
+        
+        #transform node properties into the numerical types if possible
         nodeProperties = {}
         for i, column in enumerate(data[:,1:].T):
-            #transform node properties into the numerical types if possible
             values = convert_type(list(column))
             nodeProperties[properties[i]] = values
         self.nodeProperties = nodeProperties
@@ -104,43 +114,58 @@ class Hive():
             print '    Node properties are: '
             for k,v in self.nodeProperties.iteritems():
                 print k, v
+                
         return self.nodeProperties
+
 
     def get_edges(self,inputFile):
         '''gets edges and their properties from csv file'''
+        
         delimiter = self.get_delimiter(inputFile)
         data = np.genfromtxt(inputFile, delimiter=delimiter, dtype='str')
+        
+        #get properties and format as strings
         properties = data[0,2:]
         properties = self.format_properties(properties)
+        
+        #remove first row with column names
         data = data[2:,]
+        
         #get all the edge data
         self.sources = list(data[:,0])        
         self.targets = list(data[:,1])
 
+        #transform edge properties into the numerical types if possible
         edgeProperties = {}
         for i, column in enumerate(data[:,2:].T):
-            #transform edge properties into the numerical types if possible
             values = convert_type(list(column))
             edgeProperties[properties[i]] = values
         self.edgeProperties = edgeProperties
+        
+        #store the name of the edge properties
         self.edgePropertyList = edgeProperties.keys()
             
         if self.debug:
             print '    Sources are: ', self.sources
             print '    Targets are: ', self.targets
             print '    Edge properties are: ', self.edgeProperties
+            
         return self.edgeProperties
+
 
     def make_axes(self):
         '''creates axes and angles given the number of axes desired
         and whether the axes are being doubled or not'''
+        
         angles = []
         if self.doubleAxes:
-            #create a total of 3*self.numAxes to make spacing between the doubled axes
+            #create a total of 3*self.numAxes to create spacing between the doubled axes
             allAngles = [2.0*pi/float(self.numAxes*3)*i for i in range(0,self.numAxes*3)]
+            
             #re-center the axes for symmetry
             shiftBy = allAngles[1]/2.0
             allAngles = [a-shiftBy for a in allAngles]
+            
             #remove the "spacer" axes
             for a in allAngles:
                 if (allAngles.index(a)+1) % 3 != 0:
@@ -156,16 +181,20 @@ class Hive():
         
         if self.debug:
             print "Axes angles are", angles   
+        
         self.angles = angles
+        
         return None
-    
+
+
     def node_assignment(self, assignmentValues = None, cutoffValues = []):
         '''determines on which axis the node should be placed
-            depending on the rule. Integer valued rules indicate the use of
-            node properties. Rules which are string values denote network 
+            depending on the rule. Integer valued rules indicate the index of a
+            node property in the list of properties. Rules which are string values denote network 
             properties which need to be calculated. Nodes are partitioned into groups
             depending on their value related to the rule. There are as many groups
             as numAxes'''
+        
         axisAssignment = {} 
         if not assignmentValues:
             assignmentValues = self.get_assignment_values(self.axisAssignRule)
@@ -437,8 +466,11 @@ class Hive():
     @staticmethod
     def format_properties(properties):
         '''takes a list of property names and removes all punctuation and numbers'''
+        
         numbers = {1:'one', 2:'two', 3:'three', 4:'four', 5:'five', 6:'six', 7:'seven', 8:'eight', 9:'nine', 10:'ten'}
+        
         def convert_word(word):
+            '''remove punctuation and numbers from a word'''
             w = word
             for c in string.punctuation + string.digits:
                 word = word.replace(c,'')
@@ -450,7 +482,6 @@ class Hive():
         i = 1
         for prop in properties:
             newProp = convert_word(prop)
-            print "\n\n\n\nHAHAHA", prop, newProp
             if not newProp:
                 #if property isn't named, we give it one
                 newProperties.append('unNamedProperty' + numbers[i] + '')
