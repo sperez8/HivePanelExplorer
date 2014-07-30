@@ -5,6 +5,10 @@ A graphical user interface (GUI) written using Tkinter in Python that takes a ne
 
 **Update** The GUI is now fully functional and contains all the basic features needed to plot a proper hive. Additional interactive and coloring features are on their way.
 
+Below is a screenshot of a hive plot made using the test dataset "Friends" described below.
+
+![example plot](http://i.imgur.com/vMl07N6.png)
+
 ## Why hive plots?
 Visualizing large networks is tricky; conventional graph layout such as force directed layouts are inconsistent, often resemble "hair balls" and can even suggest patterns which aren't actually there. Comes in Martin Krzywinski (Genome Science Center, Vancouver, BC) and develops [hive plots](http://www.hiveplot.net/), a coherent network layout algorithm that places nodes using predefined rules. Hive plots facilitate the visualization of structural patterns in a network and the comparison of networks.
 
@@ -14,26 +18,25 @@ Visualizing large networks is tricky; conventional graph layout such as force di
 ##Details
 
 ####Versions and Dependencies
-HivePlotter was developed using Python version 2.7. The following packages are required to run HivePlotter:
-* numpy
+HivePlotter was developed using Python version 2.7. The [NumPy](http://www.numpy.org/) package is currently required to run HivePlotter. Most modern browsers support SVG and thus D3 features. See [http://caniuse.com/svg](http://caniuse.com/svg) for more details. 
 
 ####Input
 The network should be stored in two csv input files: one storing nodes and one storing edges. The node file should look like the table below where all columns after the first column (arbitrarily called "Node" in this example) contain node properties. These properties can be encoded as text or numbers. The first column must contain the names of the nodes to be used to identify edges in the edge file.
 
-| Node | Gender | Height |
-|:----:|:----------:|:----------:|
-| Alice | girl | 12 |
-| Bob | boy | 11 |
-| Cam | boy | 13 |
+| Node | Gender | Height | Property 3... |
+|:----:|:----------:|:----------:|:----------:|
+| Alice | girl | 12 | ... |
+| Bob | boy | 11 | ... |
+| Cam | boy | 13 | ... |
 
 
 The edge file needs to specify the sources and targets (though the directionality of the edge won't change the way it looks in the hive plot - yet) in the first two columns of the file. The edges input file should look like:
 
-|Source | Target | Relationship | Property 2...|
+|Source | Target | Relationship | Friendship Strength|
 |:------:|:------:|:----------:|:----------:|
-|Bob | Alice | friends | ...|
-Bob | Cam | enemies | ...|
-|Alice | Cam | friends | ...|
+|Bob | Alice | friends | 6|
+Bob | Cam | enemies | 2|
+|Alice | Cam | friends | 11|
 
 Again, the edge properties can be encoded as text or numbers.
 
