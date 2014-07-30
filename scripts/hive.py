@@ -201,7 +201,7 @@ class Hive():
         
         values = assignmentValues.values()
         #check if styling values are numerical, otherwise treat as categorical
-        #and recode into numerical variables
+        # and recode into numerical variables
         categories = find_categories(values)
         if categories:
             if len(categories) != self.numAxes:
@@ -237,18 +237,23 @@ class Hive():
             if categories:
                 print '    Node Categories:', categories
             print '    Node assignments to axis:', axisAssignment
+            
         return None
-    
+
+
     def node_position(self):
         '''determines where on the axis the node should be placed
             depending on the rule. Integer valued rules indicate the use of
             node properties. Rules which are string values denote network 
             properties which need to be calculated. node positions are scaled
             equally for all axes'''
+        
         nodePositions = {}
         assignmentValues = self.get_assignment_values(self.axisPositRule)
         
         values = assignmentValues.values()
+        #check if styling values are numerical, otherwise treat as categorical
+        # and recode into numerical variables
         categories = find_categories(values)
         if categories:
             categories.sort() # sorts strings alphabetically
@@ -263,8 +268,15 @@ class Hive():
         self.nodePositions = nodePositions
         if self.debug:
             print '    Node positions on axis:', nodePositions
+        
+        return None
+
 
     def get_assignment_values(self, rule):
+        '''get the values to be used to assign nodes to axes.
+            If the rule is a network property, then a networkx graph is created
+            and analyzed. Otherwise, assignment values are organized in a dictionary'''
+        
         assignmentValues = {}
         if rule in self.nodeProperties.keys():
             #get assignment values from the column of node properties indicated by the interger "rule"
@@ -273,6 +285,7 @@ class Hive():
                 [assignmentValues.update({n:p}) for n,p in zipper(self.nodes, properties*2)]
             else:
                 [assignmentValues.update({n:p}) for n,p in zipper(self.nodes, properties)]
+                
             return assignmentValues
         
         elif isinstance(rule, str):
@@ -293,10 +306,12 @@ class Hive():
             print "Rule could not be parsed"
             sys.exit()
 
+
     def make_edges(self):
         '''takes sources and edges and makes a list of 
         edges while assignment nodes to the correct axis in 
         the case of double axis. also keeps track of edge properties.'''
+        
         newSources = []
         newTargets = []
         newProperties = []
@@ -359,7 +374,7 @@ class Hive():
                     newSources.append(s)
                     newTargets.append(t)
                     newProperties.append(p)
-                #gets edges that connect nodes on the 1st and last axes
+                #gets edges that connect nodes on the 1st and last axes when there are 2 axes
                 elif axis[s] == 1 and axis[t] == self.numAxes:
                     newSources.append(s)
                     newTargets.append(t)
@@ -369,6 +384,7 @@ class Hive():
                     newTargets.append(t)   
                     newProperties.append(p)     
         
+        #save the new edges and their properties
         self.edges = zipper(newSources, newTargets)
         self.edgeProperties = newProperties
         
@@ -377,24 +393,30 @@ class Hive():
             print '    ', self.edgeProperties
             
         return None
- 
+
+
     def get_edge_properties(self, rule):
-       values = {}
-       if rule in self.edgeKeys:
-           i = self.edgeKeys.index(rule)
-           properties = zip(*self.edgeProperties)[i]
-           [values.update({e:p}) for e,p in zipper(self.edges, properties)]
-           return values
-       
-       else: 
-           print "The edge styling rule could not be parsed"
-           sys.exit()
-               
+        '''Organize edge properties in a dicitonary to be used to color the edges'''
+         
+        values = {}
+        if rule in self.edgeKeys:
+            i = self.edgeKeys.index(rule)
+            properties = zip(*self.edgeProperties)[i]
+            [values.update({e:p}) for e,p in zipper(self.edges, properties)]
+            return values
+        else: 
+            print "The edge styling rule could not be parsed"
+            sys.exit()
+
+
     def node_style(self, opacity = 0.9, color = 'purple', size = '7'):
+        '''In development...'''
         return None
+
     
     def edge_style(self, opacity = 0.9, color = 'purple', size = '7'):
         '''determines how the edges will look given different characteristics'''
+        
         edgeStyling = {}
         categories = None
         if self.edgeStyleRule != EDGE_STYLE_RULE and self.edgeStyleRule != None:
@@ -431,20 +453,25 @@ class Hive():
             if categories:
                 print '    Edge Categories:', categories
             print '    Edge styling:', edgeStyling
+            
         return None
 
+
     def fix_color_palette(self):
+        '''fix edge palette so it can be plotted'''
+        
         if not isinstance(self.edgePalette, list) or len(self.edgePalette) < len(set(self.edgeStyling.values())):
             print 'Using default color palette'
             self.edgePalette  = PALETTE[:len(set(self.edgeStyling.values()))]
-
-    def check_input(self):
-        '''IN DEVELOPMENT
-        checks if all edges are connecting nodes which exist in the self.nodes'''
         
+        return None
+
+
     @staticmethod
     def get_delimiter(inputFile):
-        '''returns correct delimiter for tab or comma seperated file'''
+        '''detect if input file is a tab or comma delimited file
+            and return delimiter.'''
+        
         ext = os.path.splitext(os.path.basename(inputFile))[1]
         
         if 'tab' in ext or 'tsv' in ext:
@@ -457,12 +484,16 @@ class Hive():
             first = f.read()
             if first.count(',') > first.count('\t'):
                 return ','
-            else:
+            elif first.count(',') < first.count('\t'):
                 return '\t'
+            else:
+                print "Couldn't detect a valid file extension: ", inputFile
+                return ','
         else:
             print "Couldn't detect a valid file extension: ", inputFile
             return ','
-        
+
+
     @staticmethod
     def format_properties(properties):
         '''takes a list of property names and removes all punctuation and numbers'''
@@ -490,5 +521,7 @@ class Hive():
                 newProperties.append(newProp + 'second')
             else:
                 newProperties.append(newProp)
+                
         return newProperties
+
         
