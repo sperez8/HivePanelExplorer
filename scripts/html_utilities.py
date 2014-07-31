@@ -74,9 +74,11 @@ def make_html(title, hive, folder = TEMP_FOLDER, rules = None):
     keyOrder = html_items.keyOrder
     
     outputfile = os.path.join(folder, title + ".html")
-    print '    Making the hive plot \'{0}\''.format(outputfile) 
-    nodeFile = os.path.join(folder, title + '_nodes.js')
-    edgeFile = os.path.join(folder,title + '_edges.js')
+    print '    Making the hive plot \'{0}\''.format(outputfile)
+    nodeFileName = title + '_nodes.js' 
+    edgeFileName = title + '_edges.js'
+    nodeFile = os.path.join(folder, nodeFileName)
+    edgeFile = os.path.join(folder, edgeFileName)
     
     write_nodes(nodeFile, hive)
     write_edges(edgeFile, hive)
@@ -86,9 +88,9 @@ def make_html(title, hive, folder = TEMP_FOLDER, rules = None):
             text = htmlItems[key]
             #wrap text given user input
             if key == 'nodefile':
-                f.write('<script src="' + nodeFile +  '"></script>')
+                f.write('<script src="' + nodeFileName  +  '"></script>')
             elif key == 'edgefile':
-                f.write('<script src="' + edgeFile +  '"></script>')
+                f.write('<script src="' + edgeFileName +  '"></script>')
             elif key == 'start js parameters':
                 f.write('<script> \n//All the user defined parameters')
             elif key == 'titleheader':

@@ -10,18 +10,18 @@
 <div id="rules" style="height:120px;width:300px;float:left;border-bottom:2px solid #5C5C5C"></div>
 <div id="reveal" style="height:60px;width:300px;float:left;"></div></div>
 
-<script src="/Users/sperez/git/HivePlotter/tmp/friends_nodes.js"></script>
-<script src="/Users/sperez/git/HivePlotter/tmp/friends_edges.js"></script>
+<script src="friends_nodes.js"></script>
+<script src="friends_edges.js"></script>
 <script> 
 //All the user defined parameters
 var SVGTitle = 'Hive plot : Friends'
 d3.select("body").select("#rules").append("p")
-	.html("Node assignment property: Degree <br><br>Node positioning property: Height <br><br>Edge coloring property: Relationship")
+	.html("Node assignment property: Degree <br><br>Node positioning property: Clustering <br><br>Edge coloring property: Uniform")
 	.style("color", "#5C5C5C")
-var num_axis = 6
-var angle = [-0.35,0.35,1.75,2.44,3.84,4.54]
-var nodecolor = 'green'
-var edge_color = ['lightseagreen','limegreen']
+var num_axis = 3
+var angle = [0.0001,2.09,4.19]
+var nodecolor = 'blue'
+var edge_color = ['blue']
 var revealNode = function(d,color){
     d3.select("body").select("#reveal").append("p")
 		.html("<br><br><b>Name: " + d.name +"</b>"+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)
