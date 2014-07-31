@@ -4,11 +4,11 @@
 <body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/d3.hive.v0.min.js"></script>
-<div id="container" style="width:900px">
+<div id="container" style="width:1000px">
 <div id="title" style="height:70px;width:550px;float:left;"></div>
+<div id="rules" style="height:200px;width:450px;float:right;border-bottom:2px solid #5C5C5C"></div>
 <div id="hive" style="height:550px;width:550px;float:left;"></div>
-<div id="rules" style="height:120px;width:300px;float:left;border-bottom:2px solid #5C5C5C"></div>
-<div id="reveal" style="height:60px;width:300px;float:left;"></div></div>
+<div id="reveal" style="height:60px;width:450px;float:left;"></div></div>
 
 <script src="friends_nodes.js"></script>
 <script src="friends_edges.js"></script>
@@ -16,12 +16,12 @@
 //All the user defined parameters
 var SVGTitle = 'Hive plot : Friends'
 d3.select("body").select("#rules").append("p")
-	.html("Node assignment property: Degree <br><br>Node positioning property: Clustering <br><br>Edge coloring property: Uniform")
+	.html("<br><br>Node assignment property: Gender: (alien, boy, girl) <br><br>Node positioning property: Height: (0.2, 1) <br><br>Edge coloring property: Relationship: (enemies, friends)")
 	.style("color", "#5C5C5C")
 var num_axis = 3
 var angle = [0.0001,2.09,4.19]
 var nodecolor = 'blue'
-var edge_color = ['blue']
+var edge_color = ['blue','cornflowerblue']
 var revealNode = function(d,color){
     d3.select("body").select("#reveal").append("p")
 		.html("<br><br><b>Name: " + d.name +"</b>"+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)

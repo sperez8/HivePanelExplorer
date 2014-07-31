@@ -208,6 +208,8 @@ class Hive():
                 print 'The number of node groups using the rule \'{0}\' is different than the number of axes ({1})!'.format(self.axisAssignRule, self.numAxes)
             [axisAssignment.update({n:categories.index(v)}) for n,v in assignmentValues.iteritems()] 
             [axisAssignment.update({n:i+1}) for n,i in axisAssignment.iteritems()] #want the node group to start at 1, not 0
+            #save categories values to be displayed on plot
+            self.valuesAssignment = categories
         else:
             if not cutoffValues:      
                 values.sort()
@@ -223,6 +225,10 @@ class Hive():
                         axisAssignment[n]=i+1 #want the node group to start at 1, not 0
                         break
                     else: i+=1
+            #save cutoff values to be displayed on plot
+            cutoffValues.insert(0,0)
+            self.valuesAssignment = [str(cutoffValues[i-1])+'-'+str(val) for i,val in enumerate(cutoffValues)]
+            self.valuesAssignment.pop(0)
                 
         if self.doubleAxes:
             #for the case of 3 doubled axis, the axis groups become 2,4,6 below
@@ -260,10 +266,14 @@ class Hive():
             maxValue = len(categories) #index of last element in categories + 1
             for n,p in assignmentValues.iteritems():
                 nodePositions[n] = round(float(categories.index(p))/float(maxValue),3)
+            #save categories values to be displayed on plot
+            self.valuesPosition = categories
         else:    
             maxValue = max(values)
             for n,p in assignmentValues.iteritems():
                 nodePositions[n] = round(float(p)/float(maxValue),3)
+            #save min,max values pf positions to be displayed on plot
+            self.valuesPosition = [str(min(values)),str(maxValue)]
                 
         self.nodePositions = nodePositions
         if self.debug:
@@ -427,6 +437,8 @@ class Hive():
                 categories = find_categories(values)
                 if categories:
                     [edgeStyling.update({e:categories.index(edgeValues[e])}) for e in self.edges ]
+                    #save categories values to be displayed on plot
+                    self.valuesEdges = categories
                 else:
                     values.sort()
                     cutoffs = [int(len(values)/float(len(self.edgePalette)))*i for i in range(1,len(self.edgePalette))]
@@ -439,6 +451,10 @@ class Hive():
                                 edgeStyling[e]=i
                                 break
                             else: i+=1
+                    #save cutoff values to be displayed on plot
+                    cutoffValues.insert(0,0)
+                    self.valuesEdges = [str(cutoffValues[i-1])+'-'+str(val) for i,val in enumerate(cutoffValues)]
+                    self.valuesEdges.pop(0)
             
             else:
                 [edgeStyling.update({e:0}) for e in self.edges]

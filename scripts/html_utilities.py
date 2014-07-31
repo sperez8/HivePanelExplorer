@@ -98,9 +98,9 @@ def make_html(title, hive, folder = TEMP_FOLDER, rules = None):
             elif key == 'rules':
                 if rules:
                     f.write('d3.select("body").select("#rules").append("p")\n\t.html(')
-                    f.write('\"Node assignment property: '+ string.capitalize(rules['assignment']))
-                    f.write(' <br><br>Node positioning property: '+ string.capitalize(rules['position']))
-                    f.write(' <br><br>Edge coloring property: '+ string.capitalize(rules['edges']))
+                    f.write('\"<br><br>Node assignment property: '+ string.capitalize(rules['assignment']) + ': (' + ', '.join(hive.valuesAssignment) + ')')
+                    f.write(' <br><br>Node positioning property: '+ string.capitalize(rules['position']) + ': (' + ', '.join(hive.valuesPosition) + ')')
+                    f.write(' <br><br>Edge coloring property: '+ string.capitalize(rules['edges']) + ': (' + ', '.join(hive.valuesEdges) + ')')
                     f.write('\")')
                     f.write('\n\t.style("color", "' + NEUTRAL_COLOR + '")')
             elif key == 'angles':
