@@ -8,15 +8,15 @@
 <div id="reveal" style="height:60px;width:300px;float:left;"></div>
 <div id="print" style="height:440px;width:300px;float:left;"></div>
 
-<script src="/Users/sperez/git/HivePlotter/tmp/nodeshive1.js"></script>
-<script src="/Users/sperez/git/HivePlotter/tmp/edgeshive1.js"></script>
+<script src="C:\Users\Sarah\git\HivePlotter/tmp/nodeshive1.js"></script>
+<script src="C:\Users\Sarah\git\HivePlotter/tmp/edgeshive1.js"></script>
 <script> 
 //All the user defined parameters
 var SVGTitle = 'Hive plot : hive1'
 var num_axis = 3
 var angle = [0.0001,2.09,4.19]
 var nodecolor = 'blue'
-var edge_color = ['blue']
+var edge_color = ['blue','cornflowerblue','darkblue','deepskyblue']
 var revealName = function(d){
     d3.select("body").select("#reveal").append("p").html("<br><br><b>Name: " + d.name +"</b>"+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)
 	.style("color", nodecolor)
