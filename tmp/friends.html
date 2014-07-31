@@ -18,10 +18,10 @@ var SVGTitle = 'Hive plot : Friends'
 d3.select("body").select("#rules").append("p")
 	.html("<br><br>Node assignment property: Gender: (alien, boy, girl) <br><br>Node positioning property: Height: (0.2, 1) <br><br>Edge coloring property: Relationship: (enemies, friends)")
 	.style("color", "#5C5C5C")
-var num_axis = 3
-var angle = [0.0001,2.09,4.19]
+var num_axis = 6
+var angle = [-0.35,0.35,1.75,2.44,3.84,4.54]
 var nodecolor = 'blue'
-var edge_color = ['blue','cornflowerblue']
+var edge_color = ['lightseagreen','limegreen']
 var revealNode = function(d,color){
     d3.select("body").select("#reveal").append("p")
 		.html("<br><br><b>Name: " + d.name +"</b>"+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)

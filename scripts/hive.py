@@ -206,8 +206,8 @@ class Hive():
         if categories:
             if len(categories) != self.numAxes:
                 print 'The number of node groups using the rule \'{0}\' is different than the number of axes ({1})!'.format(self.axisAssignRule, self.numAxes)
-            [axisAssignment.update({n:categories.index(v)}) for n,v in assignmentValues.iteritems()] 
-            [axisAssignment.update({n:i+1}) for n,i in axisAssignment.iteritems()] #want the node group to start at 1, not 0
+            for n,v in assignmentValues.iteritems():
+                axisAssignment[n] = categories.index(v) + 1 #want the node group to start at 1, not 0
             #save categories values to be displayed on plot
             self.valuesAssignment = categories
         else:
@@ -229,7 +229,7 @@ class Hive():
             cutoffValues.insert(0,0)
             self.valuesAssignment = [str(cutoffValues[i-1])+'-'+str(val) for i,val in enumerate(cutoffValues)]
             self.valuesAssignment.pop(0)
-                
+        
         if self.doubleAxes:
             #for the case of 3 doubled axis, the axis groups become 2,4,6 below
             [axisAssignment.update({n:i*2}) for n,i in axisAssignment.iteritems()]
