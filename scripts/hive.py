@@ -11,11 +11,12 @@ including node position, edge coloring, number of axes etc...
 import sys
 import os
 import numpy as np
+
 from math import pi
 from graph_utilities import *
-from time import strftime
+import string
 
-#hive parameter defaults
+#hive parameter defaults when not using GUI
 AXIS_ASSIGN_RULE = 'degree'
 AXIS_POSIT_RULE = 'closeness'
 EDGE_PALETTE = 'purple'
@@ -39,6 +40,7 @@ class Hive():
                  nodeColor = NODE_COLOR
                  ):
         '''Initializing defining parameters of the hive'''
+        
         self.debug = debug
         self.numAxes = numAxes
         self.doubleAxes = doubleAxes
@@ -59,9 +61,10 @@ class Hive():
             self.axisPositRule = axisPositRule
         
         return None
+ 
     
     def make_hive(self, nodefile, edgefile, cutoffValues = None):
-        '''creates a hive instance from user input'''  
+        '''runs Hive methods to create an instance from user input'''  
             
         self.get_nodes(nodefile)
         self.get_edges(edgefile)
@@ -74,23 +77,33 @@ class Hive():
         self.fix_color_palette()
         return None
 
-    def get_nodes(self,inputFile, delimiter = ','):
+
+    def get_nodes(self,inputFile):
         '''gets nodes and their properties from csv file'''
+        
+        delimiter = self.get_delimiter(inputFile)
         data = np.genfromtxt(inputFile, delimiter=delimiter, dtype='str')
+        
+        #get properties and format as strings
         properties = data[0,1:]
+        properties = self.format_properties(properties)
+        
+        #remove first row with column names
         data = data[1:,]
+        
         #get all the node data
         nodes = list(data[:,0])
+        
         #double the number of nodes when axes are doubled
         if self.doubleAxes:
             self.nodes = [n+".1" for n in nodes]
             self.nodes.extend([n+".2" for n in nodes])
         else: 
             self.nodes = nodes
-            
+        
+        #transform node properties into the numerical types if possible
         nodeProperties = {}
         for i, column in enumerate(data[:,1:].T):
-            #transform node properties into the numerical types if possible
             values = convert_type(list(column))
             nodeProperties[properties[i]] = values
         self.nodeProperties = nodeProperties
@@ -101,40 +114,58 @@ class Hive():
             print '    Node properties are: '
             for k,v in self.nodeProperties.iteritems():
                 print k, v
+                
         return self.nodeProperties
 
-    def get_edges(self,inputFile, delimiter = ','):
+
+    def get_edges(self,inputFile):
         '''gets edges and their properties from csv file'''
+        
+        delimiter = self.get_delimiter(inputFile)
         data = np.genfromtxt(inputFile, delimiter=delimiter, dtype='str')
+        
+        #get properties and format as strings
         properties = data[0,2:]
+        properties = self.format_properties(properties)
+        
+        #remove first row with column names
         data = data[2:,]
+        
         #get all the edge data
         self.sources = list(data[:,0])        
         self.targets = list(data[:,1])
 
+        #transform edge properties into the numerical types if possible
         edgeProperties = {}
         for i, column in enumerate(data[:,2:].T):
-            #transform edge properties into the numerical types if possible
             values = convert_type(list(column))
             edgeProperties[properties[i]] = values
         self.edgeProperties = edgeProperties
+        
+        #store the name of the edge properties
+        self.edgePropertyList = edgeProperties.keys()
             
         if self.debug:
             print '    Sources are: ', self.sources
             print '    Targets are: ', self.targets
             print '    Edge properties are: ', self.edgeProperties
+            
         return self.edgeProperties
+
 
     def make_axes(self):
         '''creates axes and angles given the number of axes desired
         and whether the axes are being doubled or not'''
+        
         angles = []
         if self.doubleAxes:
-            #create a total of 3*self.numAxes to make spacing between the doubled axes
+            #create a total of 3*self.numAxes to create spacing between the doubled axes
             allAngles = [2.0*pi/float(self.numAxes*3)*i for i in range(0,self.numAxes*3)]
+            
             #re-center the axes for symmetry
             shiftBy = allAngles[1]/2.0
             allAngles = [a-shiftBy for a in allAngles]
+            
             #remove the "spacer" axes
             for a in allAngles:
                 if (allAngles.index(a)+1) % 3 != 0:
@@ -150,23 +181,27 @@ class Hive():
         
         if self.debug:
             print "Axes angles are", angles   
+        
         self.angles = angles
+        
         return None
-    
+
+
     def node_assignment(self, assignmentValues = None, cutoffValues = []):
         '''determines on which axis the node should be placed
-            depending on the rule. Integer valued rules indicate the use of
-            node properties. Rules which are string values denote network 
+            depending on the rule. Integer valued rules indicate the index of a
+            node property in the list of properties. Rules which are string values denote network 
             properties which need to be calculated. Nodes are partitioned into groups
             depending on their value related to the rule. There are as many groups
             as numAxes'''
+        
         axisAssignment = {} 
         if not assignmentValues:
             assignmentValues = self.get_assignment_values(self.axisAssignRule)
         
         values = assignmentValues.values()
         #check if styling values are numerical, otherwise treat as categorical
-        #and recode into numerical variables
+        # and recode into numerical variables
         categories = find_categories(values)
         if categories:
             if len(categories) != self.numAxes:
@@ -202,18 +237,23 @@ class Hive():
             if categories:
                 print '    Node Categories:', categories
             print '    Node assignments to axis:', axisAssignment
+            
         return None
-    
+
+
     def node_position(self):
         '''determines where on the axis the node should be placed
             depending on the rule. Integer valued rules indicate the use of
             node properties. Rules which are string values denote network 
             properties which need to be calculated. node positions are scaled
             equally for all axes'''
+        
         nodePositions = {}
         assignmentValues = self.get_assignment_values(self.axisPositRule)
         
         values = assignmentValues.values()
+        #check if styling values are numerical, otherwise treat as categorical
+        # and recode into numerical variables
         categories = find_categories(values)
         if categories:
             categories.sort() # sorts strings alphabetically
@@ -228,8 +268,15 @@ class Hive():
         self.nodePositions = nodePositions
         if self.debug:
             print '    Node positions on axis:', nodePositions
+        
+        return None
+
 
     def get_assignment_values(self, rule):
+        '''get the values to be used to assign nodes to axes.
+            If the rule is a network property, then a networkx graph is created
+            and analyzed. Otherwise, assignment values are organized in a dictionary'''
+        
         assignmentValues = {}
         if rule in self.nodeProperties.keys():
             #get assignment values from the column of node properties indicated by the interger "rule"
@@ -238,6 +285,7 @@ class Hive():
                 [assignmentValues.update({n:p}) for n,p in zipper(self.nodes, properties*2)]
             else:
                 [assignmentValues.update({n:p}) for n,p in zipper(self.nodes, properties)]
+                
             return assignmentValues
         
         elif isinstance(rule, str):
@@ -258,10 +306,12 @@ class Hive():
             print "Rule could not be parsed"
             sys.exit()
 
+
     def make_edges(self):
         '''takes sources and edges and makes a list of 
         edges while assignment nodes to the correct axis in 
         the case of double axis. also keeps track of edge properties.'''
+        
         newSources = []
         newTargets = []
         newProperties = []
@@ -324,7 +374,7 @@ class Hive():
                     newSources.append(s)
                     newTargets.append(t)
                     newProperties.append(p)
-                #gets edges that connect nodes on the 1st and last axes
+                #gets edges that connect nodes on the 1st and last axes when there are 2 axes
                 elif axis[s] == 1 and axis[t] == self.numAxes:
                     newSources.append(s)
                     newTargets.append(t)
@@ -334,6 +384,7 @@ class Hive():
                     newTargets.append(t)   
                     newProperties.append(p)     
         
+        #save the new edges and their properties
         self.edges = zipper(newSources, newTargets)
         self.edgeProperties = newProperties
         
@@ -342,24 +393,30 @@ class Hive():
             print '    ', self.edgeProperties
             
         return None
- 
+
+
     def get_edge_properties(self, rule):
-       values = {}
-       if rule in self.edgeKeys:
-           i = self.edgeKeys.index(rule)
-           properties = zip(*self.edgeProperties)[i]
-           [values.update({e:p}) for e,p in zipper(self.edges, properties)]
-           return values
-       
-       else: 
-           print "The edge styling rule could not be parsed"
-           sys.exit()
-               
+        '''Organize edge properties in a dicitonary to be used to color the edges'''
+         
+        values = {}
+        if rule in self.edgeKeys:
+            i = self.edgeKeys.index(rule)
+            properties = zip(*self.edgeProperties)[i]
+            [values.update({e:p}) for e,p in zipper(self.edges, properties)]
+            return values
+        else: 
+            print "The edge styling rule could not be parsed"
+            sys.exit()
+
+
     def node_style(self, opacity = 0.9, color = 'purple', size = '7'):
+        '''In development...'''
         return None
+
     
     def edge_style(self, opacity = 0.9, color = 'purple', size = '7'):
         '''determines how the edges will look given different characteristics'''
+        
         edgeStyling = {}
         categories = None
         if self.edgeStyleRule != EDGE_STYLE_RULE and self.edgeStyleRule != None:
@@ -396,13 +453,75 @@ class Hive():
             if categories:
                 print '    Edge Categories:', categories
             print '    Edge styling:', edgeStyling
+            
         return None
 
+
     def fix_color_palette(self):
+        '''fix edge palette so it can be plotted'''
+        
         if not isinstance(self.edgePalette, list) or len(self.edgePalette) < len(set(self.edgeStyling.values())):
             print 'Using default color palette'
             self.edgePalette  = PALETTE[:len(set(self.edgeStyling.values()))]
+        
+        return None
 
-    def check_input(self):
-        '''IN DEVELOPMENT
-        checks if all edges are connecting nodes which exist in the self.nodes'''
+
+    @staticmethod
+    def get_delimiter(inputFile):
+        '''detect if input file is a tab or comma delimited file
+            and return delimiter.'''
+        
+        ext = os.path.splitext(os.path.basename(inputFile))[1]
+        
+        if 'tab' in ext or 'tsv' in ext:
+            return '\t'
+        elif 'csv' in ext:
+            return ','
+        elif 'txt' in ext:
+            #detects delimeter by counting the number of tabs and commas in the first line
+            f = open(inputFile, 'r')
+            first = f.read()
+            if first.count(',') > first.count('\t'):
+                return ','
+            elif first.count(',') < first.count('\t'):
+                return '\t'
+            else:
+                print "Couldn't detect a valid file extension: ", inputFile
+                return ','
+        else:
+            print "Couldn't detect a valid file extension: ", inputFile
+            return ','
+
+
+    @staticmethod
+    def format_properties(properties):
+        '''takes a list of property names and removes all punctuation and numbers'''
+        
+        numbers = {1:'one', 2:'two', 3:'three', 4:'four', 5:'five', 6:'six', 7:'seven', 8:'eight', 9:'nine', 10:'ten'}
+        
+        def convert_word(word):
+            '''remove punctuation and numbers from a word'''
+            w = word
+            for c in string.punctuation + string.digits:
+                word = word.replace(c,'')
+            if w != word:
+                print "The property \'{0}\' contained punctuation or digits which were removed".format(w)
+            return word
+             
+        newProperties = []
+        i = 1
+        for prop in properties:
+            newProp = convert_word(prop)
+            if not newProp:
+                #if property isn't named, we give it one
+                newProperties.append('unNamedProperty' + numbers[i] + '')
+                i += 1
+            elif newProp in newProperties:
+                newProperties.append(newProp + 'second')
+            else:
+                newProperties.append(newProp)
+                
+        return newProperties
+
+        

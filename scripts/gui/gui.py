@@ -21,8 +21,11 @@ from html_utilities import *
 from graph_utilities import *
 
 _root_dir = os.path.dirname(_root_dir)
-NODES = _root_dir + "/tests/test_nodes_friends.csv"
-EDGES = _root_dir + "/tests/test_edges_friends.csv"
+TITLE = "friends"
+NODES = _root_dir + "/tests/test_nodes_friends.txt"
+EDGES = _root_dir + "/tests/test_edges_friends.txt"
+#NODES = "/Users/sperez/Documents/Aria/Hive/WLSpearman_nodes_annotated_more.txt"
+#EDGES = "/Users/sperez/Documents/Aria/Hive/WLSpearman_edges.txt"
 
 class HiveGui(Tk):
     def __init__(self, *args, **kwargs):
@@ -66,7 +69,7 @@ class HiveGui(Tk):
         self.bEdges.grid(row=row, column=column, sticky=W)       
         
         #default inputs for testing
-        self.title.insert(0,"hive1")
+        self.title.insert(0,TITLE)
         self.nodes.insert(0,NODES)
         self.edges.insert(0,EDGES)
         
@@ -203,7 +206,11 @@ class HiveGui(Tk):
     def create_hive(self):
         hive = self.get_hive()
         hiveTitle = self.title.get()
-        url = make_html(hiveTitle, hive)
+        rules = {}
+        rules['assignment'] = self.assignmentVar.get()
+        rules['position'] = self.positionVar.get()
+        rules['edges'] = self.edgeStyleVar.get()
+        url = make_html(hiveTitle, hive, rules = rules)
         
         webbrowser.open("file://"+url, new=2)
 
@@ -212,7 +219,7 @@ class HiveGui(Tk):
         hive = self.get_hive()
         filePath = tkFileDialog.asksaveasfilename(defaultextension = '.html')
         if filePath:
-            hiveTitle = os.path.basename(filePath)
+            hiveTitle = os.path.splitext(os.path.basename(filePath))[0]
             folder = os.path.dirname(filePath)
             url = make_html(hiveTitle, hive, folder = folder)
             webbrowser.open("file://"+url, new=2)

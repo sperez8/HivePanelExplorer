@@ -1,19 +1,4 @@
-'''
-created 06/05/2014
-
-by sperez
-
-contains all the pieces of the html and d3 functions to plot the hive
-'''
-
-htmlContainer= {}
-
-keyOrder = ['intro', 'nodefile', 'edgefile',
-            'start js parameters','titleheader', 'rules',
-            'numAxes', 'angles','color', 'edge_color', 'revealNode', 'revealLink',
-            'end js parameters', 'd3functions']
-
-htmlContainer['intro'] = """<!comment This is a hive plot developed using HivePlotter.>
+<!comment This is a hive plot developed using HivePlotter.>
 <!DOCTYPE html>
 <meta charset="utf-8">
 <body>
@@ -24,24 +9,31 @@ htmlContainer['intro'] = """<!comment This is a hive plot developed using HivePl
 <div id="hive" style="height:550px;width:550px;float:left;"></div>
 <div id="rules" style="height:120px;width:300px;float:left;border-bottom:2px solid #5C5C5C"></div>
 <div id="reveal" style="height:60px;width:300px;float:left;"></div></div>
-"""
 
-htmlContainer['nodefile'] = 'nodes.js' #will be specified by user
-htmlContainer['edgefile'] = 'links.js' #will be specified by user
+<script src="/Users/sperez/git/HivePlotter/tmp/friends_nodes.js"></script>
+<script src="/Users/sperez/git/HivePlotter/tmp/friends_edges.js"></script>
+<script> 
+//All the user defined parameters
+var SVGTitle = 'Hive plot : Friends'
+d3.select("body").select("#rules").append("p")
+	.html("Node assignment property: Degree <br><br>Node positioning property: Height <br><br>Edge coloring property: Relationship")
+	.style("color", "#5C5C5C")
+var num_axis = 6
+var angle = [-0.35,0.35,1.75,2.44,3.84,4.54]
+var nodecolor = 'green'
+var edge_color = ['lightseagreen','limegreen']
+var revealNode = function(d,color){
+    d3.select("body").select("#reveal").append("p")
+		.html("<br><br><b>Name: " + d.name +"</b>"+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)
+		.style("color", color)
+	};
+var revealLink = function(d,color){
+    d3.select("body").select("#reveal").append("p")
+		.html("<br><br><b>Source: " + d.source.name + ", Target: " + d.target.name +"</b>"+','+"    Friendshipstrength: " + d.friendshipstrength+','+"    Relationship: " + d.relationship)
+		.style("color", color)
+	};
+</script>
 
-htmlContainer['start js parameters'] = '' #will be specified by user
-htmlContainer['titleheader'] = '' #will be specified by user
-htmlContainer['rules'] = '' #will be specified by user
-htmlContainer['numAxes'] = '' #will be specified by user
-htmlContainer['angles'] = '' #will be specified by user
-htmlContainer['color'] = '' #will be specified by user
-htmlContainer['edge_color'] = '' #will be specified by user
-htmlContainer['revealNode'] = '' #will be specified by user
-htmlContainer['revealLink'] = '' #will be specified by user
-htmlContainer['end js parameters'] = '' #will be specified by user
-
-
-htmlContainer['d3functions'] = """
 <script>
 d3.select("body").select("#title")
     .append("h2").html('<center>'+SVGTitle+'</center>')
@@ -219,6 +211,4 @@ function degrees(radians) {
 </script>
 </body>
 </html>
-"""
 
-#more to be added
