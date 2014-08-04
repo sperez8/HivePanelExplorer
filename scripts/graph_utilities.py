@@ -16,7 +16,7 @@ _cur_dir = os.path.dirname(os.path.realpath(__file__))
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 
-import networkx_copy as nx
+import networkx as nx
 
 def edge_analysis(G, rule):
     if rule == 'average connecting degree':
