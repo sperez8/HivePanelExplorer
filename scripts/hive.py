@@ -231,11 +231,15 @@ class Hive():
             self.valuesAssignment.pop(0)
         
         if self.doubleAxes:
-            #for the case of 3 doubled axis, the axis groups become 2,4,6 below
-            [axisAssignment.update({n:i*2}) for n,i in axisAssignment.iteritems()]
-            #for the node on the 'first' axis, we change its group to 1,2 or 3
-            #so that nodes in group 1 are now on axis 1 or 2, group 2 in 3 or 4 and group 3 in 5 or 6.
-            [axisAssignment.update({n:(i-1)}) if n[-2:] == '.1' else None for n,i in axisAssignment.iteritems()]
+            newAssignment = {}
+            #for the case of 3 doubled axis, the axis groups become 2,4, or 6 for nodes ending in '.2'
+            #and 1,3,or 5 for nodes ending in '.1'
+            for n,i in axisAssignment.iteritems():
+                if  n[-2:] == '.1':
+                    newAssignment[n] = i*2 - 1
+                else:
+                    newAssignment[n] = i*2
+            axisAssignment = newAssignment
         
         self.axisAssignment = axisAssignment
 
@@ -289,13 +293,14 @@ class Hive():
         
         assignmentValues = {}
         if rule in self.nodeProperties.keys():
-            #get assignment values from the column of node properties indicated by the interger "rule"
+            #get assignment values from the column of node properties indicated by the "rule"
             properties = self.nodeProperties[rule]
             if self.doubleAxes:
                 [assignmentValues.update({n:p}) for n,p in zipper(self.nodes, properties*2)]
             else:
                 [assignmentValues.update({n:p}) for n,p in zipper(self.nodes, properties)]
-                
+            if self.debug:
+                print '    Assignment values for \'{0}\' node property: {1}'.format(rule,assignmentValues)    
             return assignmentValues
         
         elif isinstance(rule, str):
@@ -313,7 +318,7 @@ class Hive():
             else:
                 return assignmentValues
         else: 
-            print "Rule could not be parsed"
+            print "\nRule could not be parsed"
             sys.exit()
 
 
@@ -406,7 +411,7 @@ class Hive():
 
 
     def get_edge_properties(self, rule):
-        '''Organize edge properties in a dicitonary to be used to color the edges'''
+        '''Organize edge properties in a dictionary to be used to color the edges'''
          
         values = {}
         if rule in self.edgeKeys:
@@ -462,7 +467,7 @@ class Hive():
         else:
             #No edge coloring rule specified
             [edgeStyling.update({e:0}) for e in self.edges]
-            
+            print 'No edge coloring palette specified. Will default to palette: \'{0}\'.'.format(EDGE_PALETTE)
         self.edgeStyling = edgeStyling
         
         if self.debug:
@@ -495,7 +500,7 @@ class Hive():
         elif 'csv' in ext:
             return ','
         elif 'txt' in ext:
-            #detects delimeter by counting the number of tabs and commas in the first line
+            #detects delimiter by counting the number of tabs and commas in the first line
             f = open(inputFile, 'r')
             first = f.read()
             if first.count(',') > first.count('\t'):
