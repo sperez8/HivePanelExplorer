@@ -21,7 +21,7 @@ from graph_utilities import *
 
 ACCEPTED_FILETYPES = (("CSV files", "*.csv"),("Tab delimited files", "*.txt"))
 FONT_TYPE = 'Helvetica'
-FONT_SIZE = 15
+FONT_SIZE = 12
 TEXT_ENTRY_WIDTH = 60
 MENU_WIDTH = 13
 PADDING = int(FONT_SIZE*0.5)
