@@ -83,7 +83,7 @@ class Hive():
         '''gets nodes and their properties from csv file'''
         
         delimiter = self.get_delimiter(inputFile)
-        data = np.genfromtxt(inputFile, delimiter=delimiter, dtype='str')
+        data = np.genfromtxt(inputFile, delimiter=delimiter, dtype='str', filling_values = 'None')
         
         #get properties and format as strings
         properties = data[0,1:]
@@ -123,7 +123,7 @@ class Hive():
         '''gets edges and their properties from csv file'''
         
         delimiter = self.get_delimiter(inputFile)
-        data = np.genfromtxt(inputFile, delimiter=delimiter, dtype='str')
+        data = np.genfromtxt(inputFile, delimiter=delimiter, dtype='str', filling_values = 'None')
         
         #get properties and format as strings
         properties = data[0,2:]

@@ -22,11 +22,15 @@ from html_writer import *
 from graph_utilities import *
 
 _root_dir = os.path.dirname(_root_dir)
-TITLE = "friends"
-NODES = _root_dir + "/tests/test_nodes_friends.txt"
-EDGES = _root_dir + "/tests/test_edges_friends.txt"
+
+TITLE = "R_BAC_BS_ensemble"
+#TITLE = "friends"
+#NODES = _root_dir + "/tests/test_nodes_friends.txt"
+#EDGES = _root_dir + "/tests/test_edges_friends.txt"
 #NODES = "/Users/sperez/Documents/Aria/Hive/WLSpearman_nodes_annotated_more.txt"
 #EDGES = "/Users/sperez/Documents/Aria/Hive/WLSpearman_edges.txt"
+NODES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_BS_ensemble_nodes.csv"
+EDGES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_BS_ensemble_edges.csv"
 
 class HiveGui(Tk):
     def __init__(self, *args, **kwargs):
