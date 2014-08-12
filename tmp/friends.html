@@ -10,34 +10,42 @@
 <div id="hive" style="height:550px;width:550px;float:left;"></div>
 <div id="reveal" style="height:60px;width:450px;float:left;"></div></div>
 
-<script src="friends_nodes.js"></script>
-<script src="friends_edges.js"></script>
-<script> 
+<script src="C:\Users\Sarah\git\HivePlotter/tmp/friends_nodes.js"></script>
+<script src="C:\Users\Sarah\git\HivePlotter/tmp/friends_edges.js"></script>
+<script>
 //All the user defined parameters
-var SVGTitle = 'Hive plot : Friends'
-d3.select("body").select("#rules").append("p")
-	.html("<br><br>Node assignment property: Degree: (0-2, 2-4, 4-5) <br><br>Node positioning property: Gender: (alien, boy, girl) <br><br>Edge coloring property: Friendshipstrength: (0-11)")
-	.style("color", "#5C5C5C")
-var num_axis = 6
-var angle = [-0.35,0.35,1.75,2.44,3.84,4.54]
-var nodecolor = 'blue'
-var edge_color = ['blue']
+
+var SVGTitle = 'Hive plot : ' + 'Friends'
+
+var colorNeutral = '#5C5C5C'
+
+var num_axis = 3
+
+var angle = [0.0001, 2.09, 4.19]
+
+var nodeColor = 'blue'
+
+var edgeColor = ['blue']
+
 var revealNode = function(d,color){
     d3.select("body").select("#reveal").append("p")
-		.html("<br><br><b>Name: " + d.name +"</b>"+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)
-		.style("color", color)
-	};
+        .html("<br><br><b>Name: " + d.name +"</b>"+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)
+        .style("color", color)
+    };
 var revealLink = function(d,color){
     d3.select("body").select("#reveal").append("p")
-		.html("<br><br><b>Source: " + d.source.name + ", Target: " + d.target.name +"</b>"+','+"    Friendshipstrength: " + d.friendshipstrength+','+"    Relationship: " + d.relationship)
-		.style("color", color)
-	};
-</script>
+        .html("<br><br><b>Source: " + d.source.name + ", Target: " + d.target.name +"</b>"+','+"    Friendshipstrength: " + d.friendshipstrength+','+"    Relationship: " + d.relationship)
+        .style("color", color)
+    };
 
-<script>
+d3.select("body").select("#rules")
+    .append("p")
+    .html('<br><br>Node assignment property: ' + 'Degree: (0-2, 2-4, 4-5)' + '<br><br>Node positioning property: ' + 'Gender: (alien, boy, girl)' + '<br><br>Edge coloring property: ' + 'Friendshipstrength: (0-11)') 
+    .style("color", colorNeutral)
+
 d3.select("body").select("#title")
     .append("h2").html('<center>'+SVGTitle+'</center>')
-    .style("color", "#5C5C5C")
+    .style("color", colorNeutral)
     
 var removeReveal = function(d){
     d3.select("body").select("#reveal").selectAll("p")
@@ -71,8 +79,8 @@ var angles = d3.scale.ordinal()
     .range(angle);
 
 var link_color = d3.scale.linear()
-    .domain(d3.range(0,edge_color.length,1.0))
-    .range(edge_color);
+    .domain(d3.range(0,edgeColor.length,1.0))
+    .range(edgeColor);
 
 var svg = d3.select("body").select("#container").select("#hive").append("svg")
     .attr("class", SVGTitle)
@@ -102,8 +110,8 @@ svg.selectAll(".link")
     .style("fill", linkfill)
     .style("stroke-opacity", oplink)
     .style("stroke", function(d) {
-        if (edge_color.length == 1){
-            return edge_color}
+        if (edgeColor.length == 1){
+            return edgeColor}
         else {return link_color(d.type)}
         })
     .style("stroke-width", linkwidth)
@@ -130,7 +138,7 @@ svg.selectAll(".node")
     .attr("stroke-width", nodestroke)
     .attr("stroke", nodestrokecolor)
     .style("fill-opacity", opnode)
-    .style("fill", nodecolor)
+    .style("fill", nodeColor)
     .on("mouseover", function(d){
             d3.select(this)
                 .style("fill-opacity", 1)
@@ -211,4 +219,3 @@ function degrees(radians) {
 </script>
 </body>
 </html>
-

@@ -18,7 +18,7 @@ from gui_utilities import *
 from gui_options import *
 
 from hive import Hive
-from html_utilities import *
+from html_writer import *
 from graph_utilities import *
 
 _root_dir = os.path.dirname(_root_dir)
@@ -148,7 +148,7 @@ class HiveGui(Tk):
         row+=1
         self.bClose = Button(self)
         self.bClose.grid(padx = PADDING*2, pady = PADDING, columnspan = 4, sticky = SE)
-        self.bClose.configure(text = "Close window", width=10, command=self.close_window, font = (FONT_TYPE, int(0.8*FONT_SIZE)))
+        self.bClose.configure(text = "Close window", width=20, command=self.close_window, font = (FONT_TYPE, int(0.8*FONT_SIZE)))
 
     def reset_option_menu(self, w, variable, options, index=None, caption = None):
         '''reset the values in the option menu

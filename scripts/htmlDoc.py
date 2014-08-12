@@ -6,10 +6,6 @@ by sperez
 contains all the pieces of the html and d3 functions to plot the hive
 '''
 
-hrmlItems = ['nodefile', 'edgefile', 'title', 'rules',
-            'numAxes', 'angles','color', 'edge_color', 'revealNode', 'revealLink',
-            'end js parameters', 'd3functions']
-
 htmlDoc = """<!comment This is a hive plot developed using HivePlotter.>
 <!DOCTYPE html>
 <meta charset="utf-8">
@@ -27,24 +23,45 @@ htmlDoc = """<!comment This is a hive plot developed using HivePlotter.>
 <script>
 //All the user defined parameters
 
-var SVGTitle = 'Hive plot : ' + {2}
+var SVGTitle = 'Hive plot : ' + '{2}'
+
+var colorNeutral = '{3}'
+
+var num_axis = {4}
+
+var angle = {5}
+
+var nodeColor = '{6}'
+
+var edgeColor = {7}
+
+var revealNode = function(d,color){{
+    d3.select("body").select("#reveal").append("p")
+        .html({8})
+        .style("color", color)
+    }};
+var revealLink = function(d,color){{
+    d3.select("body").select("#reveal").append("p")
+        .html({9})
+        .style("color", color)
+    }};
 
 d3.select("body").select("#rules")
     .append("p")
-    .html('<br><br>Node assignment property: ' + {3} + '<br><br>Node positioning property: ' + {4} + <br><br>Edge coloring property: '+ string.capitalize(rules['edges']) +{5}) 
-    .style("color", "' + NEUTRAL_COLOR + '")')
+    .html('<br><br>Node assignment property: ' + '{10}' + '<br><br>Node positioning property: ' + '{11}' + '<br><br>Edge coloring property: ' + '{12}') 
+    .style("color", colorNeutral)
 
 d3.select("body").select("#title")
     .append("h2").html('<center>'+SVGTitle+'</center>')
-    .style("color", "#5C5C5C")
+    .style("color", colorNeutral)
     
-var removeReveal = function(d){
+var removeReveal = function(d){{
     d3.select("body").select("#reveal").selectAll("p")
         .transition()
         .duration(hoverOverTime)
         .style("opacity", 0)
         .remove();
-    };
+    }};
     
 var nodesize = 4
     nodestroke = 0.4
@@ -70,8 +87,8 @@ var angles = d3.scale.ordinal()
     .range(angle);
 
 var link_color = d3.scale.linear()
-    .domain(d3.range(0,edge_color.length,1.0))
-    .range(edge_color);
+    .domain(d3.range(0,edgeColor.length,1.0))
+    .range(edgeColor);
 
 var svg = d3.select("body").select("#container").select("#hive").append("svg")
     .attr("class", SVGTitle)
@@ -85,7 +102,7 @@ svg.selectAll(".axis")
     .data(angle)
   .enter().append("line")
     .attr("class", "axis")
-    .attr("transform", function(d) { return "rotate(" + degrees(angles(d)) + ")"; })
+    .attr("transform", function(d) {{ return "rotate(" + degrees(angles(d)) + ")"; }})
     .attr("x1", radius.range()[0])
     .attr("x2", radius.range()[1])
     .attr("stroke-width",0.7)
@@ -96,41 +113,41 @@ svg.selectAll(".link")
   .enter().append("path")
     .attr("class", "link")
     .attr("d", d3.hive.link()
-    .angle(function(d) { return angles(d.axis); })
-    .radius(function(d) { return radius(d.pos); }))
+    .angle(function(d) {{ return angles(d.axis); }})
+    .radius(function(d) {{ return radius(d.pos); }}))
     .style("fill", linkfill)
     .style("stroke-opacity", oplink)
-    .style("stroke", function(d) {
-        if (edge_color.length == 1){
-            return edge_color}
-        else {return link_color(d.type)}
-        })
+    .style("stroke", function(d) {{
+        if (edgeColor.length == 1){{
+            return edgeColor}}
+        else {{return link_color(d.type)}}
+        }})
     .style("stroke-width", linkwidth)
-    .on("mouseover", function(d){
+    .on("mouseover", function(d){{
             revealLink(d, d3.select(this).style("stroke"));
             d3.select(this)
                 .style("stroke-opacity", 1)
-                .style("stroke-width", linkwidth*2)})
-    .on("mouseout", function(d){
+                .style("stroke-width", linkwidth*2)}})
+    .on("mouseout", function(d){{
             removeReveal();
             d3.select(this)
                 .transition()
                 .duration(800)
                 .style("stroke-opacity", oplink)
-                .style("stroke-width", linkwidth)});
+                .style("stroke-width", linkwidth)}});
   
 svg.selectAll(".node")
     .data(nodes)
   .enter().append("circle")
     .attr("class", "node")
-    .attr("transform", function(d) { return "rotate(" + degrees(angles(d.axis)) + ")"; })
-    .attr("cx", function(d) { return radius(d.pos); })
+    .attr("transform", function(d) {{ return "rotate(" + degrees(angles(d.axis)) + ")"; }})
+    .attr("cx", function(d) {{ return radius(d.pos); }})
     .attr("r", nodesize)
     .attr("stroke-width", nodestroke)
     .attr("stroke", nodestrokecolor)
     .style("fill-opacity", opnode)
-    .style("fill", nodecolor)
-    .on("mouseover", function(d){
+    .style("fill", nodeColor)
+    .on("mouseover", function(d){{
             d3.select(this)
                 .style("fill-opacity", 1)
                 .attr("stroke-width", nodestroke*3)
@@ -140,48 +157,48 @@ svg.selectAll(".node")
             d3.selectAll(".node")
                 .transition()
                 .duration(hoverOverTime*0.2)
-                .style("fill-opacity", function(n){
-                    if (n.name == d.name){
-                        return 1}
-                    else {
-                        return opnode}
-                })
-                .style("stroke-width", function(n){
-                    if (n.name == d.name){
-                        return nodestroke*3}
-                    else {
-                        return nodestroke}
-                })
-                .attr("stroke", function(n){
-                    if (n.name == d.name){
-                        return 'black'}
-                    else {
-                        return nodestrokecolor}
-                })
-                .attr("r", function(n){
-                    if (n.name == d.name){
-                        return nodesize*1.5}
-                    else {
-                        return nodesize}
-                })
+                .style("fill-opacity", function(n){{
+                    if (n.name == d.name){{
+                        return 1}}
+                    else {{
+                        return opnode}}
+                }})
+                .style("stroke-width", function(n){{
+                    if (n.name == d.name){{
+                        return nodestroke*3}}
+                    else {{
+                        return nodestroke}}
+                }})
+                .attr("stroke", function(n){{
+                    if (n.name == d.name){{
+                        return 'black'}}
+                    else {{
+                        return nodestrokecolor}}
+                }})
+                .attr("r", function(n){{
+                    if (n.name == d.name){{
+                        return nodesize*1.5}}
+                    else {{
+                        return nodesize}}
+                }})
             d3.selectAll(".link")
                 .transition()
                 .delay(hoverOverTime*0.1)
                 .duration(hoverOverTime*0.2)
-                .style("stroke-opacity", function(l){
-                    if (l.source.name == d.name || l.target.name == d.name){
-                        return 1}
-                    else {
-                        return oplink}
-                })
-                .style("stroke-width", function(l){
-                    if (l.source.name == d.name || l.target.name == d.name){
-                        return linkwidth*2.5}
-                    else {
-                        return linkwidth}
-                })
-            })
-    .on("mouseout", function(d){
+                .style("stroke-opacity", function(l){{
+                    if (l.source.name == d.name || l.target.name == d.name){{
+                        return 1}}
+                    else {{
+                        return oplink}}
+                }})
+                .style("stroke-width", function(l){{
+                    if (l.source.name == d.name || l.target.name == d.name){{
+                        return linkwidth*2.5}}
+                    else {{
+                        return linkwidth}}
+                }})
+            }})
+    .on("mouseout", function(d){{
             d3.select(this)
                 .transition()
                 .duration(hoverOverTime)
@@ -202,11 +219,11 @@ svg.selectAll(".node")
                 .attr("stroke-width", nodestroke)
                 .attr("stroke", nodestrokecolor)
                 .style("fill-opacity", opnode)
-            });
+            }});
 
-function degrees(radians) {
+function degrees(radians) {{
   return radians / Math.PI * 180 - 90;
-}
+}}
 </script>
 </body>
 </html>

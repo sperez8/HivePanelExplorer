@@ -24,7 +24,7 @@ FONT_TYPE = 'Helvetica'
 FONT_SIZE = 12
 TEXT_ENTRY_WIDTH = 60
 MENU_WIDTH = 13
-PADDING = int(FONT_SIZE*0.5)
+PADDING = int(FONT_SIZE*0.3)
 
     
 def make_entry(parent, caption, width=None, row = 0, column = 0, **options):
