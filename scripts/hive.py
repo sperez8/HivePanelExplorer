@@ -334,6 +334,7 @@ class Hive():
         axis = self.axisAssignment
         keys = []
         properties = []
+        ignoreExtraEdges = False
         for k,v in self.edgeProperties.iteritems():
             keys.append(k)
             properties.append(v)
@@ -383,6 +384,7 @@ class Hive():
                 else:
                     pass
             else:
+                        
                 #makes edges for nodes of neighboring axes,
                 #doesn't include self nodes, nor nodes of same group
                 #nor nodes from non-neighboring axes when numAxes >3
@@ -525,10 +527,11 @@ class Hive():
         def convert_word(word):
             '''remove punctuation and numbers from a word'''
             w = word
+            word = ''.join(word.split()) #removes all whitespace (tabs, newlines, spaces...)
             for c in string.punctuation + string.digits:
                 word = word.replace(c,'')
             if w != word:
-                print "The property \'{0}\' contained punctuation or digits which were removed".format(w)
+                print "The property \'{0}\' contains spaces, punctuation or digits and has been renamed '{1}'".format(w,word)
             return word
              
         newProperties = []
@@ -546,4 +549,24 @@ class Hive():
                 
         return newProperties
 
-        
+'''
+To implement or not?
+
+    @staticmethod
+    def missing_node_in_edge(node):
+        while True:
+            answer = raw_input("\n\tNode {0} was found in the edge file but not in the node file. Ignore edge? (y/n):".format(node))
+            if answer == 'y':
+                return True
+            elif answer =='n':
+                sys.exit()
+            else:
+                print "Invalid response."
+                
+    
+                
+    if not ignoreExtraEdges:
+        if s1 not in axis.keys():
+            ignoreExtraEdges = self.missing_node_in_edge(s1)
+        elif t1 not in axis.keys():
+            ignoreExtraEdges = self.missing_node_in_edge(t1)'''

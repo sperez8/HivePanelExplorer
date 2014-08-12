@@ -29,7 +29,7 @@ TITLE = "R_BAC_BS_ensemble"
 #EDGES = _root_dir + "/tests/test_edges_friends.txt"
 #NODES = "/Users/sperez/Documents/Aria/Hive/WLSpearman_nodes_annotated_more.txt"
 #EDGES = "/Users/sperez/Documents/Aria/Hive/WLSpearman_edges.txt"
-NODES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_BS_ensemble_nodes.csv"
+NODES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_BS_ensemble_nodes_nofeatures.csv"
 EDGES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_BS_ensemble_edges.csv"
 
 class HiveGui(Tk):

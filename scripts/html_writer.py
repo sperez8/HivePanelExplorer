@@ -74,8 +74,10 @@ def make_html(title, hive, folder = TEMP_FOLDER, rules = None):
     outputfile = os.path.join(folder, title + ".html")
     print '    Making the hive plot \'{0}\''.format(outputfile)
     
-    nodeFile = os.path.join(folder, title + '_nodes.js' )
-    edgeFile = os.path.join(folder, title + '_edges.js')
+    nodeFileName = title + '_nodes.js' 
+    edgeFileName = title + '_edges.js'
+    nodeFile = os.path.join(folder, nodeFileName)
+    edgeFile = os.path.join(folder, edgeFileName)
     
     write_nodes(nodeFile, hive)
     write_edges(edgeFile, hive)
@@ -108,7 +110,7 @@ def make_html(title, hive, folder = TEMP_FOLDER, rules = None):
     
     #writing the html
     with open(outputfile, 'w') as f:           
-        document = htmlDoc.format(nodeFile, edgeFile, title,
+        document = htmlDoc.format(nodeFileName, edgeFileName, title,
                        colorNeutral, numAxis, angles, nodeColor, 
                        edgeColor, nodeReveal, linkReveal,
                        assignmentRule, positionsRule, colorRule
