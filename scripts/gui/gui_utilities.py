@@ -52,7 +52,7 @@ def get_num_colors(edges, style):
         colors = [1]
     else:
         edgefile = edges.get()
-        hive = Hive(debug = True)
+        hive = Hive(debug = False)
         properties = hive.get_edges(edgefile)[style]
         categories = find_categories(properties)
         if categories:

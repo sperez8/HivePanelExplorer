@@ -458,9 +458,7 @@ class Hive():
                                 break
                             else: i+=1
                     #save cutoff values to be displayed on plot
-                    cutoffValues.insert(0,0)
-                    self.valuesEdges = [str(cutoffValues[i-1])+'-'+str(val) for i,val in enumerate(cutoffValues)]
-                    self.valuesEdges.pop(0)
+                    self.valuesEdges = self.reformat(cutoffValues)
             
             else:
                 [edgeStyling.update({e:0}) for e in self.edges]
@@ -546,7 +544,8 @@ class Hive():
                 newProperties.append(newProp)
                 
         return newProperties
-
+    
+    @staticmethod
     def reformat(self,cutoffValues):
         cutoffValues = [1,2,3]
         cutoffValues.insert(0,0)
@@ -556,13 +555,10 @@ class Hive():
            roundedValues = cutoffValues
         else:
             while badlyRounded:
-                print 'yo', cutoffValues
                 roundedValues = [round(val,d) for val in cutoffValues]
                 newValues = [roundedValues[i-1] - val for i,val in enumerate(roundedValues)]
                 if 0 not in newValues[1:]:
                     badlyRounded = False
-                print roundedValues
-                print newValues
                 d += 1
         valuesAssignment = [str(roundedValues[i-1])+'-'+str(val) for i,val in enumerate(roundedValues)]
         valuesAssignment.pop(0)
