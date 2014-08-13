@@ -21,10 +21,10 @@ from graph_utilities import *
 
 ACCEPTED_FILETYPES = (("CSV files", "*.csv"),("Tab delimited files", "*.txt"))
 FONT_TYPE = 'Helvetica'
-FONT_SIZE = 12
-TEXT_ENTRY_WIDTH = 60
+FONT_SIZE = 15
+TEXT_ENTRY_WIDTH = 50
 MENU_WIDTH = 13
-PADDING = int(FONT_SIZE*0.3)
+PADDING = int(FONT_SIZE*0.4)
 
     
 def make_entry(parent, caption, width=None, row = 0, column = 0, **options):

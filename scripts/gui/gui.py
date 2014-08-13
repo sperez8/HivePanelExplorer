@@ -24,13 +24,13 @@ from graph_utilities import *
 
 _root_dir = os.path.dirname(_root_dir)
 
-TITLE = "R_BAC_SBS_ensemble soil community"
-NODES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_SBS_ensemble_nodes_nofeatures.csv"
-EDGES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_SBS_ensemble_edges.csv"
+#TITLE = "R_BAC_SBS_ensemble soil community"
+#NODES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_SBS_ensemble_nodes_nofeatures.csv"
+#EDGES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_SBS_ensemble_edges.csv"
 
-#TITLE = "friends"
-#NODES = _root_dir + "/tests/test_nodes_friends.txt"
-#EDGES = _root_dir + "/tests/test_edges_friends.txt"
+TITLE = "friends"
+NODES = _root_dir + "/tests/test_nodes_friends.txt"
+EDGES = _root_dir + "/tests/test_edges_friends.txt"
 #NODES = "/Users/sperez/Documents/Aria/Hive/WLSpearman_nodes_annotated_more.txt"
 #EDGES = "/Users/sperez/Documents/Aria/Hive/WLSpearman_edges.txt"
 
@@ -143,18 +143,18 @@ class HiveGui(Tk):
         row+=1
         bCreate = Button(self.app3)
         bCreate.grid(row = row, column = column, padx = PADDING, pady = PADDING*2, columnspan = 2)
-        bCreate.configure(text = "Create and open Hive", width=30, command=self.create_hive, bg = 'aliceblue', font = (FONT_TYPE, int(1.2*FONT_SIZE)))
+        bCreate.configure(text = "Create and open Hive", width=30, command=self.create_hive, bg = 'aliceblue', font = (FONT_TYPE, int(1.1*FONT_SIZE)))
         
         column += 2
         bSave = Button(self.app3)
         bSave.grid(row = row, column = column, padx = PADDING, pady = PADDING*2, columnspan = 2)
-        bSave.configure(text = "Save Hive", width=30, command=self.save_hive, bg = 'aliceblue', font = (FONT_TYPE, int(1.2*FONT_SIZE)))
+        bSave.configure(text = "Save Hive", width=30, command=self.save_hive, bg = 'aliceblue', font = (FONT_TYPE, int(1.1*FONT_SIZE)))
         
         
         row+=1
         self.bClose = Button(self)
-        self.bClose.grid(padx = PADDING*2, pady = PADDING, columnspan = 4, sticky = SE)
-        self.bClose.configure(text = "Close window", width=20, command=self.close_window, font = (FONT_TYPE, int(0.8*FONT_SIZE)))
+        self.bClose.grid(padx = PADDING*2, pady = PADDING*2, columnspan = 4, sticky = SE)
+        self.bClose.configure(text = "Close window", width=20, command=self.close_window, font = (FONT_TYPE, int(0.9*FONT_SIZE)))
 
     def reset_option_menu(self, w, variable, options, index=None, caption = None):
         '''reset the values in the option menu
