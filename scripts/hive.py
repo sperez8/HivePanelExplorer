@@ -227,9 +227,7 @@ class Hive():
                         break
                     else: i+=1
             #save cutoff values to be displayed on plot
-            cutoffValues.insert(0,0)
-            self.valuesAssignment = [str(cutoffValues[i-1])+'-'+str(val) for i,val in enumerate(cutoffValues)]
-            self.valuesAssignment.pop(0)
+            self.valuesAssignment = self.reformat(cutoffValues)
         
         if self.doubleAxes:
             newAssignment = {}
@@ -548,6 +546,28 @@ class Hive():
                 newProperties.append(newProp)
                 
         return newProperties
+
+    def reformat(self,cutoffValues):
+        cutoffValues = [1,2,3]
+        cutoffValues.insert(0,0)
+        d = 2
+        badlyRounded = True
+        if isinstance(cutoffValues[1], int):
+           roundedValues = cutoffValues
+        else:
+            while badlyRounded:
+                print 'yo', cutoffValues
+                roundedValues = [round(val,d) for val in cutoffValues]
+                newValues = [roundedValues[i-1] - val for i,val in enumerate(roundedValues)]
+                if 0 not in newValues[1:]:
+                    badlyRounded = False
+                print roundedValues
+                print newValues
+                d += 1
+        valuesAssignment = [str(roundedValues[i-1])+'-'+str(val) for i,val in enumerate(roundedValues)]
+        valuesAssignment.pop(0)
+        
+        return valuesAssignment  
 
 '''
 To implement or not?

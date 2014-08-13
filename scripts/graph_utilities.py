@@ -81,7 +81,6 @@ def find_categories(data):
 def zipper(*args):
     '''a revamped version of zip() method that checks that lists
     to be zipped are the same length'''
-    print args
     for i,item in enumerate(args):
         if len(item) != len(args[0]):
             raise ValueError('The lists to be zipped aren\'t the same length.')
