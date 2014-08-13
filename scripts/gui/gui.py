@@ -13,6 +13,7 @@ _cur_dir = os.path.dirname(os.path.realpath(__file__))
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 
+import copy
 import webbrowser
 from gui_utilities import *
 from gui_options import *
@@ -23,14 +24,16 @@ from graph_utilities import *
 
 _root_dir = os.path.dirname(_root_dir)
 
-TITLE = "R_BAC_BS_ensemble"
+TITLE = "Soil community"
+NODES = "C:\Users\Sarah\Desktop\WL_Nodes_ALL.csv"
+EDGES = "C:\Users\Sarah\Desktop\WL_EDGES_ALL.csv"
 #TITLE = "friends"
 #NODES = _root_dir + "/tests/test_nodes_friends.txt"
 #EDGES = _root_dir + "/tests/test_edges_friends.txt"
 #NODES = "/Users/sperez/Documents/Aria/Hive/WLSpearman_nodes_annotated_more.txt"
 #EDGES = "/Users/sperez/Documents/Aria/Hive/WLSpearman_edges.txt"
-NODES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_BS_ensemble_nodes_nofeatures.csv"
-EDGES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_BS_ensemble_edges.csv"
+#NODES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_BS_ensemble_nodes_nofeatures.csv"
+#EDGES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_BS_ensemble_edges.csv"
 
 class HiveGui(Tk):
     def __init__(self, *args, **kwargs):
@@ -194,10 +197,18 @@ class HiveGui(Tk):
         self.colorVar = self.reset_option_menu(self.colorOpt, self.colorVar, numColors)
 
     def update_parameters(self):
+        
+        print "Updating parameters"
+        
         nodefile = self.nodes.get()
         edgefile = self.edges.get()
+        debug = self.debugVar.get()
+        if debug == 'True':
+            debug = True
+        else: 
+            debug = False
         
-        hive = Hive(debug = False)
+        hive = Hive(debug = debug)
         properties = list(hive.get_nodes(nodefile).keys()) + assignmentOptions
         self.assignmentVar = self.reset_option_menu(self.assignmentOpt, self.assignmentVar, properties, index = 2) 
         
