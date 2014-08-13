@@ -41,10 +41,19 @@ def node_analysis(G, rule):
         print "Node assignment rule {0} not recognized.".format(rule)
         sys.exit()
 
-def make_graph(sources, targets):
+def make_graph(sources, targets, nodes):
     '''Makes a graph using the networkx package Graph instance'''
     G = nx.Graph()
     G.add_edges_from(zipper(sources,targets))
+    
+    #make sure only represented nodes are in the graph
+    badNodes = []
+    for n in G.nodes(data=False):
+        if n not in nodes:
+            badNodes.append(n)
+    
+    G.remove_nodes_from(badNodes)
+    
     return G
         
 def convert_type(data):

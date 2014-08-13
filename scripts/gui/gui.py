@@ -24,16 +24,15 @@ from graph_utilities import *
 
 _root_dir = os.path.dirname(_root_dir)
 
-TITLE = "Soil community"
-NODES = "C:\Users\Sarah\Desktop\WL_Nodes_ALL.csv"
-EDGES = "C:\Users\Sarah\Desktop\WL_EDGES_ALL.csv"
+TITLE = "R_BAC_SBS_ensemble soil community"
+NODES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_SBS_ensemble_nodes_nofeatures.csv"
+EDGES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_SBS_ensemble_edges.csv"
+
 #TITLE = "friends"
 #NODES = _root_dir + "/tests/test_nodes_friends.txt"
 #EDGES = _root_dir + "/tests/test_edges_friends.txt"
 #NODES = "/Users/sperez/Documents/Aria/Hive/WLSpearman_nodes_annotated_more.txt"
 #EDGES = "/Users/sperez/Documents/Aria/Hive/WLSpearman_edges.txt"
-#NODES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_BS_ensemble_nodes_nofeatures.csv"
-#EDGES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_BS_ensemble_edges.csv"
 
 class HiveGui(Tk):
     def __init__(self, *args, **kwargs):

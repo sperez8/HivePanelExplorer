@@ -123,7 +123,7 @@ def make_html(title, hive, folder = TEMP_FOLDER, rules = None):
 def reformat_title(title):
     '''remove punctuation from the title'''
     newtitle = title
-    for p in string.punctuation:
+    for p in "#$%&\'*+/:;<=>?@[\\]^`{|}~:":
         newtitle = newtitle.replace(p,'')
     if newtitle != title:
         print "The title \'{0}\' contained punctuation which have been removed".format(title)

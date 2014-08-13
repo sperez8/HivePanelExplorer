@@ -304,7 +304,7 @@ class Hive():
         
         elif isinstance(rule, str):
             #Need to make a graph instance using networkx
-            G = make_graph(self.sources, self.targets)
+            G = make_graph(self.sources, self.targets, self.nodes)
             assignmentValues = node_analysis(G, rule)
             if self.debug:
                 print '    Assignment values for \'{0}\' node property: {1}'.format(rule,assignmentValues)
