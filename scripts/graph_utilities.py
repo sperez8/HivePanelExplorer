@@ -49,11 +49,14 @@ def make_graph(sources, targets, nodes):
     #make sure only represented nodes are in the graph
     badNodes = []
     for n in G.nodes(data=False):
-        if n not in nodes:
+        if n in nodes:
+            pass
+        elif (n +".1") in nodes:
+            pass
+        else:
             badNodes.append(n)
     
     G.remove_nodes_from(badNodes)
-    
     return G
         
 def convert_type(data):

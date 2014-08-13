@@ -32,8 +32,10 @@ var num_axis = {4}
 var angle = {5}
 
 var nodeColor = '{6}'
-
-var edgeColor = {7}
+    edgeColor = {7}
+    linkwidth = {13}
+    oplink = {14}
+    opnode = {15}
 
 var revealNode = function(d,color){{
     d3.select("body").select("#reveal").append("p")
@@ -73,9 +75,6 @@ var width = document.getElementById("hive").offsetWidth
     outerRadius = 240;
 
 var linkfill = "none"
-    linkwidth = 1.3
-    oplink = 0.9
-    opnode = 0.6
     bkgcolor = "white"
 
 var hoverOverTime = 900

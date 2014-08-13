@@ -50,6 +50,8 @@ class Hive():
         self.edgeStyleRule = edgeStyleRule
         self.nodeColor = nodeColor
         self.valuesEdges = None
+        self.totalNodes = 0
+        self.totalEdges = 0
         
         try:
             self.axisAssignRule = int(axisAssignRule)
@@ -95,6 +97,9 @@ class Hive():
         #get all the node data
         nodes = list(data[:,0])
         
+        #take note of number of nodes
+        self.totalNodes = len(nodes)
+        
         #double the number of nodes when axes are doubled
         if self.doubleAxes:
             self.nodes = [n+".1" for n in nodes]
@@ -135,6 +140,9 @@ class Hive():
         #get all the edge data
         self.sources = list(data[:,0])        
         self.targets = list(data[:,1])
+        
+        #take note of number of edges:
+        self.totalEdges = len(self.sources)
 
         #transform edge properties into the numerical types if possible
         edgeProperties = {}
@@ -413,6 +421,9 @@ class Hive():
         #save the new edges and their properties
         self.edges = zipper(newSources, newTargets)
         self.edgeProperties = newProperties
+        
+        #update the number of edges
+        self.totalEdges = len(self.edges)
         
         if self.debug:
             print '    The new edges with their properties are:', self.edges

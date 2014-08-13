@@ -21,7 +21,12 @@ import string
 TEMP_FOLDER = _root_dir + '/tmp/'
 NEUTRAL_COLOR = "#5C5C5C"
 
+EDGE_WIDTH = 1.3
+EDGE_OPACITY = 0.8
+NODE_OPACITY = 0.6
 
+LARGE_NODE_NUMBER = 100
+LARGE_EDGE_NUMBER = 400
 
 def write_nodes(file, hive):
     '''outputs node info to a text file
@@ -108,12 +113,24 @@ def make_html(title, hive, folder = TEMP_FOLDER, rules = None):
     else:
         colorRule = 'None'
     
+    edgeWidth = EDGE_WIDTH
+    edgeOpacity = EDGE_OPACITY
+    nodeOpacity = NODE_OPACITY
+    
+    if hive.totalNodes > LARGE_NODE_NUMBER:
+        nodeOpacity *= 0.8
+    if hive.totalEdges > LARGE_EDGE_NUMBER:
+        edgeWidth *= 0.7
+        edgeOpacity *= 0.8
+      
+    
     #writing the html
     with open(outputfile, 'w') as f:           
         document = htmlDoc.format(nodeFileName, edgeFileName, title,
                        colorNeutral, numAxis, angles, nodeColor, 
                        edgeColor, nodeReveal, linkReveal,
-                       assignmentRule, positionsRule, colorRule
+                       assignmentRule, positionsRule, colorRule,
+                       edgeWidth, edgeOpacity, nodeOpacity
                        )    
         f.write(document)
     f.close()
