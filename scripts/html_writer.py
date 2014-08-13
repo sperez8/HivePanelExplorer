@@ -70,8 +70,8 @@ def make_html(title, hive, folder = TEMP_FOLDER, rules = None):
         edges.js - contains edges and their type
         hiveplot.html - contains the html and D3 script to make the hive plot!
     '''
-    
-    outputfile = os.path.join(folder, title + ".html")
+    newtitle = reformat_title(title)
+    outputfile = os.path.join(folder, newtitle + ".html")
     print '    Making the hive plot \'{0}\''.format(outputfile)
     
     nodeFileName = title + '_nodes.js' 
@@ -119,3 +119,12 @@ def make_html(title, hive, folder = TEMP_FOLDER, rules = None):
     f.close()
     
     return outputfile
+
+def reformat_title(title):
+    '''remove punctuation from the title'''
+    newtitle = title
+    for p in string.punctuation:
+        newtitle = newtitle.replace(p,'')
+    if newtitle != title:
+        print "The title \'{0}\' contained punctuation which have been removed".format(title)
+    return newtitle

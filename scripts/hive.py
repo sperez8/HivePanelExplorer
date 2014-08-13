@@ -546,8 +546,7 @@ class Hive():
         return newProperties
     
     @staticmethod
-    def reformat(self,cutoffValues):
-        cutoffValues = [1,2,3]
+    def reformat(cutoffValues):
         cutoffValues.insert(0,0)
         d = 2
         badlyRounded = True

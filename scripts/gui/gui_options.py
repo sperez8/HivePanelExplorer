@@ -21,7 +21,7 @@ colors['purple'] = ['plum', 'purple', 'magenta', 'blueviolet', 'darkviolet',
 
 colorOptions = colors.keys()
 
-debugOptions = ['True', 'False']
+debugOptions = ['False','True']
 
 axesOptions = [2,3,4,5]
 

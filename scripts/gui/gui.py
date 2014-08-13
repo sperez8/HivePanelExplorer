@@ -197,10 +197,18 @@ class HiveGui(Tk):
         self.colorVar = self.reset_option_menu(self.colorOpt, self.colorVar, numColors)
 
     def update_parameters(self):
+        
+        print "Updating parameters"
+        
         nodefile = self.nodes.get()
         edgefile = self.edges.get()
+        debug = self.debugVar.get()
+        if debug == 'True':
+            debug = True
+        else: 
+            debug = False
         
-        hive = Hive(debug = False)
+        hive = Hive(debug = debug)
         properties = list(hive.get_nodes(nodefile).keys()) + assignmentOptions
         self.assignmentVar = self.reset_option_menu(self.assignmentOpt, self.assignmentVar, properties, index = 2) 
         
