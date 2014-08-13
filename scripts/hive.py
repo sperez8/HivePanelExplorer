@@ -347,6 +347,11 @@ class Hive():
                 t1 = t + '.1'
                 t2 = t + '.2'
                 
+                ###REMOVE THIS
+                if s1 not in axis.keys() or t1 not in axis.keys():
+                    print "A NODE IN EDGE ({0},{1}) WAS NOT FOUND".format(s1,t1)
+                    continue
+                
                 #if nodes are from same group we add edge
                 #and it's symmetrical edge within the doubled Axes
                 if axis[s1] == axis[t1]:
@@ -384,7 +389,12 @@ class Hive():
                 else:
                     pass
             else:
-                        
+                
+                ###REMOVE THIS
+                if s not in axis.keys() or t not in axis.keys():
+                    print "A NODE IN EDGE ({0},{1}) WAS NOT FOUND".format(s,t)
+                    continue
+                
                 #makes edges for nodes of neighboring axes,
                 #doesn't include self nodes, nor nodes of same group
                 #nor nodes from non-neighboring axes when numAxes >3
