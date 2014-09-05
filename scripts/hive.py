@@ -141,6 +141,9 @@ class Hive():
         self.sources = list(data[:,0])        
         self.targets = list(data[:,1])
         
+        #check that all nodes are found in the sources and targets
+        self.nodes = self.check_nodes(self.sources, self.targets, self.nodes)
+        
         #take note of number of edges:
         self.totalEdges = len(self.sources)
 
@@ -207,6 +210,7 @@ class Hive():
         axisAssignment = {} 
         if not assignmentValues:
             assignmentValues = self.get_assignment_values(self.axisAssignRule)
+        #print "XX", self.axisAssignRule, assignmentValues
         
         values = assignmentValues.values()
         #check if styling values are numerical, otherwise treat as categorical
@@ -227,13 +231,20 @@ class Hive():
             if values[-1] not in cutoffValues:
                 cutoffValues.append(values[-1]) #add greatest value as a cutoff
                 
+            j = 0
             for n in self.nodes:
                 i = 0
                 while i < len(cutoffValues):
-                    if assignmentValues[n] <= cutoffValues[i]:
+                    if n not in assignmentValues.keys():
+                        #print "XXHERE:", n
+                        j+=1
+                        break
+                    elif assignmentValues[n] <= cutoffValues[i]:
                         axisAssignment[n]=i+1 #want the node group to start at 1, not 0
                         break
                     else: i+=1
+            print "XX count", len(self.nodes), j, len(assignmentValues.keys())
+            sys.exit()
             #save cutoff values to be displayed on plot
             self.valuesAssignment = self.reformat(cutoffValues)
         
@@ -584,6 +595,33 @@ class Hive():
         valuesAssignment.pop(0)
         
         return valuesAssignment  
+
+
+    @staticmethod
+    def check_nodes(sources, targets, nodes):
+        '''check that all nodes are found in the sources and targets
+        and update nodes such that all nodes are connected to another node'''
+        newNodes = []
+        
+        for n in nodes:
+            if n  in sources:
+                newNodes.append(n)
+            elif n not in targets:
+                newNodes.append(n)
+            else:
+                pass
+        
+        old = len(nodes)
+        new = len(newNodes)
+        if new < old:
+            print "WARNING: {0} of the {1} nodes were not found in the edge file and were removed".format(old-new,old)
+        
+        if new == 0:
+            print "No nodes were found in the edge file! Please check that the names of the nodes are the same in both files"
+            print "Exiting..."
+            sys.exit()                               
+        
+        return newNodes
 
 '''
 To implement or not?
