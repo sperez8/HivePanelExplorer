@@ -142,7 +142,7 @@ class Hive():
         self.targets = list(data[:,1])
         
         #check that all nodes are found in the sources and targets
-        self.nodes = self.check_nodes(self.sources, self.targets, self.nodes)
+        self.check_nodes(self.sources, self.targets, self.nodes)
         
         #take note of number of edges:
         self.totalEdges = len(self.sources)
@@ -244,7 +244,7 @@ class Hive():
                         break
                     else: i+=1
             print "XX count", len(self.nodes), j, len(assignmentValues.keys())
-            sys.exit()
+            
             #save cutoff values to be displayed on plot
             self.valuesAssignment = self.reformat(cutoffValues)
         
@@ -357,6 +357,7 @@ class Hive():
             properties.append(v)
         reorganizedProperties = zip(*properties)
         self.edgeKeys = keys
+        misingNodesCount = 0
         for s,t,p in zipper(self.sources, self.targets, reorganizedProperties):
             if self.doubleAxes:
                 s1 = s + '.1'
@@ -367,6 +368,7 @@ class Hive():
                 ###REMOVE THIS
                 if s1 not in axis.keys() or t1 not in axis.keys():
                     print "A NODE IN EDGE ({0},{1}) WAS NOT FOUND".format(s1,t1)
+                    misingNodesCount += 1
                     continue
                 
                 #if nodes are from same group we add edge
@@ -410,6 +412,7 @@ class Hive():
                 ###REMOVE THIS
                 if s not in axis.keys() or t not in axis.keys():
                     print "A NODE IN EDGE ({0},{1}) WAS NOT FOUND".format(s,t)
+                    misingNodesCount += 1
                     continue
                 
                 #makes edges for nodes of neighboring axes,
@@ -428,6 +431,9 @@ class Hive():
                     newSources.append(s)
                     newTargets.append(t)   
                     newProperties.append(p)     
+        
+        if misingNodesCount > 0:
+            print "WARNING: There were {0} nodes encoded in the edges which weren't in the node file and were ignored".format(misingNodesCount)
         
         #save the new edges and their properties
         self.edges = zipper(newSources, newTargets)
@@ -613,15 +619,16 @@ class Hive():
         
         old = len(nodes)
         new = len(newNodes)
-        if new < old:
-            print "WARNING: {0} of the {1} nodes were not found in the edge file and were removed".format(old-new,old)
         
         if new == 0:
             print "No nodes were found in the edge file! Please check that the names of the nodes are the same in both files"
             print "Exiting..."
-            sys.exit()                               
+            sys.exit()  
+            
+        elif new < old:
+            print "WARNING: {0} of the {1} nodes were not found in the edge file! Please remove them and rerun HivePlotter.".format(old-new,old)                             
         
-        return newNodes
+        return None
 
 '''
 To implement or not?
