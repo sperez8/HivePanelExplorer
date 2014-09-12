@@ -56,6 +56,8 @@ def make_graph(sources, targets, nodes):
         else:
             badNodes.append(n)
     
+    print badNodes
+    
     G.remove_nodes_from(badNodes)
     return G
         

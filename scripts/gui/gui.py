@@ -24,13 +24,17 @@ from graph_utilities import *
 
 _root_dir = os.path.dirname(_root_dir)
 
-#TITLE = "R_BAC_SBS_ensemble soil community"
-#NODES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_SBS_ensemble_nodes_nofeatures.csv"
-#EDGES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_SBS_ensemble_edges.csv"
+TITLE = "R_BAC_SBS_ensemble soil community"
+NODES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_SBS_ensemble_nodes_nofeatures.csv"
+EDGES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_SBS_ensemble_edges.csv"
 
-TITLE = "friends"
-NODES = _root_dir + "/tests/test_nodes_friends.txt"
-EDGES = _root_dir + "/tests/test_edges_friends.txt"
+TITLE = "sup5"
+NODES = "/Users/sperez/Documents/Cam/For Sarah_Hives/nodes_937_938_941.csv"
+EDGES = "/Users/sperez/Documents/Cam/For Sarah_Hives/edges_937_938_941.csv"
+
+#TITLE = "friends"
+#NODES = _root_dir + "/tests/test_nodes_friends.txt"
+#EDGES = _root_dir + "/tests/test_edges_friends.txt"
 #NODES = "/Users/sperez/Documents/Aria/Hive/WLSpearman_nodes_annotated_more.txt"
 #EDGES = "/Users/sperez/Documents/Aria/Hive/WLSpearman_edges.txt"
 
