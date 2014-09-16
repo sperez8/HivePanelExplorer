@@ -29,7 +29,7 @@ _root_dir = os.path.dirname(_root_dir)
 #EDGES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_SBS_ensemble_edges.csv"
 
 TITLE = "sup5"
-NODES = "/Users/sperez/Documents/Cam/For Sarah_Hives/nodes_937_938_941_filtered.csv"
+NODES = "/Users/sperez/Documents/Cam/For Sarah_Hives/nodes_937_938_941.csv"
 EDGES = "/Users/sperez/Documents/Cam/For Sarah_Hives/edges_937_938_941.csv"
 
 #TITLE = "friends"
@@ -278,7 +278,7 @@ class HiveGui(Tk):
         
         palette = get_palette(paletteHue,int(numColors))
         
-        hive = Hive(debug = debug, 
+        hive = Hive(debug = debug,
                     numAxes = axes,
                     doubleAxes = double, 
                     axisAssignRule = assignment, 

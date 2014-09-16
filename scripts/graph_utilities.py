@@ -100,54 +100,5 @@ def zipper(*args):
             raise ValueError('The lists to be zipped aren\'t the same length.')
     
     return zip(*args)
-            
-def filter_nodes(nodeFile, edgeFile):
-    '''check that all nodes are found in the sources and targets and vice versa.
-    Remove nodes such that all nodes are connected to another node.
-    Remove edges whose nodes aren't found in the nodes file'''
-
-    nodeData = np.genfromtxt(nodeFile, delimiter=',', dtype='str', filling_values = 'None')
-    nodeHeader = nodeData[0,:]
-
-    edgeData = np.genfromtxt(edgeFile, delimiter=',', dtype='str', filling_values = 'None')
-    
-    #find all nodes which aren't in an edge, as a target or a source
-    sourceTest = np.in1d(nodeData[:,0], edgeData[:,0], assume_unique = False)
-    targetTest = np.in1d(nodeData[:,0], edgeData[:,1], assume_unique = False)
-    newNode = nodeData[np.logical_or(sourceTest,targetTest),:]
-    
-    print "Of the {0} nodes, {1} were not found in the edges and removed".format(nodeData.shape[0], nodeData.shape[0]-newNode.shape[0])
-
-    nodeFile = nodeFile[:-4] +  '_filtered' + nodeFile[-4:]
-    np.savetxt(nodeFile, newNode, delimiter = ',', fmt="%s"+",%s"*(newNode.shape[1]-1))
-    
-    return None
-            
-def filter_edges(nodeFile, edgeFile):
-    '''check that all nodes are found in the sources and targets and vice versa.
-    Remove nodes such that all nodes are connected to another node.
-    Remove edges whose nodes aren't found in the nodes file'''
-
-    nodeData = np.genfromtxt(nodeFile, delimiter=',', dtype='str', filling_values = 'None')
-
-    edgeData = np.genfromtxt(edgeFile, delimiter=',', dtype='str', filling_values = 'None')
-    edgeHeader = edgeData[0,:]
-    
-    #find all sources and targets which aren't in the node file
-    sourceTest = np.in1d(edgeData[:,0], nodeData[:,0], assume_unique = False)
-    targetTest = np.in1d(edgeData[:,1], nodeData[:,0], assume_unique = False)
-    newEdge = edgeData[np.logical_and(sourceTest, targetTest),:]
-    
-    print "Of the {0} edges, {1} had a source or target not found in the node file and were removed".format(edgeData.shape[0], edgeData.shape[0]-newEdge.shape[0])
-    
-    edgeFile = edgeFile[:-4] +  '_filtered' + edgeFile[-4:]
-    np.savetxt(edgeFile, newEdge, delimiter = ',', fmt="%s"+",%s"*(newEdge.shape[1]-1))
-    
-    return None
-
-NODES = "/Users/sperez/Documents/Cam/For Sarah_Hives/nodes_937_938_941.csv"
-EDGES = "/Users/sperez/Documents/Cam/For Sarah_Hives/edges_937_938_941.csv"
-filter_nodes(NODES,EDGES)
-filter_edges(NODES,EDGES)
     
     

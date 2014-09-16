@@ -31,6 +31,7 @@ class Hive():
     
     def __init__(self, 
                  debug = True,
+                 filter = False,
                  numAxes = 3, 
                  doubleAxes = False, 
                  axisAssignRule = AXIS_ASSIGN_RULE, 
@@ -66,12 +67,11 @@ class Hive():
         return None
  
     
-    def make_hive(self, nodefile, edgefile, cutoffValues = None):
+    def make_hive(self, nodeFile, edgeFile, cutoffValues = None, filter = False):
         '''runs Hive methods to create an instance from user input'''  
             
-        self.get_nodes(nodefile)
-        self.get_edges(edgefile)
-        #check that all nodes are found in the sources and targets
+        self.get_nodes(nodeFile)
+        self.get_edges(edgeFile)               
         self.check_nodes(self.sources, self.targets, self.nodes)
         self.make_axes()
         self.node_assignment(cutoffValues = cutoffValues)
@@ -209,7 +209,6 @@ class Hive():
         axisAssignment = {} 
         if not assignmentValues:
             assignmentValues = self.get_assignment_values(self.axisAssignRule)
-        #print "XX", self.axisAssignRule, assignmentValues
         
         values = assignmentValues.values()
         #check if styling values are numerical, otherwise treat as categorical
@@ -235,14 +234,12 @@ class Hive():
                 i = 0
                 while i < len(cutoffValues):
                     if n not in assignmentValues.keys():
-                        #print "XXHERE:", n
                         j+=1
                         break
                     elif assignmentValues[n] <= cutoffValues[i]:
                         axisAssignment[n]=i+1 #want the node group to start at 1, not 0
                         break
                     else: i+=1
-            print "XX count", len(self.nodes), j, len(assignmentValues.keys())
             
             #save cutoff values to be displayed on plot
             self.valuesAssignment = self.reformat(cutoffValues)
@@ -550,7 +547,6 @@ class Hive():
             print "Couldn't detect a valid file extension: ", inputFile
             return ','
 
-
     @staticmethod
     def format_properties(properties):
         '''takes a list of property names and removes all punctuation and numbers'''
@@ -601,7 +597,6 @@ class Hive():
         
         return valuesAssignment  
 
-
     @staticmethod
     def check_nodes(sources, targets, nodes):
         '''check that all nodes are found in the sources and targets
@@ -629,26 +624,3 @@ class Hive():
         
         return None
 
-
-
-'''
-To implement or not?
-
-    @staticmethod
-    def missing_node_in_edge(node):
-        while True:
-            answer = raw_input("\n\tNode {0} was found in the edge file but not in the node file. Ignore edge? (y/n):".format(node))
-            if answer == 'y':
-                return True
-            elif answer =='n':
-                sys.exit()
-            else:
-                print "Invalid response."
-                
-    
-                
-    if not ignoreExtraEdges:
-        if s1 not in axis.keys():
-            ignoreExtraEdges = self.missing_node_in_edge(s1)
-        elif t1 not in axis.keys():
-            ignoreExtraEdges = self.missing_node_in_edge(t1)'''
