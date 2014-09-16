@@ -71,6 +71,8 @@ class Hive():
             
         self.get_nodes(nodefile)
         self.get_edges(edgefile)
+        #check that all nodes are found in the sources and targets
+        self.check_nodes(self.sources, self.targets, self.nodes)
         self.make_axes()
         self.node_assignment(cutoffValues = cutoffValues)
         self.node_position()
@@ -140,9 +142,6 @@ class Hive():
         #get all the edge data
         self.sources = list(data[:,0])        
         self.targets = list(data[:,1])
-        
-        #check that all nodes are found in the sources and targets
-        self.check_nodes(self.sources, self.targets, self.nodes)
         
         #take note of number of edges:
         self.totalEdges = len(self.sources)
@@ -629,6 +628,8 @@ class Hive():
             print "WARNING: {0} of the {1} nodes were not found in the edge file! Please remove them and rerun HivePlotter.".format(old-new,old)                             
         
         return None
+
+
 
 '''
 To implement or not?
