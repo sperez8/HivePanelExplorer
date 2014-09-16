@@ -24,12 +24,12 @@ from graph_utilities import *
 
 _root_dir = os.path.dirname(_root_dir)
 
-TITLE = "R_BAC_SBS_ensemble soil community"
-NODES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_SBS_ensemble_nodes_nofeatures.csv"
-EDGES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_SBS_ensemble_edges.csv"
+#TITLE = "R_BAC_SBS_ensemble soil community"
+#NODES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_SBS_ensemble_nodes_nofeatures.csv"
+#EDGES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_SBS_ensemble_edges.csv"
 
 TITLE = "sup5"
-NODES = "/Users/sperez/Documents/Cam/For Sarah_Hives/nodes_937_938_941.csv"
+NODES = "/Users/sperez/Documents/Cam/For Sarah_Hives/nodes_937_938_941_filtered.csv"
 EDGES = "/Users/sperez/Documents/Cam/For Sarah_Hives/edges_937_938_941.csv"
 
 #TITLE = "friends"

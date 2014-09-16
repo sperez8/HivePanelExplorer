@@ -101,10 +101,35 @@ def zipper(*args):
     
     return zip(*args)
             
-            
-    
+def filter_nodes(nodeFile, edgeFile):
+    '''check that all nodes are found in the sources and targets and vice versa.
+    Remove nodes such that all nodes are connected to another node.
+    Remove edges whose nodes aren't found in the nodes file'''
 
-        
+    nodeData = np.genfromtxt(nodeFile, delimiter=',', dtype='str', filling_values = 'None')
+
+    edgeData = np.genfromtxt(edgeFile, delimiter=',', dtype='str', filling_values = 'None')
     
+    #filter all nodes which aren't in an edge
+    sourceTest = np.in1d(nodeData[:,0], edgeData[:,0], assume_unique = False)
+    targetTest = np.in1d(nodeData[:,0], edgeData[:,1], assume_unique = False)
+
+    newNode = nodeData[sourceTest + targetTest,:]
+    
+    print "Of the {0} nodes, {1} were not found in the edges and removed".format(nodeData.shape, newNode.shape)
+
+    nodeFile = nodeFile[:-4] +  '_filtered' + nodeFile[-4:]
+    
+    print newNode.shape
+    
+    np.savetxt(nodeFile, newNode, delimiter = ',', fmt="%s %s")#*newNode.shape[1])
+    
+    return None
+            
+
+
+NODES = "/Users/sperez/Documents/Cam/For Sarah_Hives/nodes_937_938_941.csv"
+EDGES = "/Users/sperez/Documents/Cam/For Sarah_Hives/edges_937_938_941.csv"
+filter_nodes(NODES,EDGES)
     
     
