@@ -67,9 +67,6 @@ if __name__ == "__main__":
     nodeFile = "/Users/sperez/Documents/Cam/For Sarah_Hives/nodes_937_938_941.csv"
     edgeFile = "/Users/sperez/Documents/Cam/For Sarah_Hives/edges_937_938_941.csv"
     
-    #nodeFile = "/Users/sperez/Desktop/nodes_fruits.txt"
-    #edgeFile = "/Users/sperez/Desktop/edges_fruits.txt"
-    
     nodes, nodeHeader = get_nodes(nodeFile)
     edges, edgeHeader = get_edges(edgeFile)
     
@@ -96,3 +93,7 @@ if __name__ == "__main__":
     
     save_filtered_nodes(old_nodes, newNodes, nodeHeader, nodeFile)
     save_filtered_edges(old_edges, newEdges, edgeHeader, edgeFile)
+    
+    
+    
+    

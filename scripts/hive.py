@@ -117,11 +117,8 @@ class Hive():
         self.nodeProperties = nodeProperties
         
         if self.debug:
-            print '    Nodes are: '
-            print ','.join(self.nodes)
-            print '    Node properties are: '
-            for k,v in self.nodeProperties.iteritems():
-                print k, v
+            print '    There are {0} nodes.'.format(len(self.nodes))
+            print '    These are the Node properties: "{0}"'.format(', '.join(self.nodeProperties.keys()))
                 
         return self.nodeProperties
 
@@ -157,9 +154,8 @@ class Hive():
         self.edgePropertyList = edgeProperties.keys()
             
         if self.debug:
-            print '    Sources are: ', self.sources
-            print '    Targets are: ', self.targets
-            print '    Edge properties are: ', self.edgeProperties
+            print '    There are {0} edges in this network.'.format(self.totalEdges)
+            print '    The properties of the edges:  "{0}"'.format(', '.join(self.edgePropertyList))
             
         return self.edgeProperties
 
@@ -260,7 +256,7 @@ class Hive():
         if self.debug:
             if categories:
                 print '    Node Categories:', categories
-            print '    Node assignments to axis:', axisAssignment
+            print '    For the rule "{0}", the cut off values for assigning nodes to axes are: {1}'.format(self.axisAssignRule, self.valuesAssignment)
             
         return None
 
@@ -295,7 +291,10 @@ class Hive():
                 
         self.nodePositions = nodePositions
         if self.debug:
-            print '    Node positions on axis:', nodePositions
+            if categories:
+                print '    For the rule "{0}", the values for positioning nodes onto axes are categorical values: {1}'.format(self.axisPositRule, self.valuesPosition)
+            else:
+                print '    For the rule "{0}", the values for positioning nodes onto axes occur in this range: {1}'.format(self.axisPositRule, self.valuesPosition)
         
         return None
 
@@ -313,16 +312,12 @@ class Hive():
                 [assignmentValues.update({n:p}) for n,p in zipper(self.nodes, properties*2)]
             else:
                 [assignmentValues.update({n:p}) for n,p in zipper(self.nodes, properties)]
-            if self.debug:
-                print '    Assignment values for \'{0}\' node property: {1}'.format(rule,assignmentValues)    
             return assignmentValues
         
         elif isinstance(rule, str):
             #Need to make a graph instance using networkx
             G = make_graph(self.sources, self.targets, self.nodes)
             assignmentValues = node_analysis(G, rule)
-            if self.debug:
-                print '    Assignment values for \'{0}\' node property: {1}'.format(rule,assignmentValues)
             if self.doubleAxes:
                 newAssignmentValues = {}
                 for n,v in assignmentValues.iteritems():
@@ -423,7 +418,7 @@ class Hive():
                     newSources.append(s)
                     newTargets.append(t)
                     newProperties.append(p)
-                elif axis[t] == 1 and axis[t] == self.numAxes:
+                elif axis[t] == 1 and axis[s] == self.numAxes:
                     newSources.append(s)
                     newTargets.append(t)   
                     newProperties.append(p)     
@@ -439,8 +434,7 @@ class Hive():
         self.totalEdges = len(self.edges)
         
         if self.debug:
-            print '    The new edges with their properties are:', self.edges
-            print '    ', self.edgeProperties
+            print '    There are now {0} edges that will be drawn'.format(self.totalEdges)
             
         return None
 
@@ -506,7 +500,7 @@ class Hive():
         if self.debug:
             if categories:
                 print '    Edge Categories:', categories
-            print '    Edge styling:', edgeStyling
+            print '    For the rule "{0}", the cut off values for styling edges are: {1}'.format(self.edgeStyleRule, self.valuesEdges)
             
         return None
 
