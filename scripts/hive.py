@@ -580,22 +580,25 @@ class Hive():
     
     @staticmethod
     def reformat(cutoffValues):
-        cutoffValues.insert(0,0)
-        d = 2
-        badlyRounded = True
-        if isinstance(cutoffValues[1], int):
-           roundedValues = cutoffValues
-        else:
-            while badlyRounded:
-                roundedValues = [round(val,d) for val in cutoffValues]
-                newValues = [roundedValues[i-1] - val for i,val in enumerate(roundedValues)]
-                if 0 not in newValues[1:]:
-                    badlyRounded = False
-                d += 1
-        valuesAssignment = [str(roundedValues[i-1])+'-'+str(val) for i,val in enumerate(roundedValues)]
-        valuesAssignment.pop(0)
-        
-        return valuesAssignment  
+        '''brocken. Being fixed...'''
+#         cutoffValues.insert(0,0)
+#         d = 2
+#         badlyRounded = True
+#         if isinstance(cutoffValues[1], int):
+#            roundedValues = cutoffValues
+#         else:
+#             while badlyRounded:
+#                 roundedValues = [round(val,d) for val in cutoffValues]
+#                 newValues = [roundedValues[i-1] - val for i,val in enumerate(roundedValues)]
+#                 if 0 not in newValues[1:]:
+#                     badlyRounded = False
+#                 d += 1
+#         valuesAssignment = [str(roundedValues[i-1])+'-'+str(val) for i,val in enumerate(roundedValues)]
+#         valuesAssignment.pop(0)
+#         
+#         return valuesAssignment  
+
+        return [str(c) for c in cutoffValues]
 
     @staticmethod
     def check_nodes(sources, targets, nodes):
@@ -604,9 +607,9 @@ class Hive():
         newNodes = []
         
         for n in nodes:
-            if n  in sources:
+            if n in sources:
                 newNodes.append(n)
-            elif n not in targets:
+            elif n in targets:
                 newNodes.append(n)
             else:
                 pass
@@ -620,7 +623,8 @@ class Hive():
             sys.exit()  
             
         elif new < old:
-            print "WARNING: {0} of the {1} nodes were not found in the edge file! Please remove them and rerun HivePlotter.".format(old-new,old)                             
-        
+            print "WARNING: {0} of the {1} nodes were not found in the edge file! Please filter them out using filter_data.py and rerun HivePlotter.".format(old-new,old)                             
+            sys.exit()
+            
         return None
 

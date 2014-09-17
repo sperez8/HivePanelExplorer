@@ -29,8 +29,8 @@ _root_dir = os.path.dirname(_root_dir)
 #EDGES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_SBS_ensemble_edges.csv"
 
 TITLE = "sup5"
-NODES = "/Users/sperez/Documents/Cam/For Sarah_Hives/nodes_937_938_941.csv"
-EDGES = "/Users/sperez/Documents/Cam/For Sarah_Hives/edges_937_938_941.csv"
+NODES = "/Users/sperez/Documents/Cam/For Sarah_Hives/nodes_937_938_941_filtered.csv"
+EDGES = "/Users/sperez/Documents/Cam/For Sarah_Hives/edges_937_938_941_filtered.csv"
 
 #TITLE = "friends"
 #NODES = _root_dir + "/tests/test_nodes_friends.txt"
