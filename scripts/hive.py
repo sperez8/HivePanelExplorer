@@ -458,7 +458,7 @@ class Hive():
         return None
 
     
-    def edge_style(self, opacity = 0.9, color = 'purple', size = '7'):
+    def edge_style(self, opacity = 0.9, color = EDGE_PALETTE, size = '7'):
         '''determines how the edges will look given different characteristics'''
         
         edgeStyling = {}
@@ -490,11 +490,10 @@ class Hive():
             
             else:
                 [edgeStyling.update({e:0}) for e in self.edges]
-                print 'No edge coloring palette specified. Will default to palette: \'{0}\'.'.format(EDGE_PALETTE)
         else:
             #No edge coloring rule specified
             [edgeStyling.update({e:0}) for e in self.edges]
-            print 'No edge coloring palette specified. Will default to palette: \'{0}\'.'.format(EDGE_PALETTE)
+            
         self.edgeStyling = edgeStyling
         
         if self.debug:
@@ -614,12 +613,10 @@ class Hive():
         if new == 0:
             print "No nodes were found in the edge file! Please check that the names of the nodes are the same in both files"
             print "Exiting..."
-            print nodes[0:3]
-            print sources[0:3]
             sys.exit()  
             
         elif new < old:
-            print "WARNING: {0} of the {1} nodes were not found in the edge file! Please filter them out using filter_data.py and rerun HivePlotter.".format(old-new,old)                             
+            print "WARNING: {0} of the {1} nodes were not found in the edge file! Please filter them out using filter_data.py and rerun HivePlotter.".format(old-new,old)                        
             sys.exit()
             
         return None

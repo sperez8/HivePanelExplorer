@@ -75,8 +75,8 @@ class HiveGui(Tk):
         
         #default inputs for testing
         self.title.insert(0,title)
-        self.nodes.insert(0,edgeFile)
-        self.edges.insert(0,nodeFile)
+        self.nodes.insert(0,nodeFile)
+        self.edges.insert(0,edgeFile)
         
         #Submit button updates plotting parameter choices
         column = 0
