@@ -8,6 +8,7 @@ Template for GUI
 
 import sys
 import os
+import argparse
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))
 _root_dir = os.path.dirname(_cur_dir)
@@ -24,19 +25,13 @@ from graph_utilities import *
 
 _root_dir = os.path.dirname(_root_dir)
 
-#TITLE = "R_BAC_SBS_ensemble soil community"
-#NODES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_SBS_ensemble_nodes_nofeatures.csv"
-#EDGES = "/Users/sperez/Desktop/Networks_for_SARAH/R_BAC_SBS_ensemble_edges.csv"
-
 TITLE = "sup5"
 NODES = "/Users/sperez/Documents/Cam/For Sarah_Hives/nodes_937_938_941_filtered.csv"
 EDGES = "/Users/sperez/Documents/Cam/For Sarah_Hives/edges_937_938_941_filtered.csv"
 
-#TITLE = "friends"
-#NODES = _root_dir + "/tests/test_nodes_friends.txt"
-#EDGES = _root_dir + "/tests/test_edges_friends.txt"
-#NODES = "/Users/sperez/Documents/Aria/Hive/WLSpearman_nodes_annotated_more.txt"
-#EDGES = "/Users/sperez/Documents/Aria/Hive/WLSpearman_edges.txt"
+TITLE = "friends"
+NODES = _root_dir + "/tests/test_nodes_friends.txt"
+EDGES = _root_dir + "/tests/test_edges_friends.txt"
 
 class HiveGui(Tk):
     def __init__(self, *args, **kwargs):
@@ -45,7 +40,7 @@ class HiveGui(Tk):
         self.title("Hive Plotter GUI")
         #self.geometry("830x670")
         
-    def create_interface(self):
+    def create_interface(self, title, nodeFile, edgeFile):
         '''creates and places on the grid all the menus, inputs,
          options, and text on the interface'''
         self.app = Frame(self)
@@ -79,9 +74,9 @@ class HiveGui(Tk):
         self.bEdges.grid(row=row, column=column, sticky=W)       
         
         #default inputs for testing
-        self.title.insert(0,TITLE)
-        self.nodes.insert(0,NODES)
-        self.edges.insert(0,EDGES)
+        self.title.insert(0,title)
+        self.nodes.insert(0,edgeFile)
+        self.edges.insert(0,nodeFile)
         
         #Submit button updates plotting parameter choices
         column = 0
@@ -290,8 +285,28 @@ class HiveGui(Tk):
         hive.make_hive(nodefile, edgefile)
         return hive
 
+def parse_args(*argv):
+    parser = argparse.ArgumentParser(description='This scripts opens the Hive Plotter gui and produces hive plots given user data.')
+    parser.add_argument('-t', help='Title of hive plot', default = '')
+    parser.add_argument('-n', help='The node file', default = '')
+    parser.add_argument('-e', help='The edge file', default = '')
+    args = parser.parse_args()
+    
+    title = args.t
+    nodeFile = args.n
+    edgeFile = args.e
+    
+    if title and nodeFile and edgeFile:
+        return title, nodeFile, edgeFile
+    elif nodeFile and edgeFile:
+        return 'hive plot', nodeFile, edgeFile
+    else:
+        return TITLE, NODES, EDGES
+    
 if __name__ == "__main__":
+    title, nodeFile, edgeFile = parse_args(*sys.argv[1:])
     app = HiveGui()
-    app.create_interface()
+    app.create_interface(title, nodeFile, edgeFile)
     app.mainloop()
+    
 
