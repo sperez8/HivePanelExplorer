@@ -601,9 +601,9 @@ class Hive():
         newNodes = []
         
         for n in nodes:
-            if n in sources:
+            if n in sources or n[:-2] in sources:
                 newNodes.append(n)
-            elif n in targets:
+            elif n in targets or n[:-2] in targets:
                 newNodes.append(n)
             else:
                 pass
@@ -614,6 +614,8 @@ class Hive():
         if new == 0:
             print "No nodes were found in the edge file! Please check that the names of the nodes are the same in both files"
             print "Exiting..."
+            print nodes[0:3]
+            print sources[0:3]
             sys.exit()  
             
         elif new < old:
