@@ -292,6 +292,11 @@ def parse_args(*argv):
     parser.add_argument('-e', help='The edge file', default = '')
     args = parser.parse_args()
     
+    if (args.n == '' and args.e != '') or (args.n != '' and args.e == ''):
+        print "\n***You must specify both a node and an edge file if specifying either.***\n"
+        parser.print_help()
+        sys.exit()
+        
     title = args.t
     nodeFile = args.n
     edgeFile = args.e
@@ -305,8 +310,8 @@ def parse_args(*argv):
     
 if __name__ == "__main__":
     title, nodeFile, edgeFile = parse_args(*sys.argv[1:])
+    
     app = HiveGui()
     app.create_interface(title, nodeFile, edgeFile)
     app.mainloop()
-    
 

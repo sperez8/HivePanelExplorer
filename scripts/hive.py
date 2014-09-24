@@ -111,6 +111,7 @@ class Hive():
         
         #transform node properties into the numerical types if possible
         nodeProperties = {}
+
         for i, column in enumerate(data[:,1:].T):
             values = convert_type(list(column))
             nodeProperties[properties[i]] = values
@@ -119,7 +120,7 @@ class Hive():
         if self.debug:
             print '    There are {0} nodes.'.format(len(self.nodes))
             print '    These are the Node properties: "{0}"'.format(', '.join(self.nodeProperties.keys()))
-                
+
         return self.nodeProperties
 
 
@@ -134,7 +135,7 @@ class Hive():
         properties = self.format_properties(properties)
         
         #remove first row with column names
-        data = data[2:,]
+        data = data[1:,]
         
         #get all the edge data
         self.sources = list(data[:,0])        
@@ -145,6 +146,7 @@ class Hive():
 
         #transform edge properties into the numerical types if possible
         edgeProperties = {}
+
         for i, column in enumerate(data[:,2:].T):
             values = convert_type(list(column))
             edgeProperties[properties[i]] = values
@@ -156,7 +158,7 @@ class Hive():
         if self.debug:
             print '    There are {0} edges in this network.'.format(self.totalEdges)
             print '    The properties of the edges:  "{0}"'.format(', '.join(self.edgePropertyList))
-            
+        
         return self.edgeProperties
 
 
@@ -346,6 +348,7 @@ class Hive():
         for k,v in self.edgeProperties.iteritems():
             keys.append(k)
             properties.append(v)
+        
         reorganizedProperties = zip(*properties)
         self.edgeKeys = keys
         misingNodesCount = 0
@@ -355,12 +358,6 @@ class Hive():
                 s2 = s + '.2'
                 t1 = t + '.1'
                 t2 = t + '.2'
-                
-                ###REMOVE THIS
-                if s1 not in axis.keys() or t1 not in axis.keys():
-                    print "A NODE IN EDGE ({0},{1}) WAS NOT FOUND".format(s1,t1)
-                    misingNodesCount += 1
-                    continue
                 
                 #if nodes are from same group we add edge
                 #and it's symmetrical edge within the doubled Axes
@@ -399,12 +396,6 @@ class Hive():
                 else:
                     pass
             else:
-                
-                ###REMOVE THIS
-                if s not in axis.keys() or t not in axis.keys():
-                    print "A NODE IN EDGE ({0},{1}) WAS NOT FOUND".format(s,t)
-                    misingNodesCount += 1
-                    continue
                 
                 #makes edges for nodes of neighboring axes,
                 #doesn't include self nodes, nor nodes of same group
@@ -445,7 +436,8 @@ class Hive():
         values = {}
         if rule in self.edgeKeys:
             i = self.edgeKeys.index(rule)
-            properties = zip(*self.edgeProperties)[i]
+            properties = zip(*self.edgeProperties)
+            properties = properties[i]
             [values.update({e:p}) for e,p in zipper(self.edges, properties)]
             return values
         else: 
