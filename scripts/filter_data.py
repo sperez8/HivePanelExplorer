@@ -7,14 +7,27 @@ filter nodes not in edge file and vice versa to clean data
 '''
 
 import numpy as np
+import sys
+import os
+import argparse
+from graph_utilities import *
+
+_cur_dir = os.path.dirname(os.path.realpath(__file__))
+_root_dir = os.path.dirname(_cur_dir)
+
+NODES = _root_dir + "/tests/test_nodes_friends.txt"
+EDGES = _root_dir + "/tests/test_edges_friends.txt"
 
 def get_nodes(nodeFile):
-    nodeData = np.genfromtxt(nodeFile, delimiter=',', dtype='str', filling_values = 'None')
+    delimiter = get_delimiter(nodeFile)
+    nodeData = np.genfromtxt(nodeFile, delimiter=delimiter, dtype='str', filling_values = 'None')
     nodeHeader = nodeData[0,:]
     return  nodeData, nodeHeader
 
 def get_edges(edgeFile):
-    edgeData = np.genfromtxt(edgeFile, delimiter=',', dtype='str', filling_values = 'None')
+    delimiter = get_delimiter(edgeFile)
+    edgeData = np.genfromtxt(edgeFile, delimiter=delimiter, dtype='str', filling_values = 'None')
+    print edgeData
     edgeHeader = edgeData[0,:]
     return  edgeData, edgeHeader
 
@@ -60,12 +73,31 @@ def save_filtered_edges(old, newEdge, edgeHeader, edgeFile):
     np.savetxt(edgeFile, newEdge, delimiter = ',', fmt="%s"+",%s"*(newEdge.shape[1]-1))
     print "Of the {0} edges, {1} had a source or target not found in the node file and were removed".format(old, old-new)
     
+def parse_args(*argv):
+    parser = argparse.ArgumentParser(description='This scripts filters nodes and edges to clean data')
+    parser.add_argument('-n', help='The node file', default = '')
+    parser.add_argument('-e', help='The edge file', default = '')
+    args = parser.parse_args()
+    
+    if (args.n == '' and args.e != '') or (args.n != '' and args.e == ''):
+        print "\n***You must specify both a node and an edge file if specifying either.***\n"
+        parser.print_help()
+        sys.exit()
+
+    nodeFile = args.n
+    edgeFile = args.e
+    
+    if nodeFile and edgeFile:
+        print "Using the following node file:\n{0}\nand edge file\n{1}".format(nodeFile, edgeFile)
+        return nodeFile, edgeFile
+    else:
+        print "Using the test node file:\n{0}\nand test edge file\n{1}".format(NODES,EDGES)
+        return NODES, EDGES
+    
     
     
 if __name__ == "__main__":
-
-    nodeFile = "/Users/sperez/Documents/Cam/For Sarah_Hives/nodes_937_938_941.csv"
-    edgeFile = "/Users/sperez/Documents/Cam/For Sarah_Hives/edges_937_938_941.csv"
+    nodeFile, edgeFile = parse_args(*sys.argv[1:])
     
     nodes, nodeHeader = get_nodes(nodeFile)
     edges, edgeHeader = get_edges(edgeFile)
