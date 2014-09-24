@@ -222,6 +222,9 @@ class Hive():
         else:
             if not cutoffValues:      
                 values.sort()
+                if len(set(values)) < self.numAxes:
+                    print "\nPlease choose a different rule for assigning nodes to axes. There aren't enough unique values for all {1} axes".format(self.edgeStyleRule, self.numAxes)
+                    sys.exit()
                 cutoffIndexes = [int(len(values)/self.numAxes)*i for i in range(1,self.numAxes)]
                 cutoffValues = [values[c] for c in cutoffIndexes] # to prevent nodes with the same value to be in different groups
             if values[-1] not in cutoffValues:
@@ -238,7 +241,7 @@ class Hive():
                         axisAssignment[n]=i+1 #want the node group to start at 1, not 0
                         break
                     else: i+=1
-            
+                    
             #save cutoff values to be displayed on plot
             self.valuesAssignment = self.reformat(cutoffValues)
         
@@ -254,6 +257,7 @@ class Hive():
             axisAssignment = newAssignment
         
         self.axisAssignment = axisAssignment
+        print self.axisAssignment
 
         if self.debug:
             if categories:
@@ -423,6 +427,11 @@ class Hive():
         
         #update the number of edges
         self.totalEdges = len(self.edges)
+        
+        if self.totalEdges == 0:
+            print "\nUsing this axis assignment rule, there were no edges found between the different axes."
+            print "Please choose a different rule."
+            sys.exit()
         
         if self.debug:
             print '    There are now {0} edges that will be drawn'.format(self.totalEdges)
