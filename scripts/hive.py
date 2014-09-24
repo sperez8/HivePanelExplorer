@@ -569,8 +569,7 @@ class Hive():
 
     @staticmethod
     def check_nodes(sources, targets, nodes):
-        '''check that all nodes are found in the sources and targets
-        and update nodes such that all nodes are connected to another node'''
+        '''check that all nodes are found in the sources and targets'''
         newNodes = []
         
         for n in nodes:
@@ -590,8 +589,7 @@ class Hive():
             sys.exit()  
             
         elif new < old:
-            print "WARNING: {0} of the {1} nodes were not found in the edge file! Please filter them out using filter_data.py and rerun HivePlotter.".format(old-new,old)                        
-            sys.exit()
+            print "\n\n***WARNING: {0} of the {1} nodes were not found in the edge file! Please filter them out using filter_data.py and rerun HivePlotter.***".format(old-new,old)                        
             
         return None
 
