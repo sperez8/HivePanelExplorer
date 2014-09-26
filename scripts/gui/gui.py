@@ -21,17 +21,9 @@ from gui_options import *
 
 from hive import Hive
 from html_writer import *
-from graph_utilities import *
+from hive_utilities import *
 
 _root_dir = os.path.dirname(_root_dir)
-
-TITLE = "sup5"
-NODES = "/Users/sperez/Documents/Cam/For Sarah_Hives/nodes_937_938_941_filtered.csv"
-EDGES = "/Users/sperez/Documents/Cam/For Sarah_Hives/edges_937_938_941_filtered.csv"
-
-TITLE = "friends"
-NODES = _root_dir + "/tests/test_nodes_friends.txt"
-EDGES = _root_dir + "/tests/test_edges_friends.txt"
 
 class HiveGui(Tk):
     def __init__(self, *args, **kwargs):

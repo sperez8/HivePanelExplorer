@@ -13,7 +13,7 @@ import os
 import numpy as np
 
 from math import pi
-from graph_utilities import *
+from hive_utilities import *
 import string
 
 #hive parameter defaults when not using GUI
@@ -257,7 +257,6 @@ class Hive():
             axisAssignment = newAssignment
         
         self.axisAssignment = axisAssignment
-        print self.axisAssignment
 
         if self.debug:
             if categories:
