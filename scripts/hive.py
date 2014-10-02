@@ -91,7 +91,7 @@ class Hive():
         
         #get properties and format as strings
         properties = data[0,1:]
-        properties = self.format_properties(properties)
+        properties = self.format_properties(properties, self.debug)
         
         #remove first row with column names
         data = data[1:,]
@@ -132,7 +132,7 @@ class Hive():
         
         #get properties and format as strings
         properties = data[0,2:]
-        properties = self.format_properties(properties)
+        properties = self.format_properties(properties, self.debug)
         
         #remove first row with column names
         data = data[1:,]
@@ -514,7 +514,7 @@ class Hive():
         return None
 
     @staticmethod
-    def format_properties(properties):
+    def format_properties(properties, debug = False):
         '''takes a list of property names and removes all punctuation and numbers'''
         
         numbers = {1:'one', 2:'two', 3:'three', 4:'four', 5:'five', 6:'six', 7:'seven', 8:'eight', 9:'nine', 10:'ten'}
@@ -526,7 +526,8 @@ class Hive():
             for c in string.punctuation + string.digits:
                 word = word.replace(c,'')
             if w != word:
-                print "The property \'{0}\' contains spaces, punctuation or digits and has been renamed '{1}'".format(w,word)
+                if debug:
+                    print "The property \'{0}\' contains spaces, punctuation or digits and has been renamed '{1}'".format(w,word)
             return word
              
         newProperties = []

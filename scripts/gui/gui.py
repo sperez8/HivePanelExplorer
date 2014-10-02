@@ -25,11 +25,16 @@ from hive_utilities import *
 
 _root_dir = os.path.dirname(_root_dir)
 
+TITLE = 'friends'
+NODES = os.path.join(_root_dir, 'tests', 'test_nodes_friends.txt')
+EDGES = os.path.join(_root_dir, 'tests', 'test_edges_friends.txt')
+
 class HiveGui(Tk):
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
         #create window
         self.title("Hive Plotter GUI")
+        print "\n Welcome to Hive Plotter."
         #self.geometry("830x670")
         
     def create_interface(self, title, nodeFile, edgeFile):
@@ -217,18 +222,22 @@ class HiveGui(Tk):
         rules['edges'] = self.edgeStyleVar.get()
         url = make_html(hiveTitle, hive, rules = rules)
         
-        webbrowser.open("file://"+url, new=2)
+        self.view_hive(url,2)
 
     def save_hive(self):
-        hiveTitle = self.title.get()
         hive = self.get_hive()
+        hiveTitle = self.title.get()
+        rules = {}
+        rules['assignment'] = self.assignmentVar.get()
+        rules['position'] = self.positionVar.get()
+        rules['edges'] = self.edgeStyleVar.get()
         filePath = tkFileDialog.asksaveasfilename(defaultextension = '.html')
         if filePath:
             hiveTitle = os.path.splitext(os.path.basename(filePath))[0]
             folder = os.path.dirname(filePath)
-            url = make_html(hiveTitle, hive, folder = folder)
-            webbrowser.open("file://"+url, new=2)
-
+            url = make_html(hiveTitle, hive, folder = folder, rules = rules)
+            self.view_hive(url,1)
+             
     def close_window(self):
         print 'Closing window...'
         self.destroy()
@@ -276,6 +285,10 @@ class HiveGui(Tk):
                     )
         hive.make_hive(nodefile, edgefile)
         return hive
+
+    @staticmethod
+    def view_hive(url, new):
+        webbrowser.open("file://"+url, new=new)
 
 def parse_args(*argv):
     parser = argparse.ArgumentParser(description='This scripts opens the Hive Plotter gui and produces hive plots given user data.')
