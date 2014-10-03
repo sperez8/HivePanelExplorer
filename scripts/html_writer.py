@@ -9,6 +9,7 @@ needed to make a hive plot in D3 using Mike Bolstock's D3 hive module
 #library imports
 import os
 import sys
+import math
 
 #hive plot specific imports
 _cur_dir = os.path.dirname(os.path.realpath(__file__))
@@ -26,7 +27,7 @@ EDGE_OPACITY = 0.8
 NODE_OPACITY = 0.6
 
 LARGE_NODE_NUMBER = 100
-LARGE_EDGE_NUMBER = 400
+LARGE_EDGE_NUMBER = 500
 
 def write_nodes(file, hive):
     '''outputs node info to a text file
@@ -68,7 +69,7 @@ def write_edges(file, hive):
     f.write('];')
 
 
-def make_html(title, hive, folder = TEMP_FOLDER, rules = None):
+def make_html(title, hive, hive_size, folder = TEMP_FOLDER, rules = None):
     '''takes a hive instance and write the
     following files:
         nodes.js - contains nodes, position and coloring
@@ -117,20 +118,22 @@ def make_html(title, hive, folder = TEMP_FOLDER, rules = None):
     edgeOpacity = EDGE_OPACITY
     nodeOpacity = NODE_OPACITY
     
-    if hive.totalNodes > LARGE_NODE_NUMBER:
-        nodeOpacity *= 0.8
-    if hive.totalEdges > LARGE_EDGE_NUMBER:
-        edgeWidth *= 0.7
-        edgeOpacity *= 0.8
-      
+    #adjust and reduce the opacity of nodes and edges given how many there are
+    if hive.totalNodes/LARGE_NODE_NUMBER > 0:
+        nodeOpacity *= pow(0.8,hive.totalNodes/LARGE_NODE_NUMBER/2)
+    if hive.totalEdges/LARGE_EDGE_NUMBER > 0:
+        edgeWidth *= pow(0.8, hive.totalEdges/LARGE_EDGE_NUMBER/2)
+        edgeOpacity *= pow(0.8, hive.totalEdges/LARGE_EDGE_NUMBER/3)
     
+  
     #writing the html
     with open(outputfile, 'w') as f:           
         document = htmlDoc.format(nodeFileName, edgeFileName, title,
                        colorNeutral, numAxis, angles, nodeColor, 
                        edgeColor, nodeReveal, linkReveal,
                        assignmentRule, positionsRule, colorRule,
-                       edgeWidth, edgeOpacity, nodeOpacity
+                       edgeWidth, edgeOpacity, nodeOpacity, 
+                       hive_size[0], hive_size[1]
                        )    
         f.write(document)
     f.close()

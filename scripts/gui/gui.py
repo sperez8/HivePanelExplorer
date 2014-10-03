@@ -132,7 +132,9 @@ class HiveGui(Tk):
         row += 1
         column = 0
         self.paletteOpt, self.paletteVar = make_options(self.app3, 'Hue of color palette:', row = row, column = column, selections = colorOptions)
-        
+        column +=2
+        self.sizeOpt, self.sizeVar = make_options(self.app3, 'Hive Size:', row = row, column = column, selections = sizeOptions)
+        column = 0
         #-----------------------------------#
         ### CREATE, SAVE AND CLOSE BUTTON ###
         #-----------------------------------#
@@ -216,17 +218,20 @@ class HiveGui(Tk):
     def create_hive(self):
         hive = self.get_hive()
         hiveTitle = self.title.get()
+        size = sizes[self.sizeVar.get()]
+        
         rules = {}
         rules['assignment'] = self.assignmentVar.get()
         rules['position'] = self.positionVar.get()
         rules['edges'] = self.edgeStyleVar.get()
-        url = make_html(hiveTitle, hive, rules = rules)
+        url = make_html(hiveTitle, hive, size, rules = rules)
         
         self.view_hive(url,2)
 
     def save_hive(self):
         hive = self.get_hive()
         hiveTitle = self.title.get()
+        size = sizes[self.sizeVar.get()]
         rules = {}
         rules['assignment'] = self.assignmentVar.get()
         rules['position'] = self.positionVar.get()
@@ -235,7 +240,7 @@ class HiveGui(Tk):
         if filePath:
             hiveTitle = os.path.splitext(os.path.basename(filePath))[0]
             folder = os.path.dirname(filePath)
-            url = make_html(hiveTitle, hive, folder = folder, rules = rules)
+            url = make_html(hiveTitle, hive, size, folder = folder, rules = rules)
             self.view_hive(url,1)
              
     def close_window(self):

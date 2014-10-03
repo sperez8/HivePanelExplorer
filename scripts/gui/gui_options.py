@@ -21,6 +21,11 @@ colors['purple'] = ['plum', 'purple', 'magenta', 'blueviolet', 'darkviolet',
 
 colorOptions = colors.keys()
 
+sizes = {'big':(1500,1000), 'small':(1000,550)}
+
+sizeOptions = sizes.keys()
+sizeOptions.sort()
+
 debugOptions = ['False','True']
 
 axesOptions = [2,3,4,5]

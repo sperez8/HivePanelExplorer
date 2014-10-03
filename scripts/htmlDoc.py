@@ -12,10 +12,10 @@ htmlDoc = """<!comment This is a hive plot developed using HivePlotter.>
 <body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/d3.hive.v0.min.js"></script>
-<div id="container" style="width:1000px">
+<div id="container" style="width:{16}px">
 <div id="title" style="height:70px;width:550px;float:left;"></div>
 <div id="rules" style="height:200px;width:450px;float:right;border-bottom:2px solid #5C5C5C"></div>
-<div id="hive" style="height:550px;width:550px;float:left;"></div>
+<div id="hive" style="height:{17}px;width:{17}px;float:left;"></div>
 <div id="reveal" style="height:60px;width:450px;float:left;"></div></div>
 
 <script src="{0}"></script>
@@ -72,7 +72,7 @@ var nodesize = 4
 var width = document.getElementById("hive").offsetWidth
     height = document.getElementById("hive").offsetHeight
     innerRadius = 40,
-    outerRadius = 240;
+    outerRadius = width*0.4;
 
 var linkfill = "none"
     bkgcolor = "white"
