@@ -24,7 +24,7 @@ colorOptions = colors.keys()
 sizes = {'big':(1500,1000), 'small':(1000,550)}
 
 sizeOptions = sizes.keys()
-sizeOptions.sort()
+#sizeOptions.sort()
 
 debugOptions = ['False','True']
 

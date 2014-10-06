@@ -45,6 +45,7 @@ def make_graph(sources, targets, nodes):
     '''Makes a graph using the networkx package Graph instance'''
     G = nx.Graph()
     G.add_edges_from(zipper(sources,targets))
+    G.add_nodes_from(nodes)
     return G
         
 def convert_type(data):
