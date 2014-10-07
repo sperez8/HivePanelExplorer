@@ -508,7 +508,7 @@ class Hive():
         '''fix edge palette so it can be plotted'''
         
         if not isinstance(self.edgePalette, list) or len(self.edgePalette) < len(set(self.edgeStyling.values())):
-            print 'Using default color palette'
+            print 'Not enough colors for number of types of edges. Using default color palette'
             self.edgePalette  = PALETTE[:len(set(self.edgeStyling.values()))]
         
         return None
