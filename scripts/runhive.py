@@ -42,10 +42,10 @@ def main(*argv):
     parser.add_argument('-n', help='The node file', default = gui.NODES)
     parser.add_argument('-e', help='The edge file', default = gui.EDGES)
     parser.add_argument('-path', help='Path where hive plot will be saved', default = TEMP_FOLDER)
-    parser.add_argument('-axes', help='Number of axes', type = int, required = True)
+    parser.add_argument('-axes', help='Number of axes', type = int)
     parser.add_argument('-double', help='Doubles the number of axes', action = 'store_true')
-    parser.add_argument('-assignment', help=assignmentHelp, required = True)
-    parser.add_argument('-position', help=positionHelp, required = True)
+    parser.add_argument('-assignment', help=assignmentHelp)
+    parser.add_argument('-position', help=positionHelp)
     parser.add_argument('-size', help = 'Size of hive plot: big or small', default = 'small')
     parser.add_argument('-nodecolor', help = 'Color of nodes', default = 'purple')
     parser.add_argument('-edgestyle', help = edgeStyleHelp)
@@ -53,6 +53,7 @@ def main(*argv):
     parser.add_argument('-numcolors', help = 'The number of colors to use to style edges', default = 1)
     parser.add_argument('-open', help='Open the hive plot in the browser', action = 'store_true')
     parser.add_argument('-debug', help='Print verbatim to debug', action = 'store_true')
+    parser.add_argument('-properties', help='Shows properties that can be used to plot hives', action = 'store_true')
     args = parser.parse_args()
     
     if (args.n == '' and args.e != '') or (args.n != '' and args.e == ''):
@@ -76,6 +77,24 @@ def main(*argv):
     debug = args.debug      
     folder = args.path
     
+    if args.properties:
+        hive = Hive(debug = debug)
+        properties = list(hive.get_nodes(nodeFile).keys()) + gui_options.assignmentOptions
+        print '\nNode properties:\n\t"'+ '", "'.join(properties) + '"\n'
+        properties = list(hive.get_edges(edgeFile)) + gui_options.edgeStyleOptions
+        print 'Edge properties:\n\t"'+ '", "'.join(properties) + '"\n'
+        sys.exit()
+    else:
+        if not axes:
+            print "You must specify a number of axes"
+            sys.exit()
+        if not assignment:
+            print "You must specify a node assignment rule"
+            sys.exit()
+        if not position:
+            print "You must specify a node position rule"
+            sys.exit()
+            
     hive = Hive(debug = debug,
                 numAxes = axes,
                 doubleAxes = double, 
