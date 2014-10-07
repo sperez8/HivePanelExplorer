@@ -72,7 +72,7 @@ class Hive():
             
         self.get_nodes(nodeFile)
         self.get_edges(edgeFile)               
-        self.check_nodes(self.sources, self.targets, self.nodes)
+        self.check_nodes(self.sources, self.targets, self.nodes, self.doubleAxes)
         self.make_axes()
         self.node_assignment(cutoffValues = cutoffValues)
         self.node_position()
@@ -568,20 +568,30 @@ class Hive():
         return [str(c) for c in cutoffValues]
 
     @staticmethod
-    def check_nodes(sources, targets, nodes):
+    def check_nodes(sources, targets, nodes, double):
         '''check that all nodes are found in the sources and targets'''
         newNodes = []
         
-        for n in nodes:
-            if n in sources or n[:-2] in sources:
-                newNodes.append(n)
-            elif n in targets or n[:-2] in targets:
-                newNodes.append(n)
-            else:
-                pass
-        
-        old = len(nodes)
-        new = len(newNodes)
+        if double:
+            for n in nodes:
+                if n[:-2] in sources:
+                    newNodes.append(n)
+                elif n[:-2] in targets:
+                    newNodes.append(n)
+                else:
+                    pass
+            old = len(nodes)/2
+            new = len(newNodes)/2
+        else:
+            for n in nodes:
+                if n in sources:
+                    newNodes.append(n)
+                elif n in targets:
+                    newNodes.append(n)
+                else:
+                    pass
+            old = len(nodes)
+            new = len(newNodes)
         
         if new == 0:
             print "No nodes were found in the edge file! Please check that the names of the nodes are the same in both files"
@@ -589,7 +599,7 @@ class Hive():
             sys.exit()  
             
         elif new < old:
-            print "\n\n***WARNING: {0} of the {1} nodes were not found in the edge file! Please filter them out using filter_data.py and rerun HivePlotter.***".format(old-new,old)                        
+            print "\n\n***WARNING: {0} of the {1} nodes were not found in the edge file! You may filter them out using filter_data.py and rerun HivePlotter or continue.***".format(old-new,old)                        
             
         return None
 
