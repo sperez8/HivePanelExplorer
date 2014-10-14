@@ -10,8 +10,9 @@ Panel class stores the hive plots to be displayed
 import sys
 import os
 import numpy as np
-
+import webbrowser
 from hive import *
+from html_writer import *
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))
 _root_dir = os.path.dirname(_cur_dir)
@@ -26,7 +27,7 @@ class Panel():
     
     def __init__(self, 
                  size = SIZE,
-                 debug = True,
+                 debug = False,
                  numAxes = 3,
                  doubleAxes = False,
                  assignmentRules = ASSIGNMENT_RULES,
@@ -57,9 +58,9 @@ class Panel():
         if not self.size_rules_agree():
             print "The number of rules and the specified size of the panel don't agree."
             sys.exit()
-        rulePairs = self.cross_rules(self.assignmentRules, self.positionRules)
+        self.rulePairs = self.cross_rules(self.assignmentRules, self.positionRules)
         Hives = {}
-        for a,p in rulePairs:
+        for a,p in self.rulePairs:
             print a,p
             hive = Hive(debug = self.debug,
                     numAxes = self.numAxes,
@@ -75,7 +76,12 @@ class Panel():
             Hives[(a,p)] = hive
             hive = None
         
-        return Hives   
+        self.Hives = Hives
+        return None
+    
+    def open_panel(self, title, folder):
+        url = make_panel_html(title, self.Hives, self.size, rules = self.rulePairs)
+        webbrowser.open("file://"+url, new=2)
         
     def size_rules_agree(self):
         if self.size[0] != len(self.assignmentRules):
@@ -98,7 +104,10 @@ if __name__ == "__main__":
     P = Panel()
     NODES = os.path.join(_root_dir, 'tests', 'test_nodes_friends.txt')
     EDGES = os.path.join(_root_dir, 'tests', 'test_edges_friends.txt')
+    TITLE = 'friends_panel_test'
+    FOLDER = os.path.join(_root_dir, 'tests')
     P.make_panel(NODES, EDGES)
+    P.open_panel(TITLE, FOLDER)
 
 
 
