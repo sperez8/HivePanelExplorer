@@ -72,7 +72,7 @@ class Hive():
             
         self.get_nodes(nodeFile)
         self.get_edges(edgeFile)               
-        self.check_nodes(self.sources, self.targets, self.nodes, self.doubleAxes)
+        self.check_nodes(self.sources, self.targets, self.nodes, self.doubleAxes, self.debug)
         self.make_axes()
         self.node_assignment(cutoffValues = cutoffValues)
         self.node_position()
@@ -508,7 +508,8 @@ class Hive():
         '''fix edge palette so it can be plotted'''
         
         if not isinstance(self.edgePalette, list) or len(self.edgePalette) < len(set(self.edgeStyling.values())):
-            print 'Not enough colors for number of types of edges. Using default color palette'
+            if self.debug:
+                print 'Not enough colors for number of types of edges. Using default color palette'
             self.edgePalette  = PALETTE[:len(set(self.edgeStyling.values()))]
         
         return None
@@ -568,7 +569,7 @@ class Hive():
         return [str(c) for c in cutoffValues]
 
     @staticmethod
-    def check_nodes(sources, targets, nodes, double):
+    def check_nodes(sources, targets, nodes, double, debug):
         '''check that all nodes are found in the sources and targets'''
         newNodes = []
         
@@ -599,7 +600,8 @@ class Hive():
             sys.exit()  
             
         elif new < old:
-            print "\n\n***WARNING: {0} of the {1} nodes were not found in the edge file! You may filter them out using filter_data.py and rerun HivePlotter or continue.***".format(old-new,old)                        
+            if debug:
+                print "\n\n***WARNING: {0} of the {1} nodes were not found in the edge file! You may filter them out using filter_data.py and rerun HivePlotter or continue.***".format(old-new,old)                        
             
         return None
 

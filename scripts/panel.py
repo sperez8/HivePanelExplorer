@@ -19,8 +19,8 @@ _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 
 SIZE = (2,2) #assignment by position rules
-ASSIGNMENT_RULES = ('degree', 'centrality')
-POSITION_RULES = ('clustering', 'betweeness')
+ASSIGNMENT_RULES = ('degree', 'Gender')
+POSITION_RULES = ('clustering', 'Height')
 
 class Panel():
     '''contains a set of hives'''
@@ -61,7 +61,6 @@ class Panel():
         self.rulePairs = self.cross_rules(self.assignmentRules, self.positionRules)
         Hives = {}
         for a,p in self.rulePairs:
-            print a,p
             hive = Hive(debug = self.debug,
                     numAxes = self.numAxes,
                     doubleAxes = self.doubleAxes, 

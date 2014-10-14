@@ -71,7 +71,8 @@ def write_nodes_panel(file, hives, rules):
         line = '    {name: \'' + str(name) +'\''
         
         rulesAdded = []
-        for (a,p),hive in hives.iteritems():
+        for (a,p) in rules:
+            hive = hives[(a,p)]
             if a not in rulesAdded:
                 line  += ', '+a+'_axis: ' + str(hive.axisAssignment[n]-1)
                 rulesAdded.append(a)
@@ -220,14 +221,18 @@ def make_panel_html(title, hives, hive_size, rules, folder = TEMP_FOLDER):
     
     assignmentRule = ''
     positionsRule = ''
-    added = []
-    for (a,p),hive in hives.iteritems():
-        if a not in added:
+    asg = []
+    pos = []
+    for (a,p) in rules:
+        hive = hives[(a,p)]
+        if a not in asg:
             assignmentRule += string.capitalize(a) + ': (' + ', '.join(hive.valuesAssignment) + '),     '
-            added.append(a)
-        if p not in added:
+            asg.append(a)
+        if p not in pos:
             positionsRule += string.capitalize(p) + ': (' + ', '.join(hive.valuesPosition) + '),     '
-            added.append(p)
+            pos.append(p)
+    rowRules = '[\"'+'\",\"'.join(asg)+'\"]'
+    columnRules = '[\"'+'\",\"'.join(pos)+'\"]'
     
     if hive.valuesEdges:
         colorRule = string.capitalize(rules['edges']) + ': (' + ', '.join(hive.valuesEdges) + ')'
@@ -244,10 +249,6 @@ def make_panel_html(title, hives, hive_size, rules, folder = TEMP_FOLDER):
     if hive.totalEdges/LARGE_EDGE_NUMBER > 0:
         edgeWidth *= pow(0.8, hive.totalEdges/LARGE_EDGE_NUMBER/2)
         edgeOpacity *= pow(0.8, hive.totalEdges/LARGE_EDGE_NUMBER/3)
-    
-    a,p = zip(*rules)
-    rowRules = '[\"'+'\",\"'.join(set(a))+'\"]'
-    columnRules = '[\"'+'\",\"'.join(set(p))+'\"]'
     
     panel_size = (1000,550)
   
