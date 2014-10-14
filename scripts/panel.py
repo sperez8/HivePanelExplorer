@@ -13,7 +13,7 @@ import numpy as np
 
 from hive import Hive
 
-SIZE = (2,2)
+SIZE = (2,2) #assignment by position rules
 ASSIGNMENT_RULES = ('degree', 'centrality')
 POSITION_RULES = ('clustering', 'betweeness')
 
@@ -45,3 +45,30 @@ class Panel():
         self.totalEdges = 0
                 
         return None
+    
+    def make_panel(self):
+        '''makes the hive plots and returns the needed assignment values'''
+        if not self.size_rules_agree():
+            print "the size and rules specified don't agree"
+            sys.exit()
+        
+    def size_rules_agree(self):
+        if size[0] != len(assignmentRules):
+            return False
+        if size[1] != len(positionRules):
+            return False
+        else:
+            return True
+        
+
+
+
+
+
+
+
+
+
+
+
+
