@@ -72,7 +72,7 @@ class Panel():
                     nodeColor = self.nodeColor
                     )
             
-            hive.make_hive(nodefile, edgefile) 
+            hive.make_hive(nodefile, edgefile, makeAllEdges = True) 
             Hives[(a,p)] = hive
             hive = None
         

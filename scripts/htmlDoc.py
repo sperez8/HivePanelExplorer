@@ -364,6 +364,10 @@ function plot(p){{
         .attr("d", d3.hive.link()
         .angle(function(d) {{ return angles(d[p.x]); }})
         .radius(function(d) {{ return radius(d[p.y]); }}))
+        .attr("show", function (d) {{
+            if (d.source[p.x] == d.target[p.x]) {{return false}}
+            else {{return true}}
+        }})
         .style("fill", linkfill)
         .style("stroke-opacity", oplink)
         .style("stroke", function(d) {{
@@ -384,7 +388,10 @@ function plot(p){{
                     .duration(800)
                     .style("stroke-opacity", oplink)
                     .style("stroke-width", linkwidth)}});
-      
+    
+    //removes any edges between nodes on same axis.
+    cell.selectAll("path[show="+false+"]").remove()
+
     cell.selectAll(".node")
         .data(nodes)
       .enter().append("circle")
