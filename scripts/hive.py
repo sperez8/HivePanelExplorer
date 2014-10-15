@@ -160,7 +160,6 @@ class Hive():
             print '    There are {0} edges in this network.'.format(self.totalEdges)
             print '    The properties of the edges:  "{0}"'.format(', '.join(self.edgePropertyList))
         
-        print 'XXX', self.edgeProperties
 
         return self.edgeProperties
 
@@ -432,7 +431,6 @@ class Hive():
         self.edges = zipper(newSources, newTargets)
         self.edgeProperties = newProperties
         
-        print 'XXX', self.edgeProperties
         #update the number of edges
         self.totalEdges = len(self.edges)
         

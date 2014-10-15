@@ -312,9 +312,8 @@ var link_color = d3.scale.linear()
     
 //Where the panel fun begins
 padding = 130;
-size = 275;
-panels = 2
-console.log(width)
+panels = {20}
+size = width/panels
 
 var svg = d3.select("body").select("#container").select("#hive").append("svg")
     .attr("class", SVGTitle)
