@@ -177,7 +177,7 @@ def make_html(title, hive, hive_size, folder = TEMP_FOLDER, rules = None):
     return outputfile
 
 
-def make_panel_html(title, hives, hive_size, rules, folder = TEMP_FOLDER):
+def make_panel_html(title, hives, panelSize, rules, folder = TEMP_FOLDER):
     '''takes a hive instance and write the
     following files:
         panel_nodes.js - contains nodes, position and coloring
@@ -260,7 +260,7 @@ def make_panel_html(title, hives, hive_size, rules, folder = TEMP_FOLDER):
                                        linkReveal,assignmentRule, positionsRule,
                                        colorRule, edgeWidth, edgeOpacity,
                                        nodeOpacity, panel_size[0], panel_size[1], 
-                                       rowRules, columnRules)    
+                                       rowRules, columnRules, panelSize[0])    
         f.write(document)
     f.close()
     

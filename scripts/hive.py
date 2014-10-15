@@ -67,7 +67,7 @@ class Hive():
         return None
  
     
-    def make_hive(self, nodeFile, edgeFile, cutoffValues = None, filter = False):
+    def make_hive(self, nodeFile, edgeFile, cutoffValues = None, filter = False, makeAllEdges = False):
         '''runs Hive methods to create an instance from user input'''  
             
         self.get_nodes(nodeFile)
@@ -77,7 +77,8 @@ class Hive():
         self.node_assignment(cutoffValues = cutoffValues)
         self.node_position()
         self.node_style()
-        self.make_edges()
+        self.make_edges(makeAllEdges = makeAllEdges)
+
         self.edge_style()
         self.fix_color_palette()
         return None
@@ -159,6 +160,7 @@ class Hive():
             print '    There are {0} edges in this network.'.format(self.totalEdges)
             print '    The properties of the edges:  "{0}"'.format(', '.join(self.edgePropertyList))
         
+
         return self.edgeProperties
 
 
@@ -336,7 +338,7 @@ class Hive():
             sys.exit()
 
 
-    def make_edges(self):
+    def make_edges(self, makeAllEdges = False):
         '''takes sources and edges and makes a list of 
         edges while assignment nodes to the correct axis in 
         the case of double axis. also keeps track of edge properties.'''
@@ -347,13 +349,18 @@ class Hive():
         axis = self.axisAssignment
         keys = []
         properties = []
-        ignoreExtraEdges = False
         for k,v in self.edgeProperties.iteritems():
             keys.append(k)
             properties.append(v)
         
         reorganizedProperties = zip(*properties)
         self.edgeKeys = keys
+
+        if makeAllEdges:
+            self.edgeProperties = reorganizedProperties
+            self.edges = zipper(self.sources, self.targets)
+            return None
+
         misingNodesCount = 0
         for s,t,p in zipper(self.sources, self.targets, reorganizedProperties):
             if self.doubleAxes:
