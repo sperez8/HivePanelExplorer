@@ -72,7 +72,7 @@ class Panel():
                     nodeColor = self.nodeColor
                     )
             
-            hive.make_hive(nodefile, edgefile) 
+            hive.make_hive(nodefile, edgefile, makeAllEdges = True) 
             Hives[(a,p)] = hive
             hive = None
         
@@ -101,7 +101,8 @@ class Panel():
 
 if __name__ == "__main__":
     '''testing purposes'''
-    P = Panel()
+    P = Panel(assignmentRules = ['degree', 'Gender', 'Height'],
+                positionRules = ['clustering','Height','betweeness'], size = (3,3))
     NODES = os.path.join(_root_dir, 'tests', 'test_nodes_friends.txt')
     EDGES = os.path.join(_root_dir, 'tests', 'test_edges_friends.txt')
     TITLE = 'friends_panel_test'
