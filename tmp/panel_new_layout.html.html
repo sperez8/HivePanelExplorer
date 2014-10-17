@@ -1,0 +1,279 @@
+<!comment This is a hive panel developed using HivePlotter.>
+<!DOCTYPE html>
+<meta charset="utf-8">
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/d3.hive.v0.min.js"></script>
+<div id="container" style="width:100%;min-width:1000px;height:100%;min-height:700px">
+<div id="title" style="height:60px;width:100%;float:left;border-bottom:1px outset #9B8C7E;"></div>
+<div id="panel" style="width:70%;height:0;"></div>
+<div id="search" style="height:100px;width:29%;float:right;border-bottom:2px outset #9B8C7E;border-left:1px outset #9B8C7E;border-radius:5px;margin-top:8px"></div>
+<div id="reveal" style="height:200px;width:29%;float:right;clear:right;border-bottom:2px outset #9B8C7E;border-left:1px outset #9B8C7E;border-radius:5px;margin-top:8px"></div>
+<div id="controlpanel" style="height:400px;width:29%;float:right;clear:right;border-bottom:2px outset #9B8C7E;border-left:1px outset #9B8C7E;border-radius:5px;margin-top:8px"></div></div>
+<script src="friends_panel_test_nodes.js"></script>
+<script src="friends_panel_test_edges.js"></script>
+<script>
+//All the user defined parameters
+
+var SVGTitle = 'Hive Panel : ' + 'Friends_panel_test'
+
+var colorNeutral = '#42264B'//#9B8C7E'//#5C5C5C'
+
+var num_axis = 3
+
+var angle = [0.0001, 2.09, 4.19]
+
+var nodeColor = 'blue'
+    edgeColor = ['blue']
+    linkwidth = 1.3
+    oplink = 0.8
+    opnode = 0.6
+
+var revealNode = function(d,color){
+    d3.select("body").select("#reveal").append("p")
+        .html("<br><br><b>Name: " + d.name +"</b>"+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)
+        .style("color", color)
+    };
+var revealLink = function(d,color){
+    d3.select("body").select("#reveal").append("p")
+        .html("<br><br><b>Source: " + d.source.name + ", Target: " + d.target.name +"</b>"+','+"    Friendshipstrength: " + d.friendshipstrength+','+"    Relationship: " + d.relationship)
+        .style("color", color)
+    };
+
+// d3.select("body").select("#rules")
+//     .append("p")
+//     .html('<br><br>Node assignment property: ' + 'Gender: (alien, boy, girl),     Degree: (2, 4, 5),     ' + '<br><br>Node positioning property: ' + 'Clustering: (0.0, 0.666666666667),     Betweeness: (0.0, 0.177777777778),     Height: (0.1, 1),     ' + '<br><br>Edge coloring property: ' + 'None') 
+//     .style("color", colorNeutral)
+
+d3.select("body").select("#title")
+    .append("h2").html('<center>'+SVGTitle+'</center>')
+    .style("color", colorNeutral)
+
+d3.select("body").select("#search")
+    .append("h3").html('<center>'+ 'Search for nodes:'+'</center>')
+    .style("color", colorNeutral)
+
+var removeReveal = function(d){
+    d3.select("body").select("#reveal").selectAll("p")
+        .transition()
+        .duration(hoverOverTime)
+        .style("opacity", 0)
+        .remove();
+    };
+    
+var nodesize = 4
+    nodestroke = 0.4
+    nodestrokecolor = "grey"
+    
+var width = document.getElementById("panel").offsetWidth
+    height = width
+
+var linkfill = "none"
+    bkgcolor = "white"
+
+var hoverOverTime = 900
+
+var angles = d3.scale.ordinal()
+    .domain(d3.range(num_axis))
+    .range(angle);
+
+var link_color = d3.scale.linear()
+    .domain(d3.range(0,edgeColor.length,1.0))
+    .range(edgeColor);
+    
+//Where the panel fun begins
+padding = width/0.7*0.05;
+panels = 3
+size = (width-padding)/panels
+
+console.log(width,height, size, padding)
+
+var svg = d3.select("body").select("#container").select("#panel").append("svg")
+    .attr("class", SVGTitle)
+    .attr("width", width)
+    .attr("height", width)
+    .style("background-color", bkgcolor)
+  .append("g")
+    .attr("transform", "translate(" + (size/2 + padding) + "," + (size/2 + padding) + ")"); //(0,0) coordinates correspond to the center of the first hive.
+ 
+var columntraits = ["Gender","degree","Height"];
+var rowtraits = ["clustering","betweeness","Height"];
+
+function cross(a, b){
+    var c = [], n = a.length, m = b.length, i, j;
+    for (i = -1; ++i < n;) for (j = -1; ++j < m;) c.push({x: a[i]+'_axis', i: i, y: b[j] + '_pos', j: j});
+    return c;
+
+};
+
+var cell = svg.selectAll(".cell")
+  .data(cross(columntraits,rowtraits))
+.enter().append("g")
+  .attr("class", "cell")
+  .attr("transform", function(d) { return "translate(" + (d.i) * size + "," + d.j * size + ")"; })
+  .each(plot);
+  
+function plot(p){
+    var cell = d3.select(this);
+
+    var innerRadius = size*0.05
+    var outerRadius = size*0.45
+    var radius = d3.scale.linear().range([innerRadius, outerRadius]);
+
+    if (p.i == 0){
+    cell.append("text")
+        .attr("x", function(d) { return d.i; })
+        .attr("y", function(d) { return d.j-size/2 - padding/2})
+        .text(p.y.split('_')[0])
+        .attr("transform", function(d) { 
+            return "rotate(-90)"; //"translate("+ d.i-size/2 + "," + d.j-size/2+")
+            })
+        .attr("font-size", "13pt");
+    }
+
+    if (p.j==0){
+    cell.append("text")
+        .attr("x", function(d) { return d.i; })
+        .attr("y", function(d) { return d.j-size/2 - padding/2; })
+        .text(p.x.split('_')[0])
+        .attr("font-size", "13pt");
+    }
+
+    cell.selectAll(".axis")
+        .data(angle)
+      .enter().append("line")
+        .attr("class", "axis")
+        .attr("transform", function(d) { return "rotate(" + degrees(angles(d)) + ")"; })
+        .attr("x1", radius.range()[0])
+        .attr("x2", radius.range()[1])
+        .attr("stroke-width",0.7)
+        .attr("stroke", "black");
+
+    cell.selectAll(".link")
+        .data(links)
+      .enter().append("path")
+        .attr("class", "link")
+        .attr("d", d3.hive.link()
+        .angle(function(d) { return angles(d[p.x]); })
+        .radius(function(d) { return radius(d[p.y]); }))
+        .attr("show", function (d) {
+            if (d.source[p.x] == d.target[p.x]) {return false}
+            else {return true}
+        })
+        .style("fill", linkfill)
+        .style("stroke-opacity", oplink)
+        .style("stroke", function(d) {
+            if (edgeColor.length == 1){
+                return edgeColor}
+            else {return link_color(d.type)}
+            })
+        .style("stroke-width", linkwidth)
+        .on("mouseover", function(d){
+                revealLink(d, d3.select(this).style("stroke"));
+                d3.select(this)
+                    .style("stroke-opacity", 1)
+                    .style("stroke-width", linkwidth*2)})
+        .on("mouseout", function(d){
+                removeReveal();
+                d3.select(this)
+                    .transition()
+                    .duration(800)
+                    .style("stroke-opacity", oplink)
+                    .style("stroke-width", linkwidth)});
+    
+    //removes any edges between nodes on same axis.
+    cell.selectAll("path[show="+false+"]").remove()
+
+    cell.selectAll(".node")
+        .data(nodes)
+      .enter().append("circle")
+        .attr("class", "node")
+        .attr("transform", function(d) { return "rotate(" + degrees(angles(d[p.x])) + ")"; })
+        .attr("cx", function(d) { return radius(d[p.y]); })
+        .attr("r", nodesize)
+        .attr("stroke-width", nodestroke)
+        .attr("stroke", nodestrokecolor)
+        .style("fill-opacity", opnode)
+        .style("fill", nodeColor)
+        .on("mouseover", function(d){
+                d3.select(this)
+                    .style("fill-opacity", 1)
+                    .attr("stroke-width", nodestroke*3)
+                    .attr("stroke", 'black')
+                    .attr("r", nodesize*1.5) 
+                   revealNode(d, d3.select(this).style("fill"));
+                d3.selectAll(".node")
+                    .transition()
+                    .duration(hoverOverTime*0.2)
+                    .style("fill-opacity", function(n){
+                        if (n.name == d.name){
+                            return 1}
+                        else {
+                            return opnode}
+                    })
+                    .style("stroke-width", function(n){
+                        if (n.name == d.name){
+                            return nodestroke*3}
+                        else {
+                            return nodestroke}
+                    })
+                    .attr("stroke", function(n){
+                        if (n.name == d.name){
+                            return 'black'}
+                        else {
+                            return nodestrokecolor}
+                    })
+                    .attr("r", function(n){
+                        if (n.name == d.name){
+                            return nodesize*1.5}
+                        else {
+                            return nodesize}
+                    })
+                d3.selectAll(".link")
+                    .transition()
+                    .delay(hoverOverTime*0.1)
+                    .duration(hoverOverTime*0.2)
+                    .style("stroke-opacity", function(l){
+                        if (l.source.name == d.name || l.target.name == d.name){
+                            return 1}
+                        else {
+                            return oplink}
+                    })
+                    .style("stroke-width", function(l){
+                        if (l.source.name == d.name || l.target.name == d.name){
+                            return linkwidth*2.5}
+                        else {
+                            return linkwidth}
+                    })
+                })
+        .on("mouseout", function(d){
+                d3.select(this)
+                    .transition()
+                    .duration(hoverOverTime)
+                    .style("fill-opacity", opnode)
+                    .attr("stroke-width", nodestroke)
+                    .attr("stroke", nodestrokecolor)
+                    .attr("r", nodesize);
+                removeReveal();
+                d3.selectAll(".link")
+                    .transition()
+                    .duration(hoverOverTime)
+                    .style("stroke-opacity", oplink)
+                    .style("stroke-width", linkwidth)
+                d3.selectAll(".node")
+                    .transition()
+                    .duration(hoverOverTime)
+                    .attr("r", nodesize)
+                    .attr("stroke-width", nodestroke)
+                    .attr("stroke", nodestrokecolor)
+                    .style("fill-opacity", opnode)
+                });
+};
+
+
+function degrees(radians) {
+  return radians / Math.PI * 180 - 90;
+}
+</script>
+</body>
+</html>
