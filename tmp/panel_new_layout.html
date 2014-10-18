@@ -86,8 +86,6 @@ padding = width/0.7*0.05;
 panels = 3
 size = (width-padding)/panels
 
-console.log(width,height, size, padding)
-
 var svg = d3.select("body").select("#container").select("#panel").append("svg")
     .attr("class", SVGTitle)
     .attr("width", width)
@@ -98,6 +96,26 @@ var svg = d3.select("body").select("#container").select("#panel").append("svg")
  
 var columntraits = ["Gender","degree","Height"];
 var rowtraits = ["clustering","betweeness","Height"];
+
+var scales = {};
+
+for (var i in columntraits) {
+    trait = columntraits[i]+'_axis';
+    max = d3.max(nodes, function(d) {
+        return d[trait]});
+    min = d3.min(nodes, function(d) {
+        return d[trait]});
+    scales[trait] = [min,max];
+    }
+
+for (var i in rowtraits) {
+    trait = rowtraits[i]+'_pos';
+    max = d3.max(nodes, function(d) {
+        return d[trait]});
+    min = d3.min(nodes, function(d) {
+        return d[trait]});
+    scales[trait] = [min,max];
+    }
 
 function cross(a, b){
     var c = [], n = a.length, m = b.length, i, j;
@@ -141,6 +159,16 @@ function plot(p){
         .attr("font-size", "13pt");
     }
 
+    var posScale = d3.scale.linear()
+                    .domain(scales[p.y])
+                    .range([0, 1]);
+    var asgScale = d3.scale.quantile()
+                    .domain(scales[p.x])
+                    .range(d3.range(num_axis));
+
+    // Uncomment to see the cutoffs of the scale
+    //console.log(asgScale.invertExtent(0), asgScale.invertExtent(1), asgScale.invertExtent(2)) 
+
     cell.selectAll(".axis")
         .data(angle)
       .enter().append("line")
@@ -156,8 +184,8 @@ function plot(p){
       .enter().append("path")
         .attr("class", "link")
         .attr("d", d3.hive.link()
-        .angle(function(d) { return angles(d[p.x]); })
-        .radius(function(d) { return radius(d[p.y]); }))
+        .angle(function(d) { return angles(asgScale(d[p.x])); })
+        .radius(function(d) { return radius(posScale(d[p.y])); }))
         .attr("show", function (d) {
             if (d.source[p.x] == d.target[p.x]) {return false}
             else {return true}
@@ -190,8 +218,9 @@ function plot(p){
         .data(nodes)
       .enter().append("circle")
         .attr("class", "node")
-        .attr("transform", function(d) { return "rotate(" + degrees(angles(d[p.x])) + ")"; })
-        .attr("cx", function(d) { return radius(d[p.y]); })
+        .attr("transform", function(d) { return "rotate(" + degrees(angles(asgScale(d[p.x]))) + ")"; })
+        .attr("cx", function(d) {
+                return radius(posScale(d[p.y]));})
         .attr("r", nodesize)
         .attr("stroke-width", nodestroke)
         .attr("stroke", nodestrokecolor)
