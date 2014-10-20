@@ -61,7 +61,7 @@ var removeReveal = function(d){
         .remove();
     };
     
-var nodesize = 4
+var nodesize = 3
     nodestroke = 0.4
     nodestrokecolor = "grey"
     
@@ -301,6 +301,18 @@ function plot(p){
                 });
 };
 
+function filter_nodes_categorical(property, value, color) {
+    nodes = d3.selectAll("circle")
+
+    nodes.each(function(d){
+        if (d[property] == value) {
+            d3.select(this)
+                .style("fill", "red")
+       }
+    })
+}
+
+filter_nodes_categorical("Gender", 'girl')
 
 function degrees(radians) {
   return radians / Math.PI * 180 - 90;

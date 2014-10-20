@@ -238,7 +238,7 @@ htmlDocPanel = """<!comment This is a hive panel developed using HivePlotter.>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/d3.hive.v0.min.js"></script>
 <div id="container" style="width:100%;min-width:{16}">
-<div id="title" style="height:70px;width:550px;float:left;"></div>
+<div id="title" style="height:70px;width:100%;float:left;"></div>
 <div id="panel" style="height:{17}px;width:{17}px;float:left;"></div>
 <div id="rules" style="height:200px;width:450px;float:right;border-bottom:2px solid #5C5C5C"></div>
 <div id="reveal" style="height:60px;width:450px;float:left;"></div></div>
