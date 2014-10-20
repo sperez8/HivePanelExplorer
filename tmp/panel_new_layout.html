@@ -23,8 +23,8 @@ var num_axis = 3
 
 var angle = [0.0001, 2.09, 4.19]
 
-var nodeColor = 'purple'
-    edgeColor = ['purple']
+var nodeColor = 'blue'
+    edgeColor = ['blue']
     linkwidth = 1.3
     oplink = 0.8
     opnode = 0.6
@@ -301,18 +301,33 @@ function plot(p){
                 });
 };
 
-function filter_nodes_categorical(property, value, color) {
+function color_nodes(property, value, color) {
     nodes = d3.selectAll("circle")
 
     nodes.each(function(d){
         if (d[property] == value) {
             d3.select(this)
-                .style("fill", "red")
+                .style("fill", color)
        }
     })
 }
 
-filter_nodes_categorical("Gender", 'girl')
+function color_links(property, value, color) {
+    links = d3.selectAll("path")
+
+    links.each(function(d){
+        if (d[property] == value) {
+            d3.select(this)
+                .style("stroke", color)
+       }
+    })
+}
+
+color_nodes('Gender', 'girl', 'red')
+color_nodes('Gender', 'alien', 'purple')
+color_nodes('Gender', 'boy', 'blue')
+color_links('relationship', 'friends', 'black')
+color_links('relationship', 'enemies', 'grey')
 
 function degrees(radians) {
   return radians / Math.PI * 180 - 90;
