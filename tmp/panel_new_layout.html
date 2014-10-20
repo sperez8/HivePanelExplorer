@@ -13,15 +13,17 @@
 <script src="friends_panel_test_nodes.js"></script>
 <script src="friends_panel_test_edges.js"></script>
 <script>
-//All the user defined parameters
+
+  // ****************************************** //
+ //         USER DEFINED PARAMETERS            //
+// ****************************************** //
 
 var SVGTitle = 'Friends Forever' + ' Hive Panel'
 
-var colorNeutral = '#42264B'//#9B8C7E'//#5C5C5C'
+var colorNeutral = '#42264B'
 
 var num_axis = 3
-
-var angle = [0.0001, 2.09, 4.19]
+    angle = [0.0001, 2.09, 4.19]
 
 var nodeColor = 'blue'
     edgeColor = ['blue']
@@ -29,21 +31,35 @@ var nodeColor = 'blue'
     oplink = 0.8
     opnode = 0.6
 
-var revealNode = function(d,color){
-    d3.select("body").select("#reveal").append("p")
-        .html("<br><br><b>Name: " + d.name +"</b>"+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)
-        .style("color", color)
-    };
-var revealLink = function(d,color){
-    d3.select("body").select("#reveal").append("p")
-        .html("<br><br><b>Source: " + d.source.name + ", Target: " + d.target.name +"</b>"+','+"    Friendshipstrength: " + d.friendshipstrength+','+"    Relationship: " + d.relationship)
-        .style("color", color)
-    };
+var nodesize = 3
+    nodestroke = 0.4
+    nodestrokecolor = "grey"
 
-// d3.select("body").select("#rules")
-//     .append("p")
-//     .html('<br><br>Node assignment property: ' + 'Gender: (alien, boy, girl),     Degree: (2, 4, 5),     ' + '<br><br>Node positioning property: ' + 'Clustering: (0.0, 0.666666666667),     Betweeness: (0.0, 0.177777777778),     Height: (0.1, 1),     ' + '<br><br>Edge coloring property: ' + 'None') 
-//     .style("color", colorNeutral)
+var linkfill = "none"
+    bkgcolor = "white"
+
+var hoverOverTime = 900
+
+
+  // ****************************************** //
+ //         WEB PAGE LAYOUT PARAMETERS         //
+// ****************************************** //
+
+
+
+var angles = d3.scale.ordinal()
+    .domain(d3.range(num_axis))
+    .range(angle);
+
+var link_color = d3.scale.linear()
+    .domain(d3.range(0,edgeColor.length,1.0))
+    .range(edgeColor);
+
+var width = document.getElementById("panel").offsetWidth
+    height = width
+    padding = width/0.7*0.05;
+    panels = 3
+    size = (width-padding)/panels
 
 d3.select("body").select("#title")
     .append("h1").html('<center>'+SVGTitle+'</center>')
@@ -53,51 +69,16 @@ d3.select("body").select("#search")
     .append("p").html('<center>'+ 'Search for nodes:'+'</center>')
     .style("color", colorNeutral)
 
-var removeReveal = function(d){
-    d3.select("body").select("#reveal").selectAll("p")
-        .transition()
-        .duration(hoverOverTime)
-        .style("opacity", 0)
-        .remove();
-    };
-    
-var nodesize = 3
-    nodestroke = 0.4
-    nodestrokecolor = "grey"
-    
-var width = document.getElementById("panel").offsetWidth
-    height = width
 
-var linkfill = "none"
-    bkgcolor = "white"
+  // ****************************************** //
+ //       ORGANIZING PANEL TABLE ITEMS         //
+// ****************************************** //
 
-var hoverOverTime = 900
 
-var angles = d3.scale.ordinal()
-    .domain(d3.range(num_axis))
-    .range(angle);
 
-var link_color = d3.scale.linear()
-    .domain(d3.range(0,edgeColor.length,1.0))
-    .range(edgeColor);
-    
-//Where the panel fun begins
-padding = width/0.7*0.05;
-panels = 3
-size = (width-padding)/panels
-
-var svg = d3.select("body").select("#container").select("#panel").append("svg")
-    .attr("class", SVGTitle)
-    .attr("width", width)
-    .attr("height", width)
-    .style("background-color", bkgcolor)
-  .append("g")
-    .attr("transform", "translate(" + (size/2 + padding) + "," + (size/2 + padding) + ")"); //(0,0) coordinates correspond to the center of the first hive.
- 
 var columntraits = ["Gender","degree","Height"];
-var rowtraits = ["clustering","betweeness","Height"];
-
-var scales = {};
+    rowtraits = ["clustering","betweeness","Height"];
+    scales = {};
 
 for (var i in columntraits) {
     trait = columntraits[i]+'_axis';
@@ -123,6 +104,21 @@ function cross(a, b){
     return c;
 
 };
+
+
+  // ****************************************** //
+ //          MAKING THE SVG AND HIVES          //
+// ****************************************** //
+
+
+
+var svg = d3.select("body").select("#container").select("#panel").append("svg")
+    .attr("class", SVGTitle)
+    .attr("width", width)
+    .attr("height", width)
+    .style("background-color", bkgcolor)
+  .append("g")
+    .attr("transform", "translate(" + (size/2 + padding) + "," + (size/2 + padding) + ")"); //(0,0) coordinates correspond to the center of the first hive.
 
 var cell = svg.selectAll(".cell")
   .data(cross(columntraits,rowtraits))
@@ -301,6 +297,33 @@ function plot(p){
                 });
 };
 
+
+  // ****************************************** //
+ //         SOME DISPLAY FUNCTIONS             //
+// ****************************************** //
+
+
+
+var revealNode = function(d,color){
+    d3.select("body").select("#reveal").append("p")
+        .html("<br><br><b>Name: " + d.name +"</b>"+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)
+        .style("color", color)
+    };
+
+var revealLink = function(d,color){
+    d3.select("body").select("#reveal").append("p")
+        .html("<br><br><b>Source: " + d.source.name + ", Target: " + d.target.name +"</b>"+','+"    Friendshipstrength: " + d.friendshipstrength+','+"    Relationship: " + d.relationship)
+        .style("color", color)
+    };
+
+var removeReveal = function(d){
+    d3.select("body").select("#reveal").selectAll("p")
+        .transition()
+        .duration(hoverOverTime)
+        .style("opacity", 0)
+        .remove();
+    };
+
 function color_nodes(property, value, color) {
     nodes = d3.selectAll("circle")
 
@@ -310,7 +333,7 @@ function color_nodes(property, value, color) {
                 .style("fill", color)
        }
     })
-}
+};
 
 function color_links(property, value, color) {
     links = d3.selectAll("path")
@@ -321,13 +344,20 @@ function color_links(property, value, color) {
                 .style("stroke", color)
        }
     })
-}
+};
 
 color_nodes('Gender', 'girl', 'red')
 color_nodes('Gender', 'alien', 'purple')
 color_nodes('Gender', 'boy', 'blue')
-color_links('relationship', 'friends', 'black')
-color_links('relationship', 'enemies', 'grey')
+color_links('relationship', 'friends', 'green')
+color_links('relationship', 'enemies', 'orange')
+
+
+  // ****************************************** //
+ //              RANDOM FUNCTIONS              //
+// ****************************************** //
+
+
 
 function degrees(radians) {
   return radians / Math.PI * 180 - 90;
