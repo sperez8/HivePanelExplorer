@@ -1,0 +1,60 @@
+
+
+body {
+  margin: 50px 50px 50px 50px;
+}
+
+h1 {
+	font: 300 34px "Helvetica Neue";
+}
+
+#container {
+  font: normal 12px "Helvetica Neue";
+  height: 750px;
+  width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 20px;
+}
+
+#title {
+	height: 60px;
+	width:100%;
+	float: left;
+	border-bottom: 3px outset #9B8C7E;
+	padding-bottom: 25px;
+}
+
+#panel {
+	width: 700px;
+	height: 700px;
+	float: left;
+	clear: right;
+}
+
+#search {
+	height:70px;
+	margin-top:20px;
+}
+
+#reveal {
+	height:170px;
+	clear:right;
+	margin-top:10px;
+}
+
+#controlpanel {
+	height:400px;
+	clear:right;
+	margin-top:10px;
+}
+
+#search, #reveal, #controlpanel {
+	width:295px;
+	float:right;
+	border-radius:5px;
+	border-bottom:2px outset #9B8C7E;
+	border-left:1px outset #9B8C7E;
+}
+
+

@@ -1,372 +1,384 @@
 <!comment This is a hive panel developed using HivePlotter.>
 <!DOCTYPE html>
-<meta charset="utf-8">
-<body>
-<script src="http://d3js.org/d3.v3.min.js"></script>
-<script src="http://d3js.org/d3.hive.v0.min.js"></script>
-<div id="container" style="width:1000px;height:700px;margin-left:auto;margin-right:auto;margin-top:20px;">
-<div id="title" style="height:60px;width:100%;float:left;border-bottom:3px outset #9B8C7E;padding-bottom:25px"></div>
-<div id="panel" style="width:700px;height:700px;float:left;clear:right"></div>
-<div id="search" style="height:70px;width:295px;float:right;border-bottom:2px outset #9B8C7E;border-left:1px outset #9B8C7E;border-radius:5px;margin-top:20px"></div>
-<div id="reveal" style="height:170px;width:295px;float:right;clear:right;border-bottom:2px outset #9B8C7E;border-left:1px outset #9B8C7E;border-radius:5px;margin-top:10px"></div>
-<div id="controlpanel" style="height:400px;width:295px;float:right;clear:right;border-bottom:2px outset #9B8C7E;border-left:1px outset #9B8C7E;border-radius:5px;margin-top:10px"></div></div>
-<script src="friends_panel_test_nodes.js"></script>
-<script src="friends_panel_test_edges.js"></script>
-<script>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link type="text/css" rel="stylesheet" href="panel_style.css"/>
+    </head>
+    <body>
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="http://d3js.org/d3.hive.v0.min.js"></script>
+        <div id="container">
+            <div id="title"></div>
+            <div id="panel"></div>
+            <div id="search"></div>
+            <div id="reveal"></div>
+            <div id="controlpanel"></div>
+        </div>
+        <script src="friends_panel_test_nodes.js"></script>
+        <script src="friends_panel_test_edges.js"></script>
 
-  // ****************************************** //
- //         USER DEFINED PARAMETERS            //
-// ****************************************** //
+        <script>
 
-var SVGTitle = 'Friends Forever' + ' Hive Panel'
+          // ****************************************** //
+         //         USER DEFINED PARAMETERS            //
+        // ****************************************** //
 
-var colorNeutral = '#42264B'
+        var SVGTitle = 'Friends Forever' + ' Hive Panel'
 
-var num_axis = 3
-    angle = [0.0001, 2.09, 4.19]
+        var colorNeutral = '#42264B'
 
-var nodeColor = 'blue'
-    edgeColor = ['blue']
-    linkwidth = 1.3
-    oplink = 0.8
-    opnode = 0.6
+        var num_axis = 3
+            angle = [0.0001, 2.09, 4.19]
 
-var nodesize = 3
-    nodestroke = 0.4
-    nodestrokecolor = "grey"
+        var nodeColor = 'blue'
+            edgeColor = ['blue']
+            linkwidth = 1.3
+            oplink = 0.8
+            opnode = 0.6
 
-var linkfill = "none"
-    bkgcolor = "white"
+        var nodesize = 3
+            nodestroke = 0.4
+            nodestrokecolor = "grey"
 
-var hoverOverTime = 900
+        var linkfill = "none"
+            bkgcolor = "white"
 
-
-  // ****************************************** //
- //         WEB PAGE LAYOUT PARAMETERS         //
-// ****************************************** //
-
-
-
-var angles = d3.scale.ordinal()
-    .domain(d3.range(num_axis))
-    .range(angle);
-
-var link_color = d3.scale.linear()
-    .domain(d3.range(0,edgeColor.length,1.0))
-    .range(edgeColor);
-
-var width = document.getElementById("panel").offsetWidth
-    height = width
-    padding = width/0.7*0.05;
-    panels = 3
-    size = (width-padding)/panels
-
-d3.select("body").select("#title")
-    .append("h1").html('<center>'+SVGTitle+'</center>')
-    .style("color", colorNeutral)
-
-d3.select("body").select("#search")
-    .append("p").html('<center>'+ 'Search for nodes:'+'</center>')
-    .style("color", colorNeutral)
+        var hoverOverTime = 900
 
 
-  // ****************************************** //
- //       ORGANIZING PANEL TABLE ITEMS         //
-// ****************************************** //
+          // ****************************************** //
+         //         WEB PAGE LAYOUT PARAMETERS         //
+        // ****************************************** //
 
 
 
-var columntraits = ["Gender","degree","Height"];
-    rowtraits = ["clustering","betweeness","Height"];
-    scales = {};
+        var angles = d3.scale.ordinal()
+            .domain(d3.range(num_axis))
+            .range(angle);
 
-for (var i in columntraits) {
-    trait = columntraits[i]+'_axis';
-    max = d3.max(nodes, function(d) {
-        return d[trait]});
-    min = d3.min(nodes, function(d) {
-        return d[trait]});
-    scales[trait] = [min,max];
-    }
+        var link_color = d3.scale.linear()
+            .domain(d3.range(0,edgeColor.length,1.0))
+            .range(edgeColor);
 
-for (var i in rowtraits) {
-    trait = rowtraits[i]+'_pos';
-    max = d3.max(nodes, function(d) {
-        return d[trait]});
-    min = d3.min(nodes, function(d) {
-        return d[trait]});
-    scales[trait] = [min,max];
-    }
-
-function cross(a, b){
-    var c = [], n = a.length, m = b.length, i, j;
-    for (i = -1; ++i < n;) for (j = -1; ++j < m;) c.push({x: a[i]+'_axis', i: i, y: b[j] + '_pos', j: j});
-    return c;
-
-};
+        d3.select("body").select("#title")
+            .append("h1").html('<center>'+SVGTitle+'</center>')
+            .style("color", colorNeutral)
 
 
-  // ****************************************** //
- //          MAKING THE SVG AND HIVES          //
-// ****************************************** //
+          // ****************************************** //
+         //       ORGANIZING PANEL TABLE ITEMS         //
+        // ****************************************** //
+
+
+        var columntraits = ["Gender","degree","Height"];
+            rowtraits = ["clustering","betweeness","Height","Height"];
+            scales = {};
+
+        var width = document.getElementById("panel").offsetWidth
+            height = width
+            padding = width/0.7*0.05;
+            panels = Math.max(columntraits.length, rowtraits.length)
+            size = (width-padding)/panels
+
+        for (var i in columntraits) {
+            trait = columntraits[i]+'_axis';
+            max = d3.max(nodes, function(d) {
+                return d[trait]});
+            min = d3.min(nodes, function(d) {
+                return d[trait]});
+            scales[trait] = [min,max];
+            }
+
+        for (var i in rowtraits) {
+            trait = rowtraits[i]+'_pos';
+            max = d3.max(nodes, function(d) {
+                return d[trait]});
+            min = d3.min(nodes, function(d) {
+                return d[trait]});
+            scales[trait] = [min,max];
+            }
+
+        function cross(a, b){
+            var c = [], n = a.length, m = b.length, i, j;
+            for (i = -1; ++i < n;) for (j = -1; ++j < m;) c.push({x: a[i]+'_axis', i: i, y: b[j] + '_pos', j: j});
+            return c;
+
+        };
+
+
+          // ****************************************** //
+         //          MAKING THE SVG AND HIVES          //
+        // ****************************************** //
 
 
 
-var svg = d3.select("body").select("#container").select("#panel").append("svg")
-    .attr("class", SVGTitle)
-    .attr("width", width)
-    .attr("height", width)
-    .style("background-color", bkgcolor)
-  .append("g")
-    .attr("transform", "translate(" + (size/2 + padding) + "," + (size/2 + padding) + ")"); //(0,0) coordinates correspond to the center of the first hive.
+        var svg = d3.select("body").select("#container").select("#panel").append("svg")
+            .attr("class", SVGTitle)
+            .attr("width", width)
+            .attr("height", width)
+            .style("background-color", bkgcolor)
+          .append("g")
+            .attr("transform", "translate(" + (size/2 + padding) + "," + (size/2 + padding) + ")"); //(0,0) coordinates correspond to the center of the first hive.
 
-var cell = svg.selectAll(".cell")
-  .data(cross(columntraits,rowtraits))
-.enter().append("g")
-  .attr("class", "cell")
-  .attr("transform", function(d) { return "translate(" + (d.i) * size + "," + d.j * size + ")"; })
-  .each(plot);
-  
-function plot(p){
-    var cell = d3.select(this);
+        var cell = svg.selectAll(".cell")
+          .data(cross(columntraits,rowtraits))
+        .enter().append("g")
+          .attr("class", "cell")
+          .attr("transform", function(d) { return "translate(" + (d.i) * size + "," + d.j * size + ")"; })
+          .each(plot);
+          
+        function plot(p){
+            var cell = d3.select(this);
 
-    var innerRadius = size*0.05
-    var outerRadius = size*0.45
-    var radius = d3.scale.linear().range([innerRadius, outerRadius]);
+            var innerRadius = size*0.05
+            var outerRadius = size*0.45
+            var radius = d3.scale.linear().range([innerRadius, outerRadius]);
 
-    if (p.i == 0){
-    cell.append("text")
-        .attr("x", function(d) { return d.i; })
-        .attr("y", function(d) { return d.j-size/2 - padding/2})
-        .attr("text-anchor", "middle")
-        .text(capitalize(p.y.split('_')[0]))
-        .attr("transform", function(d) { 
-            return "rotate(-90)"; //"translate("+ d.i-size/2 + "," + d.j-size/2+")
-            })
-        .attr("font-size", "13pt");
-    }
-
-    if (p.j==0){
-    cell.append("text")
-        .attr("x", function(d) { return d.i; })
-        .attr("y", function(d) { return d.j-size/2 - padding/2; })
-        .attr("text-anchor", "middle")
-        .text(capitalize(p.x.split('_')[0]))
-        .attr("font-size", "13pt");
-    }
-
-    var posScale = d3.scale.linear()
-                    .domain(scales[p.y])
-                    .range([0, 1]);
-    var asgScale = d3.scale.quantile()
-                    .domain(scales[p.x])
-                    .range(d3.range(num_axis));
-
-    // Uncomment to see the cutoffs of the scale
-    //console.log(asgScale.invertExtent(0), asgScale.invertExtent(1), asgScale.invertExtent(2)) 
-
-    cell.selectAll(".axis")
-        .data(angle)
-      .enter().append("line")
-        .attr("class", "axis")
-        .attr("transform", function(d) { return "rotate(" + degrees(angles(d)) + ")"; })
-        .attr("x1", radius.range()[0])
-        .attr("x2", radius.range()[1])
-        .attr("stroke-width",0.7)
-        .attr("stroke", "black");
-
-    cell.selectAll(".link")
-        .data(links)
-      .enter().append("path")
-        .attr("class", "link")
-        .attr("d", d3.hive.link()
-        .angle(function(d) { return angles(asgScale(d[p.x])); })
-        .radius(function(d) { return radius(posScale(d[p.y])); }))
-        .attr("show", function (d) {
-            if (d.source[p.x] == d.target[p.x]) {return false}
-            else {return true}
-        })
-        .style("fill", linkfill)
-        .style("stroke-opacity", oplink)
-        .style("stroke", function(d) {
-            if (edgeColor.length == 1){
-                return edgeColor}
-            else {return link_color(d.type)}
-            })
-        .style("stroke-width", linkwidth)
-        .on("mouseover", function(d){
-                revealLink(d, d3.select(this).style("stroke"));
-                d3.select(this)
-                    .style("stroke-opacity", 1)
-                    .style("stroke-width", linkwidth*2)})
-        .on("mouseout", function(d){
-                removeReveal();
-                d3.select(this)
-                    .transition()
-                    .duration(800)
-                    .style("stroke-opacity", oplink)
-                    .style("stroke-width", linkwidth)});
-    
-    //removes any edges between nodes on same axis.
-    cell.selectAll("path[show="+false+"]").remove()
-
-    cell.selectAll(".node")
-        .data(nodes)
-      .enter().append("circle")
-        .attr("class", "node")
-        .attr("transform", function(d) { return "rotate(" + degrees(angles(asgScale(d[p.x]))) + ")"; })
-        .attr("cx", function(d) {
-                return radius(posScale(d[p.y]));})
-        .attr("r", nodesize)
-        .attr("stroke-width", nodestroke)
-        .attr("stroke", nodestrokecolor)
-        .style("fill-opacity", opnode)
-        .style("fill", nodeColor)
-        .on("mouseover", function(d){
-                d3.select(this)
-                    .style("fill-opacity", 1)
-                    .attr("stroke-width", nodestroke*3)
-                    .attr("stroke", 'black')
-                    .attr("r", nodesize*1.5) 
-                   revealNode(d, d3.select(this).style("fill"));
-                d3.selectAll(".node")
-                    .transition()
-                    .duration(hoverOverTime*0.2)
-                    .style("fill-opacity", function(n){
-                        if (n.name == d.name){
-                            return 1}
-                        else {
-                            return opnode}
+            if (p.i == 0){
+            cell.append("text")
+                .attr("x", function(d) { return d.i; })
+                .attr("y", function(d) { return d.j-size/2 - padding/2})
+                .attr("text-anchor", "middle")
+                .text(capitalize(p.y.split('_')[0]))
+                .attr("transform", function(d) { 
+                    return "rotate(-90)"; //"translate("+ d.i-size/2 + "," + d.j-size/2+")
                     })
-                    .style("stroke-width", function(n){
-                        if (n.name == d.name){
-                            return nodestroke*3}
-                        else {
-                            return nodestroke}
-                    })
-                    .attr("stroke", function(n){
-                        if (n.name == d.name){
-                            return 'black'}
-                        else {
-                            return nodestrokecolor}
-                    })
-                    .attr("r", function(n){
-                        if (n.name == d.name){
-                            return nodesize*1.5}
-                        else {
-                            return nodesize}
-                    })
-                d3.selectAll(".link")
-                    .transition()
-                    .delay(hoverOverTime*0.1)
-                    .duration(hoverOverTime*0.2)
-                    .style("stroke-opacity", function(l){
-                        if (l.source.name == d.name || l.target.name == d.name){
-                            return 1}
-                        else {
-                            return oplink}
-                    })
-                    .style("stroke-width", function(l){
-                        if (l.source.name == d.name || l.target.name == d.name){
-                            return linkwidth*2.5}
-                        else {
-                            return linkwidth}
-                    })
+                .attr("font-size", "13pt");
+            }
+
+            if (p.j==0){
+            cell.append("text")
+                .attr("x", function(d) { return d.i; })
+                .attr("y", function(d) { return d.j-size/2 - padding/2; })
+                .attr("text-anchor", "middle")
+                .text(capitalize(p.x.split('_')[0]))
+                .attr("font-size", "13pt");
+            }
+
+            var posScale = d3.scale.linear()
+                            .domain(scales[p.y])
+                            .range([0, 1]);
+            var asgScale = d3.scale.quantile()
+                            .domain(scales[p.x])
+                            .range(d3.range(num_axis));
+
+            // Uncomment to see the cutoffs of the scale
+            //console.log(asgScale.invertExtent(0), asgScale.invertExtent(1), asgScale.invertExtent(2)) 
+
+            cell.selectAll(".axis")
+                .data(angle)
+              .enter().append("line")
+                .attr("class", "axis")
+                .attr("transform", function(d) { return "rotate(" + degrees(angles(d)) + ")"; })
+                .attr("x1", radius.range()[0])
+                .attr("x2", radius.range()[1])
+                .attr("stroke-width",0.7)
+                .attr("stroke", "black");
+
+            cell.selectAll(".link")
+                .data(links)
+              .enter().append("path")
+                .attr("class", "link")
+                .attr("d", d3.hive.link()
+                .angle(function(d) { return angles(asgScale(d[p.x])); })
+                .radius(function(d) { return radius(posScale(d[p.y])); }))
+                .attr("show", function (d) {
+                    if (d.source[p.x] == d.target[p.x]) {return false}
+                    else {return true}
                 })
-        .on("mouseout", function(d){
-                d3.select(this)
-                    .transition()
-                    .duration(hoverOverTime)
-                    .style("fill-opacity", opnode)
-                    .attr("stroke-width", nodestroke)
-                    .attr("stroke", nodestrokecolor)
-                    .attr("r", nodesize);
-                removeReveal();
-                d3.selectAll(".link")
-                    .transition()
-                    .duration(hoverOverTime)
-                    .style("stroke-opacity", oplink)
-                    .style("stroke-width", linkwidth)
-                d3.selectAll(".node")
-                    .transition()
-                    .duration(hoverOverTime)
-                    .attr("r", nodesize)
-                    .attr("stroke-width", nodestroke)
-                    .attr("stroke", nodestrokecolor)
-                    .style("fill-opacity", opnode)
-                });
-};
+                .style("fill", linkfill)
+                .style("stroke-opacity", oplink)
+                .style("stroke", function(d) {
+                    if (edgeColor.length == 1){
+                        return edgeColor}
+                    else {return link_color(d.type)}
+                    })
+                .style("stroke-width", linkwidth)
+                .on("mouseover", function(d){
+                        revealLink(d, d3.select(this).style("stroke"));
+                        d3.select(this)
+                            .style("stroke-opacity", 1)
+                            .style("stroke-width", linkwidth*2)})
+                .on("mouseout", function(d){
+                        removeReveal();
+                        d3.select(this)
+                            .transition()
+                            .duration(800)
+                            .style("stroke-opacity", oplink)
+                            .style("stroke-width", linkwidth)});
+            
+            //removes any edges between nodes on same axis.
+            cell.selectAll("path[show="+false+"]").remove()
+
+            cell.selectAll(".node")
+                .data(nodes)
+              .enter().append("circle")
+                .attr("class", "node")
+                .attr("transform", function(d) { return "rotate(" + degrees(angles(asgScale(d[p.x]))) + ")"; })
+                .attr("cx", function(d) {
+                        return radius(posScale(d[p.y]));})
+                .attr("r", nodesize)
+                .attr("stroke-width", nodestroke)
+                .attr("stroke", nodestrokecolor)
+                .style("fill-opacity", opnode)
+                .style("fill", nodeColor)
+                .on("mouseover", function(d){
+                        d3.select(this)
+                            .style("fill-opacity", 1)
+                            .attr("stroke-width", nodestroke*3)
+                            .attr("stroke", 'black')
+                            .attr("r", nodesize*1.5) 
+                           revealNode(d, d3.select(this).style("fill"));
+                        d3.selectAll(".node")
+                            .transition()
+                            .duration(hoverOverTime*0.2)
+                            .style("fill-opacity", function(n){
+                                if (n.name == d.name){
+                                    return 1}
+                                else {
+                                    return opnode}
+                            })
+                            .style("stroke-width", function(n){
+                                if (n.name == d.name){
+                                    return nodestroke*3}
+                                else {
+                                    return nodestroke}
+                            })
+                            .attr("stroke", function(n){
+                                if (n.name == d.name){
+                                    return 'black'}
+                                else {
+
+                                    return nodestrokecolor}
+                            })
+                            .attr("r", function(n){
+                                if (n.name == d.name){
+                                    return nodesize*1.5}
+                                else {
+                                    return nodesize}
+                            })
+                        d3.selectAll(".link")
+                            .transition()
+                            .delay(hoverOverTime*0.1)
+                            .duration(hoverOverTime*0.2)
+                            .style("stroke-opacity", function(l){
+                                if (l.source.name == d.name || l.target.name == d.name){
+                                    return 1}
+                                else {
+                                    return oplink}
+                            })
+                            .style("stroke-width", function(l){
+                                if (l.source.name == d.name || l.target.name == d.name){
+                                    return linkwidth*2.5}
+                                else {
+                                    return linkwidth}
+                            })
+                        })
+                .on("mouseout", function(d){
+                        d3.select(this)
+                            .transition()
+                            .duration(hoverOverTime)
+                            .style("fill-opacity", opnode)
+                            .attr("stroke-width", nodestroke)
+                            .attr("stroke", nodestrokecolor)
+                            .attr("r", nodesize);
+                        removeReveal();
+                        d3.selectAll(".link")
+                            .transition()
+                            .duration(hoverOverTime)
+                            .style("stroke-opacity", oplink)
+                            .style("stroke-width", linkwidth)
+                        d3.selectAll(".node")
+                            .transition()
+                            .duration(hoverOverTime)
+                            .attr("r", nodesize)
+                            .attr("stroke-width", nodestroke)
+                            .attr("stroke", nodestrokecolor)
+                            .style("fill-opacity", opnode)
+                        });
+        };
 
 
-  // ****************************************** //
- //         SOME DISPLAY FUNCTIONS             //
-// ****************************************** //
+          // ****************************************** //
+         //         SOME DISPLAY FUNCTIONS             //
+        // ****************************************** //
 
 
 
-var revealNode = function(d,color){
-    d3.select("body").select("#reveal").append("p")
-        .html("<br><br><b>Name: " + d.name +"</b>"+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)
-        .style("color", color)
-    };
+        var revealNode = function(d,color){
+            d3.select("body").select("#reveal").append("p")
+                .html("<br><br><b>Name: " + d.name +"</b>"+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)
+                .style("color", color)
+            };
 
-var revealLink = function(d,color){
-    d3.select("body").select("#reveal").append("p")
-        .html("<br><br><b>Source: " + d.source.name + ", Target: " + d.target.name +"</b>"+','+"    Friendshipstrength: " + d.friendshipstrength+','+"    Relationship: " + d.relationship)
-        .style("color", color)
-    };
+        var revealLink = function(d,color){
+            d3.select("body").select("#reveal").append("p")
+                .html("<br><br><b>Source: " + d.source.name + ", Target: " + d.target.name +"</b>"+','+"    Friendshipstrength: " + d.friendshipstrength+','+"    Relationship: " + d.relationship)
+                .style("color", color)
+            };
 
-var removeReveal = function(d){
-    d3.select("body").select("#reveal").selectAll("p")
-        .transition()
-        .duration(hoverOverTime)
-        .style("opacity", 0)
-        .remove();
-    };
+        var removeReveal = function(d){
+            d3.select("body").select("#reveal").selectAll("p")
+                .transition()
+                .duration(hoverOverTime)
+                .style("opacity", 0)
+                .remove();
+            };
 
-function color_nodes(property, value, color) {
-    nodes = d3.selectAll("circle")
+        function color_nodes(property, value, color) {
+            nodes = d3.selectAll("circle")
 
-    nodes.each(function(d){
-        if (d[property] == value) {
-            d3.select(this)
-                .style("fill", color)
-       }
-    })
-};
+            nodes.each(function(d){
+                if (d[property] == value) {
+                    d3.select(this)
+                        .style("fill", color)
+               }
+            })
+        };
 
-function color_links(property, value, color) {
-    links = d3.selectAll("path")
+        function color_links(property, value, color) {
+            links = d3.selectAll("path")
 
-    links.each(function(d){
-        if (d[property] == value) {
-            d3.select(this)
-                .style("stroke", color)
-       }
-    })
-};
+            links.each(function(d){
+                if (d[property] == value) {
+                    d3.select(this)
+                        .style("stroke", color)
+               }
+            })
+        };
 
-color_nodes('Gender', 'girl', 'red')
-color_nodes('Gender', 'alien', 'purple')
-color_nodes('Gender', 'boy', 'blue')
-color_links('relationship', 'friends', 'green')
-color_links('relationship', 'enemies', 'orange')
-
-
-  // ****************************************** //
- //              RANDOM FUNCTIONS              //
-// ****************************************** //
+        color_nodes('Gender', 'girl', 'red')
+        color_nodes('Gender', 'alien', 'purple')
+        color_nodes('Gender', 'boy', 'blue')
+        color_links('relationship', 'friends', 'green')
+        color_links('relationship', 'enemies', 'orange')
 
 
+        function find_node() {
+            node = document.getElementById("lostNode").value
+            color_nodes('name', node, 'yellow')
+        }
 
-function degrees(radians) {
-  return radians / Math.PI * 180 - 90;
-}
+        d3.select("body").select("#search")
+            .append("p").html('<center><form><input type="text" id="lostNode"><button onclick="find_node()">Search for node</button><br></form></center>')
+            .style("color", colorNeutral)
 
-function capitalize(string)
-{
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
-</script>
-</body>
+
+          // ****************************************** //
+         //              RANDOM FUNCTIONS              //
+        // ****************************************** //
+
+
+
+        function degrees(radians) {
+          return radians / Math.PI * 180 - 90;
+        }
+
+        function capitalize(string)
+        {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+        </script>
+    </body>
 </html>
