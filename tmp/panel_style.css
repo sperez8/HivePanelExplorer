@@ -17,11 +17,13 @@ h1 {
   margin-top: 20px;
 }
 
+
+
 #title {
 	height: 60px;
-	width:100%;
+	width: 100%;
 	float: left;
-	border-bottom: 3px outset #9B8C7E;
+	border-bottom: 3px groove #9B8C7E;
 	padding-bottom: 25px;
 }
 
@@ -30,31 +32,36 @@ h1 {
 	height: 700px;
 	float: left;
 	clear: right;
+	margin-top: 20px;
 }
 
 #search {
-	height:70px;
-	margin-top:20px;
+	height: 70px;
+	margin-top: 20px;
 }
 
 #reveal {
-	height:170px;
-	clear:right;
-	margin-top:10px;
+	height: 170px;
+	clear: right;
+	margin-top: 10px;
 }
 
 #controlpanel {
-	height:400px;
-	clear:right;
-	margin-top:10px;
+	height: 400px;
+	clear: right;
+	margin-top: 10px;
 }
 
 #search, #reveal, #controlpanel {
-	width:295px;
-	float:right;
-	border-radius:5px;
-	border-bottom:2px outset #9B8C7E;
-	border-left:1px outset #9B8C7E;
+	width: 295px;
+	float: right;
+	border-radius: 7px;
+	border-bottom: 3px groove #9B8C7E;
+	border-left: 2px groove #9B8C7E;
 }
 
+
+.selected {
+    fill: red;
+}
 

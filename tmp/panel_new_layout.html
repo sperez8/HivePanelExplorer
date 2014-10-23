@@ -35,9 +35,9 @@
             edgeColor = ['blue']
             linkwidth = 1.3
             oplink = 0.8
-            opnode = 0.6
+            opnode = 0.8
 
-        var nodesize = 3
+        var nodesize = 5
             nodestroke = 0.4
             nodestrokecolor = "grey"
 
@@ -71,8 +71,8 @@
         // ****************************************** //
 
 
-        var columntraits = ["Gender","degree","Height"];
-            rowtraits = ["clustering","betweeness","Height","Height"];
+        var columntraits = ["Gender","degree"];
+            rowtraits = ["betweeness","Height"];
             scales = {};
 
         var width = document.getElementById("panel").offsetWidth
@@ -197,16 +197,16 @@
                 .style("stroke-width", linkwidth)
                 .on("mouseover", function(d){
                         revealLink(d, d3.select(this).style("stroke"));
-                        d3.select(this)
-                            .style("stroke-opacity", 1)
-                            .style("stroke-width", linkwidth*2)})
+                        d3.select(this).call(highlight_links)
+                    })
                 .on("mouseout", function(d){
                         removeReveal();
                         d3.select(this)
                             .transition()
                             .duration(800)
                             .style("stroke-opacity", oplink)
-                            .style("stroke-width", linkwidth)});
+                            .style("stroke-width", linkwidth)
+                    });
             
             //removes any edges between nodes on same axis.
             cell.selectAll("path[show="+false+"]").remove()
@@ -233,46 +233,19 @@
                         d3.selectAll(".node")
                             .transition()
                             .duration(hoverOverTime*0.2)
-                            .style("fill-opacity", function(n){
+                            .each(function(n){
                                 if (n.name == d.name){
-                                    return 1}
-                                else {
-                                    return opnode}
-                            })
-                            .style("stroke-width", function(n){
-                                if (n.name == d.name){
-                                    return nodestroke*3}
-                                else {
-                                    return nodestroke}
-                            })
-                            .attr("stroke", function(n){
-                                if (n.name == d.name){
-                                    return 'black'}
-                                else {
-
-                                    return nodestrokecolor}
-                            })
-                            .attr("r", function(n){
-                                if (n.name == d.name){
-                                    return nodesize*1.5}
-                                else {
-                                    return nodesize}
+                                    d3.select(this).call(highlight_nodes)
+                                }
                             })
                         d3.selectAll(".link")
                             .transition()
                             .delay(hoverOverTime*0.1)
                             .duration(hoverOverTime*0.2)
-                            .style("stroke-opacity", function(l){
+                            .each(function(l){
                                 if (l.source.name == d.name || l.target.name == d.name){
-                                    return 1}
-                                else {
-                                    return oplink}
-                            })
-                            .style("stroke-width", function(l){
-                                if (l.source.name == d.name || l.target.name == d.name){
-                                    return linkwidth*2.5}
-                                else {
-                                    return linkwidth}
+                                    d3.select(this).call(highlight_links)
+                                }
                             })
                         })
                 .on("mouseout", function(d){
@@ -304,7 +277,19 @@
          //         SOME DISPLAY FUNCTIONS             //
         // ****************************************** //
 
+        var highlight_nodes = function(selection) {
+            selection
+                .style("fill-opacity", 1)
+                .style("stroke-width", nodestroke*3)
+                .attr("stroke", 'black')
+                .attr("r", nodesize*1.5)
+            };
 
+        var highlight_links = function(selection) {
+            selection
+                .style("stroke-opacity", 1)
+                .style("stroke-width", linkwidth*2)
+            };
 
         var revealNode = function(d,color){
             d3.select("body").select("#reveal").append("p")
@@ -326,21 +311,18 @@
                 .remove();
             };
 
-        function color_nodes(property, value, color) {
-            nodes = d3.selectAll("circle")
-
-            nodes.each(function(d){
+        function color_nodes(property, value, color, persist) {
+            d3.selectAll("circle").each(function(d){
                 if (d[property] == value) {
                     d3.select(this)
                         .style("fill", color)
                }
             })
+
         };
 
         function color_links(property, value, color) {
-            links = d3.selectAll("path")
-
-            links.each(function(d){
+            d3.selectAll("path").each(function(d){
                 if (d[property] == value) {
                     d3.select(this)
                         .style("stroke", color)
@@ -348,21 +330,21 @@
             })
         };
 
-        color_nodes('Gender', 'girl', 'red')
-        color_nodes('Gender', 'alien', 'purple')
-        color_nodes('Gender', 'boy', 'blue')
-        color_links('relationship', 'friends', 'green')
-        color_links('relationship', 'enemies', 'orange')
-
-
-        function find_node() {
-            node = document.getElementById("lostNode").value
-            color_nodes('name', node, 'yellow')
-        }
+        color_nodes('Gender', 'girl', '#FFAE00')
+        color_nodes('Gender', 'alien', '#7700D9')
+        color_nodes('Gender', 'boy', '#62D900')
+        color_links('relationship', 'friends', 'grey')
+        color_links('relationship', 'enemies', 'grey')
 
         d3.select("body").select("#search")
-            .append("p").html('<center><form><input type="text" id="lostNode"><button onclick="find_node()">Search for node</button><br></form></center>')
+            .append("p").html('<center><form><input type="text" id="lostNode"><button>Search for node</button><br></form></center>')
             .style("color", colorNeutral)
+            .on("click", function() {
+                node = document.getElementById("lostNode").value
+                console.log(node)
+                color_nodes('name', node, 'yellow')
+            });
+
 
 
           // ****************************************** //
