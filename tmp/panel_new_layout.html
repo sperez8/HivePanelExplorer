@@ -230,52 +230,11 @@
                 .style("fill-opacity", opnode)
                 .style("fill", nodeColor)
                 .on("mouseover", function(d){
-                        d3.select(this)
-                            .style("fill-opacity", 1)
-                            .attr("stroke-width", nodestroke*3)
-                            .attr("stroke", 'black')
-                            .attr("r", nodesize*1.5) 
-                           revealNode(d, d3.select(this).style("fill"));
-                        d3.selectAll(".node")
-                            .transition()
-                            .duration(hoverOverTime*0.2)
-                            .each(function(n){
-                                if (n.name == d.name){
-                                    d3.select(this).call(highlight_nodes)
-                                }
-                            })
-                        d3.selectAll(".link")
-                            .transition()
-                            .delay(hoverOverTime*0.1)
-                            .duration(hoverOverTime*0.2)
-                            .each(function(l){
-                                if (l.source.name == d.name || l.target.name == d.name){
-                                    d3.select(this).call(highlight_links)
-                                }
-                            })
-                        })
+                    d3.select(this).call(node_mouseover,d)
+                    })
                 .on("mouseout", function(d){
-                        d3.select(this)
-                            .transition()
-                            .duration(hoverOverTime)
-                            .style("fill-opacity", opnode)
-                            .attr("stroke-width", nodestroke)
-                            .attr("stroke", nodestrokecolor)
-                            .attr("r", nodesize);
-                        removeReveal();
-                        d3.selectAll(".link")
-                            .transition()
-                            .duration(hoverOverTime)
-                            .style("stroke-opacity", oplink)
-                            .style("stroke-width", linkwidth)
-                        d3.selectAll(".node")
-                            .transition()
-                            .duration(hoverOverTime)
-                            .attr("r", nodesize)
-                            .attr("stroke-width", nodestroke)
-                            .attr("stroke", nodestrokecolor)
-                            .style("fill-opacity", opnode)
-                        });
+                    d3.select(this).call(node_mouseout)
+                    })
         };
 
 
@@ -283,8 +242,62 @@
          //         SOME DISPLAY FUNCTIONS             //
         // ****************************************** //
 
-        var highlight_nodes = function(selection) {
+        var node_mouseover = function(node,d) {
+            node
+                .style("fill-opacity", 1)
+                .attr("stroke-width", nodestroke*3)
+                .attr("stroke", 'black')
+                .attr("r", nodesize*1.5) 
+               revealNode(d, node.style("fill"));
+            d3.selectAll(".node")
+                .transition()
+                .duration(hoverOverTime*0.2)
+                .each(function(n){
+                    if (n.name == d.name){
+                        d3.select(this).call(highlight_nodes)
+                    }
+                })
+            d3.selectAll(".link")
+                .transition()
+                .delay(hoverOverTime*0.1)
+                .duration(hoverOverTime*0.2)
+                .each(function(l){
+                    if (l.source.name == d.name || l.target.name == d.name){
+                        d3.select(this).call(highlight_links)
+                    }
+                })
+        }
+
+        var node_mouseout = function(node) {
+            node
+                .transition()
+                .duration(hoverOverTime)
+                .style("fill-opacity", opnode)
+                .attr("stroke-width", nodestroke)
+                .attr("stroke", nodestrokecolor)
+                .attr("r", nodesize);
+            removeReveal();
+            d3.selectAll(".link")
+                .transition()
+                .duration(hoverOverTime)
+                .style("stroke-opacity", oplink)
+                .style("stroke-width", linkwidth)
+            d3.selectAll(".node")
+                .transition()
+                .duration(hoverOverTime)
+                .attr("r", nodesize)
+                .attr("stroke-width", nodestroke)
+                .attr("stroke", nodestrokecolor)
+                .style("fill-opacity", opnode)
+            }
+
+        var highlight_nodes = function(selection, temporary) {
             selection
+                .transition()
+                .duration(function (d) {
+                    if (temporary) {return hoverOverTime*1} 
+                    else {return 0}
+                    })
                 .style("fill-opacity", 1)
                 .style("stroke-width", nodestroke*3)
                 .attr("stroke", 'black')
@@ -342,11 +355,20 @@
         color_links('relationship', 'friends', 'grey')
         color_links('relationship', 'enemies', 'grey')
 
+
+          // ****************************************** //
+         //              SEARCH FUNCTIONS              //
+        // ****************************************** //
+
+
         function show_node() {
             var node = document.getElementById("lostNode").value
-            console.log('node', node)
-            color_nodes('name', node, 'black')
-            }
+            d3.selectAll("circle").each(function(d) {
+                if (d['name'] == node) {
+                    d3.select(this).call(highlight_nodes,true)
+                    }
+                })
+            };
 
         d3.select("body").select("#search")
             .append("p").html('<center><form action=""><input type="text" id="lostNode"/><input value ="Search" onclick="show_node();" type = "button"/><br></form></center>')
