@@ -13,7 +13,13 @@
             <div id="panel"></div>
             <div id="search"></div>
             <div id="reveal"></div>
-            <div id="controlpanel"></div>
+            <div id="controlpanel">
+                <form action="">
+                    Node: Property <input type="text" id="filter_property" style="width: 60px;">
+                    <input type="text" id="filter_value" style="width: 50px;">
+                    <input type="text" id="filter_color" style="width: 40px;"><br>
+                </form>
+            </div>
         </div>
         <script src="friends_panel_test_nodes.js"></script>
         <script src="friends_panel_test_edges.js"></script>
@@ -344,7 +350,6 @@
                 console.log(node)
                 color_nodes('name', node, 'yellow')
             });
-
 
 
           // ****************************************** //
