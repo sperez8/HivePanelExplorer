@@ -317,7 +317,7 @@
                 .remove();
             };
 
-        function color_nodes(property, value, color, persist) {
+        function color_nodes(property, value, color) {
             d3.selectAll("circle").each(function(d){
                 if (d[property] == value) {
                     d3.select(this)
@@ -342,14 +342,15 @@
         color_links('relationship', 'friends', 'grey')
         color_links('relationship', 'enemies', 'grey')
 
+        function show_node() {
+            var node = document.getElementById("lostNode").value
+            console.log('node', node)
+            color_nodes('name', node, 'black')
+            }
+
         d3.select("body").select("#search")
-            .append("p").html('<center><form><input type="text" id="lostNode"><button>Search for node</button><br></form></center>')
+            .append("p").html('<center><form action=""><input type="text" id="lostNode"/><input value ="Search" onclick="show_node();" type = "button"/><br></form></center>')
             .style("color", colorNeutral)
-            .on("click", function() {
-                node = document.getElementById("lostNode").value
-                console.log(node)
-                color_nodes('name', node, 'yellow')
-            });
 
 
           // ****************************************** //
