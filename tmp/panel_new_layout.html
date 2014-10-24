@@ -15,9 +15,10 @@
             <div id="reveal"></div>
             <div id="controlpanel">
                 <form action="">
-                    Node: Property <input type="text" id="filter_property" style="width: 60px;">
-                    <input type="text" id="filter_value" style="width: 50px;">
-                    <input type="text" id="filter_color" style="width: 40px;"><br>
+                    <select id= "node_property" onchange="make_value_options()">
+                    </select>
+                    <select id= "property_value" onchange="">
+                    </select>
                 </form>
             </div>
         </div>
@@ -377,7 +378,7 @@
             };
 
         d3.select("body").select("#search")
-            .append("p").html('<center><form action=""><input type="text" id="lostNode"/><input value ="Search" onclick="show_node();" type = "button"/><br></form></center>')
+            .append("p").html('<center><form><input type="text" id="lostNode"/><input value ="Search" onclick="show_node();" type = "button"/><br></form></center>')
             .style("color", colorNeutral)
 
 
@@ -386,11 +387,31 @@
          //         CONTROL PANEL FUNCTIONS            //
         // ****************************************** //
 
+        var property_coloring = document.getElementById("node_property")
+        for (var key in nodes[0]) {
+                    option = document.createElement("option")
+                    option.text = key
+                    property_coloring.add(option)
+                };
 
-        d3.select("body").select("#controlpanel")
-            .append("p").html('<center><form action=""></form></center>')
-            .style("color", colorNeutral)
+        function make_value_options() {
+            property = document.getElementById("node_property").value
+            console.log(property)
+            var value_coloring = document.getElementById("property_value")
 
+            var options = []
+            for (var i = nodes.length - 1; i >= 0; i--) {
+                value = nodes[i][property]
+                console.log(value)
+                if (options.indexOf(value)>0){}
+                else{
+                    options.push(value)
+                    option = document.createElement("option")
+                    option.text = value
+                    property_value.add(option)
+                }
+                    };
+        }
 
           // ****************************************** //
          //              RANDOM FUNCTIONS              //
