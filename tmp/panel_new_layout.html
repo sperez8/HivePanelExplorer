@@ -230,11 +230,13 @@
                 .style("fill-opacity", opnode)
                 .style("fill", nodeColor)
                 .on("mouseover", function(d){
-                    d3.select(this).call(node_mouseover,d)
+                    d3.select(this)
+                        .call(node_mouseover,d)
                     })
                 .on("mouseout", function(d){
                     d3.select(this).call(node_mouseout)
                     })
+                .attr()
         };
 
 
@@ -244,11 +246,8 @@
 
         var node_mouseover = function(node,d) {
             node
-                .style("fill-opacity", 1)
-                .attr("stroke-width", nodestroke*3)
-                .attr("stroke", 'black')
-                .attr("r", nodesize*1.5) 
-               revealNode(d, node.style("fill"));
+                .call(highlight_nodes)
+                revealNode(d, node.style("fill"));
             d3.selectAll(".node")
                 .transition()
                 .duration(hoverOverTime*0.2)
@@ -269,6 +268,7 @@
         }
 
         var node_mouseout = function(node) {
+            removeReveal();
             node
                 .transition()
                 .duration(hoverOverTime)
@@ -276,7 +276,6 @@
                 .attr("stroke-width", nodestroke)
                 .attr("stroke", nodestrokecolor)
                 .attr("r", nodesize);
-            removeReveal();
             d3.selectAll(".link")
                 .transition()
                 .duration(hoverOverTime)
@@ -322,11 +321,8 @@
                 .style("color", color)
             };
 
-        var removeReveal = function(d){
+        var removeReveal = function(){
             d3.select("body").select("#reveal").selectAll("p")
-                .transition()
-                .duration(hoverOverTime)
-                .style("opacity", 0)
                 .remove();
             };
 
@@ -363,14 +359,35 @@
 
         function show_node() {
             var node = document.getElementById("lostNode").value
+            var revealed = false
             d3.selectAll("circle").each(function(d) {
                 if (d['name'] == node) {
                     d3.select(this).call(highlight_nodes,true)
+                    if (!revealed){
+                        revealNode(d, d3.select(this).style("fill"))
+                        revealed = true
+
+                        d3.select(this)
+                            .transition()
+                            .delay(1000000000)
+                            .call(removeReveal)
+                        }
                     }
                 })
             };
 
         d3.select("body").select("#search")
+            .append("p").html('<center><form action=""><input type="text" id="lostNode"/><input value ="Search" onclick="show_node();" type = "button"/><br></form></center>')
+            .style("color", colorNeutral)
+
+
+
+          // ****************************************** //
+         //         CONTROL PANEL FUNCTIONS            //
+        // ****************************************** //
+
+
+        d3.select("body").select("#controlpanel")
             .append("p").html('<center><form action=""><input type="text" id="lostNode"/><input value ="Search" onclick="show_node();" type = "button"/><br></form></center>')
             .style("color", colorNeutral)
 

@@ -9,7 +9,7 @@ h1 {
 }
 
 #container {
-  font: normal 12px "Helvetica Neue";
+  font: normal 14px "Helvetica Neue";
   height: 750px;
   width: 1000px;
   margin-left: auto;
@@ -41,9 +41,10 @@ h1 {
 }
 
 #reveal {
-	height: 170px;
+	height: 100px;
 	clear: right;
 	margin-top: 10px;
+	vertical-align: middle;
 }
 
 #controlpanel {
@@ -53,7 +54,8 @@ h1 {
 }
 
 #search, #reveal, #controlpanel {
-	width: 295px;
+	width: 285px;
+	padding-left: 10px;
 	float: right;
 	border-radius: 7px;
 	border-bottom: 3px groove #9B8C7E;
@@ -61,7 +63,6 @@ h1 {
 }
 
 
-.selected {
-    fill: red;
+p { 
+	display: inline-block; 
 }
-
