@@ -1,7 +1,7 @@
 
 
 body {
-  margin: 50px 50px 50px 50px;
+	margin: 50px 50px 50px 50px;
 }
 
 h1 {
@@ -9,12 +9,12 @@ h1 {
 }
 
 #container {
-  font: normal 14px "Helvetica Neue";
-  height: 750px;
-  width: 1000px;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 20px;
+	font: normal 13px "Helvetica Neue";
+	height: 750px;
+	width: 1000px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 20px;
 }
 
 
@@ -23,7 +23,7 @@ h1 {
 	height: 60px;
 	width: 100%;
 	float: left;
-	border-bottom: 3px groove #9B8C7E;
+	border-bottom: 3px groove #D2CFE7;
 	padding-bottom: 25px;
 }
 
@@ -37,19 +37,25 @@ h1 {
 
 #search {
 	height: 70px;
-	margin-top: 20px;
+	margin-top: 25px;
+	text-align: center;
+	vertical-align: middle;
 }
 
 #reveal {
 	height: 100px;
 	clear: right;
 	margin-top: 10px;
+	text-align: center;
+	vertical-align: middle;
 }
 
 #controlpanel {
-	height: 400px;
+	height: 430px;
 	clear: right;
 	margin-top: 10px;
+	padding-top: 10px;
+	padding-left: 15px;
 }
 
 #search, #reveal, #controlpanel {
@@ -57,11 +63,41 @@ h1 {
 	padding-left: 10px;
 	float: right;
 	border-radius: 7px;
-	border-bottom: 3px groove #9B8C7E;
-	border-left: 2px groove #9B8C7E;
+	border-bottom: 3px groove #D2CFE7;
+	border-left: 2px groove #D2CFE7;
+    text-align: left;
 }
 
+select, input, input[type="button"] {
+	margin-top: 6px;
+	margin-bottom: 6px;
+	margin-left: 3px;
+	padding-right: 5px;
+	padding-left: 5px;
+    border: 0;
+    background: transparent;
+    height: 28px;
+    border: 1px solid #d4ccd4;
+    border-radius: 4px;
+	font: normal 13px "Helvetica Neue";
+}
+
+input[type="button"] {
+    border: 2px solid #B1AFC4;
+    height: 32px;
+    border-radius: 0px;
+}
 
 p { 
 	display: inline-block; 
 }
+
+.ex {
+	font-style: italic;
+}
+
+
+
+
+
+
