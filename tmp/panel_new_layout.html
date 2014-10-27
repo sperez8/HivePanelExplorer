@@ -15,13 +15,17 @@
             <div id="reveal"></div>
             <div id="controlpanel">
                 <form action="">
-                    If node's  <select id= "node_property" onchange="make_value_options()">
-                    <option></option>
+                    If a node's  <br>
+                    <select id= "node_property" onchange="make_value_options()">
+                        <option>property</option>
                     </select>
-                      = <select id= "node_value">
+                    <select id= "equality">
+                        <option>=</option>
+                    </select>
+                    <select id= "node_value">
                     </select>
                     <br>then color:   
-                    <input type="text" id="node_colour" size="6" value="green"/>  
+                    <input type="text" id="node_colour" size="6" value="black"/>  
                     <input value ="Highlight" onclick="make_coloring_nodes();" type = "button"/><br>
                 </form>
             </div>
@@ -331,14 +335,32 @@
                 .remove();
             };
 
-        function color_nodes(property, value, color) {
-            d3.selectAll("circle").each(function(d){
-                if (d[property] == value) {
-                    d3.select(this)
-                        .style("fill", color)
-               }
-            })
-
+        function color_nodes(property, value, color, equality) {
+            if (equality == '>'){
+                d3.selectAll("circle").each(function(d){
+                    if (d[property] > value) {
+                        console.log(d)
+                        d3.select(this)
+                            .style("fill", color)
+                   }
+                })
+            }            
+            else if (equality == '<'){
+                d3.selectAll("circle").each(function(d){
+                    if (d[property] < value) {
+                        d3.select(this)
+                            .style("fill", color)
+                   }
+                })
+            }
+            else {
+                d3.selectAll("circle").each(function(d){
+                    if (d[property] == value) {
+                        d3.select(this)
+                            .style("fill", color)
+                   }
+                })
+            }
         };
 
         function color_links(property, value, color) {
@@ -431,7 +453,25 @@
                     option.text = value
                     node_value.add(option)
                 }
-                    };
+            };
+
+            if (check_quantitative(options)) {
+                equality = document.getElementById("equality")
+                greater = document.createElement("option")
+                greater.text = '>'
+                less = document.createElement("option")
+                less.text = '<'
+                equality.add(greater)
+                equality.add(less)
+
+            } else {
+                equality = document.getElementById("equality")
+                equality = remove_options(equality)
+                equal = document.createElement("option")
+                equal.text = '='
+                equality.add(equal)
+            }
+
         }
 
 
@@ -440,7 +480,8 @@
             property = document.getElementById("node_property").value
             value = document.getElementById("node_value").value
             color = document.getElementById("node_colour").value
-            color_nodes(property, value, color)
+            equality = document.getElementById("equality").value
+            color_nodes(property, value, color, equality)
         }
 
 
@@ -448,7 +489,15 @@
          //              RANDOM FUNCTIONS              //
         // ****************************************** //
 
-
+        function check_quantitative(options){
+            for (o in options) {
+                opt = options[o]
+                if (isNaN(opt)) {
+                    return false
+                }
+            };
+            return true
+        }
 
         function degrees(radians) {
           return radians / Math.PI * 180 - 90;
