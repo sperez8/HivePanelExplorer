@@ -15,10 +15,14 @@
             <div id="reveal"></div>
             <div id="controlpanel">
                 <form action="">
-                    <select id= "node_property" onchange="make_value_options()">
+                    If node's  <select id= "node_property" onchange="make_value_options()">
+                    <option></option>
                     </select>
-                    <select id= "property_value" onchange="">
+                      = <select id= "node_value">
                     </select>
+                    <br>then color:   
+                    <input type="text" id="node_colour" size="6" value="green"/>  
+                    <input value ="Highlight" onclick="make_coloring_nodes();" type = "button"/><br>
                 </form>
             </div>
         </div>
@@ -387,6 +391,16 @@
          //         CONTROL PANEL FUNCTIONS            //
         // ****************************************** //
 
+        function remove_options(selector) {
+            //first remove all the previous options:
+            if (selector.length > 0){
+                for (var i = selector.length - 1; i >= 0; i--) {
+                    selector.remove(i);
+                }
+            }
+            return selector
+        };
+
         var property_coloring = document.getElementById("node_property")
         for (var key in nodes[0]) {
                     option = document.createElement("option")
@@ -396,22 +410,39 @@
 
         function make_value_options() {
             property = document.getElementById("node_property").value
-            console.log(property)
-            var value_coloring = document.getElementById("property_value")
 
+            //first remove all the previous options:
+            if (node_value.length > 0){
+                for (var i = node_value.length - 1; i >= 0; i--) {
+                    node_value.remove(i);
+                };
+            };
+
+            node_value = remove_options(node_value)
+
+            //add new options
             var options = []
             for (var i = nodes.length - 1; i >= 0; i--) {
                 value = nodes[i][property]
-                console.log(value)
-                if (options.indexOf(value)>0){}
+                if (options.indexOf(value)>=0){}
                 else{
                     options.push(value)
                     option = document.createElement("option")
                     option.text = value
-                    property_value.add(option)
+                    node_value.add(option)
                 }
                     };
         }
+
+
+
+        function make_coloring_nodes() {
+            property = document.getElementById("node_property").value
+            value = document.getElementById("node_value").value
+            color = document.getElementById("node_colour").value
+            color_nodes(property, value, color)
+        }
+
 
           // ****************************************** //
          //              RANDOM FUNCTIONS              //
