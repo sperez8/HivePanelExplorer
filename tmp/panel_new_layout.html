@@ -354,7 +354,7 @@
         function color_marks(mark, styling, property, value, color, equality) {
             if (equality == '>'){
                 d3.selectAll(mark).each(function(d){
-                    if (d[property] > value) {
+                    if (Number(d[property]) > Number(value)) {
                         d3.select(this)
                             .style(styling, color)
                    }
@@ -362,7 +362,7 @@
             }            
             else if (equality == '<'){
                 d3.selectAll(mark).each(function(d){
-                    if (d[property] < value) {
+                    if (Number(d[property]) < Number(value)) {
                         d3.select(this)
                             .style(styling, color)
                    }
