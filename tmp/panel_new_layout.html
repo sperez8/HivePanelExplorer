@@ -22,18 +22,23 @@
             <div id="reveal"></div>
             <div id="controlpanel" class = "darktext">
                 <form action="" class = "darktext">
-                    If a node's  <br>
-                    <select id= "node_property" onchange="make_value_options()" class = "darktext">
+                    If a 
+                    <select id= "node_or_link" onchange="make_property_options()" class = "darktext">
+                        <option>node</option>
+                        <option>link</option>
+                    </select>'s  <br>
+                    <select id= "property" onchange="make_value_options()" class = "darktext">
                         <option>property</option>
                     </select>
                     <select id= "equality" class = "darktext">
                         <option>=</option>
                     </select>
-                    <select id= "node_value" class = "darktext">
+                    <select id= "value" class = "darktext">
+                        <option>value</option>
                     </select>
                     <br>then color:   
                     <input type="text" id="node_color" size="6" value="color"/>  
-                    <input value ="Highlight" onclick="make_coloring_nodes();" type = "button" class = "darktext"/><br>
+                    <input value ="Highlight" onclick="make_coloring();" type = "button" class = "darktext"/><br>
                 </form>
             </div>
         </div>
@@ -326,13 +331,18 @@
 
         var revealNode = function(d,color){
             d3.select("body").select("#reveal").append("p")
-                .html("<br><br><b>Name: " + d.name +"</b>"+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)
+                .html("<b>Name: " + d.name +"</b>"+','+"    Gender: " + d.Gender+','+"    Height: " + d.Height)
                 .style("color", color)
+                .style("background-color", "white")
+                .transition()
+                .duration(hoverOverTime*2)
+                .style("background-color", calculate_brackground(color))
+
             };
 
         var revealLink = function(d,color){
             d3.select("body").select("#reveal").append("p")
-                .html("<br><br><b>Source: " + d.source.name + ", Target: " + d.target.name +"</b>"+','+"    Friendshipstrength: " + d.friendshipstrength+','+"    Relationship: " + d.relationship)
+                .html("<b>Source: " + d.source.name + ", Target: " + d.target.name +"</b>"+','+"    Friendshipstrength: " + d.friendshipstrength+','+"    Relationship: " + d.relationship)
                 .style("color", color)
             };
 
@@ -341,47 +351,38 @@
                 .remove();
             };
 
-        function color_nodes(property, value, color, equality) {
+        function color_marks(mark, styling, property, value, color, equality) {
             if (equality == '>'){
-                d3.selectAll("circle").each(function(d){
+                d3.selectAll(mark).each(function(d){
                     if (d[property] > value) {
                         d3.select(this)
-                            .style("fill", color)
+                            .style(styling, color)
                    }
                 })
             }            
             else if (equality == '<'){
-                d3.selectAll("circle").each(function(d){
+                d3.selectAll(mark).each(function(d){
                     if (d[property] < value) {
                         d3.select(this)
-                            .style("fill", color)
+                            .style(styling, color)
                    }
                 })
             }
             else {
-                d3.selectAll("circle").each(function(d){
+                d3.selectAll(mark).each(function(d){
                     if (d[property] == value) {
                         d3.select(this)
-                            .style("fill", color)
+                            .style(styling, color)
                    }
                 })
             }
         };
 
-        function color_links(property, value, color) {
-            d3.selectAll("path").each(function(d){
-                if (d[property] == value) {
-                    d3.select(this)
-                        .style("stroke", color)
-               }
-            })
-        };
-
-        color_nodes('Gender', 'girl', '#FFAE00')
-        color_nodes('Gender', 'alien', '#7700D9')
-        color_nodes('Gender', 'boy', '#62D900')
-        color_links('relationship', 'friends', 'grey')
-        color_links('relationship', 'enemies', 'grey')
+        color_marks("circle", "fill",'Gender', 'girl', '#FFAE00')
+        color_marks("circle", "fill",'Gender', 'alien', '#7700D9')
+        color_marks("circle", "fill",'Gender', 'boy', '#62D900')
+        color_marks('path', 'stroke', 'relationship', 'friends', 'darkgrey')
+        color_marks('path', 'stroke', 'relationship', 'enemies', 'black')
 
 
           // ****************************************** //
@@ -424,77 +425,116 @@
             return selector
         };
 
-        var property_coloring = document.getElementById("node_property")
-        for (var key in nodes[0]) {
-                    option = document.createElement("option")
-                    option.text = key
-                    property_coloring.add(option)
-                };
-
-        function make_value_options() {
-            property = document.getElementById("node_property").value
-
-            //first remove all the previous options:
-            if (node_value.length > 0){
-                for (var i = node_value.length - 1; i >= 0; i--) {
-                    node_value.remove(i);
-                };
-            };
-
-            node_value = remove_options(node_value)
-
-            //add new options
-            var options = []
-            for (var i = nodes.length - 1; i >= 0; i--) {
-                value = nodes[i][property]
+        function add_options(selector, data, property){
+            options = []
+            for (var i = data.length - 1; i >= 0; i--) {
+                value = data[i][property]
                 if (options.indexOf(value)>=0){}
                 else{
                     options.push(value)
-                    option = document.createElement("option")
-                    option.text = value
-                    node_value.add(option)
                 }
-            };
+            }
+            quantitative = check_quantitative(options)
 
-            if (check_quantitative(options)) {
-                equality = document.getElementById("equality")
+            if (quantitative){
+                newOptions = []
+                for (i in options) {
+                    newOptions.push(Number(options[i]))
+                }
+                options = newOptions
+            }
+
+            options.sort(function(a, b){return a-b}) //sort in ascending order
+
+            for (i in options) {
+                option = document.createElement("option")
+                option.text = String(options[i])
+                selector.add(option)
+            }
+            return quantitative
+        }
+
+        function make_property_options() {
+            var mark = document.getElementById("node_or_link").value
+            var property = document.getElementById("property")
+            remove_options(property)
+            if (mark == "node"){
+                for (var key in nodes[0]) {
+                    option = document.createElement("option")
+                    option.text = key
+                    property.add(option)
+                };
+            } else if (mark == "link") {
+                for (var key in links[0]) {
+                    if (key != "source" && key != "target"){
+                        option = document.createElement("option")
+                        option.text = key
+                        property.add(option)
+                    }
+                };
+            }
+            make_value_options()
+        };
+        make_property_options()
+        //Want this to run when page is loaded
+
+        function make_value_options() {
+            mark = document.getElementById("node_or_link").value
+            property = document.getElementById("property").value
+            valueSelector = document.getElementById("value")
+
+            //first remove all the previous options:
+            remove_options(valueSelector)
+            
+            if (mark == "node") {
+                quantitative = add_options(valueSelector, nodes, property)
+            } else if (mark == "link") {
+                quantitative = add_options(valueSelector, links, property)
+            }
+
+            equality = document.getElementById("equality")
+            remove_options(equality)
+            equal = document.createElement("option")
+            equal.text = '='
+            equality.add(equal)
+
+            if (quantitative) {
                 greater = document.createElement("option")
-                greater.text = '>'
                 less = document.createElement("option")
+                greater.text = '>'
                 less.text = '<'
                 equality.add(greater)
                 equality.add(less)
-
-            } else {
-                equality = document.getElementById("equality")
-                equality = remove_options(equality)
-                equal = document.createElement("option")
-                equal.text = '='
-                equality.add(equal)
             }
-
         }
 
         colorBox = document.getElementById("node_color")
         d3.select(colorBox).on('input', function() { 
             color = colorBox.value // get the current value of the input field.
-            console.log(color)
-            colorBox.style.color = color
             colorBox.style.fontWeight = "800"
+            colorBox.style.backgroundColor = "white"
+            colorBox.style.color = color
             computedStyle = window.getComputedStyle(colorBox)
             computedColor = computedStyle.color
             d3.select(this)
                 .transition()
-                .duration(hoverOverTime*5)
-                .style("background-color", calculate_brackground(computedColor))
+                .duration(hoverOverTime*2)
+                .style("background-color", calculate_brackground(computedColor));
         });
+        
 
-        function make_coloring_nodes() {
-            property = document.getElementById("node_property").value
-            value = document.getElementById("node_value").value
+        function make_coloring() {
+            mark = document.getElementById("node_or_link").value
+            property = document.getElementById("property").value
+            value = document.getElementById("value").value
             color = document.getElementById("node_color").value
             equality = document.getElementById("equality").value
-            color_nodes(property, value, color, equality)
+            console.log(mark, property,value, color, equality)
+            if (mark == "node"){
+                color_marks("circle", "fill", property, value, color, equality)
+            } else if (mark == "link"){
+                color_marks("path", "stroke", property, value, color, equality)
+            }
         }
 
 
@@ -505,8 +545,7 @@
         function calculate_brackground(color) {
             c = convertRGB(color)
             brightness = Math.sqrt(c[0] * c[0] * .241 + c[1] * c[1] * .691 + c[2] * c[2] * .068);
-
-            if (brightness < 130){
+            if (brightness < 200){
                 return "white"
             }
             else {return "#696773"}
