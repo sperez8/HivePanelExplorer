@@ -9,24 +9,31 @@
         <script src="http://d3js.org/d3.v3.min.js"></script>
         <script src="http://d3js.org/d3.hive.v0.min.js"></script>
         <div id="container">
-            <div id="title"></div>
-            <div id="panel"></div>
-            <div id="search"></div>
+            <div id="title" class = "darktext"></div>
+            <div id="panel" ></div>
+            <div id="search">
+                <center>
+                    <form>
+                        <input type="text" id="lostNode"/>
+                        <input value ="Search" onclick="show_node();" type = "button" class = "darktext"/><br>
+                    </form>
+                </center>
+            </div>
             <div id="reveal"></div>
-            <div id="controlpanel">
-                <form action="">
+            <div id="controlpanel" class = "darktext">
+                <form action="" class = "darktext">
                     If a node's  <br>
-                    <select id= "node_property" onchange="make_value_options()">
+                    <select id= "node_property" onchange="make_value_options()" class = "darktext">
                         <option>property</option>
                     </select>
-                    <select id= "equality">
+                    <select id= "equality" class = "darktext">
                         <option>=</option>
                     </select>
-                    <select id= "node_value">
+                    <select id= "node_value" class = "darktext">
                     </select>
                     <br>then color:   
-                    <input type="text" id="node_colour" size="6" value="color" class = "ex"/>  
-                    <input value ="Highlight" onclick="make_coloring_nodes();" type = "button"/><br>
+                    <input type="text" id="node_color" size="6" value="color"/>  
+                    <input value ="Highlight" onclick="make_coloring_nodes();" type = "button" class = "darktext"/><br>
                 </form>
             </div>
         </div>
@@ -40,8 +47,6 @@
         // ****************************************** //
 
         var SVGTitle = 'Friends Forever' + ' Hive Panel'
-
-        var colorNeutral = '#42264B'
 
         var num_axis = 3
             angle = [0.0001, 2.09, 4.19]
@@ -77,8 +82,8 @@
             .range(edgeColor);
 
         d3.select("body").select("#title")
-            .append("h1").html('<center>'+SVGTitle+'</center>')
-            .style("color", colorNeutral)
+            .attr("class", "darktext")
+            .html('<center>'+SVGTitle+'</center>')
 
 
           // ****************************************** //
@@ -155,11 +160,11 @@
                 .attr("x", function(d) { return d.i; })
                 .attr("y", function(d) { return d.j-size/2 - padding/2})
                 .attr("text-anchor", "middle")
-                .text(capitalize(p.y.split('_')[0]))
+                .attr("class","viztext")
+                .text(p.y.split('_')[0])
                 .attr("transform", function(d) { 
                     return "rotate(-90)"; //"translate("+ d.i-size/2 + "," + d.j-size/2+")
                     })
-                .attr("font-size", "13pt");
             }
 
             if (p.j==0){
@@ -167,8 +172,9 @@
                 .attr("x", function(d) { return d.i; })
                 .attr("y", function(d) { return d.j-size/2 - padding/2; })
                 .attr("text-anchor", "middle")
-                .text(capitalize(p.x.split('_')[0]))
-                .attr("font-size", "13pt");
+                .attr("class","viztext")
+                .text(p.x.split('_')[0])
+
             }
 
             var posScale = d3.scale.linear()
@@ -339,7 +345,6 @@
             if (equality == '>'){
                 d3.selectAll("circle").each(function(d){
                     if (d[property] > value) {
-                        console.log(d)
                         d3.select(this)
                             .style("fill", color)
                    }
@@ -402,10 +407,6 @@
                     }
                 })
             };
-
-        d3.select("body").select("#search")
-            .append("p").html('<center><form><input type="text" id="lostNode"/><input value ="Search" onclick="show_node();" type = "button"/><br></form></center>')
-            .style("color", colorNeutral)
 
 
 
@@ -474,12 +475,24 @@
 
         }
 
-
+        colorBox = document.getElementById("node_color")
+        d3.select(colorBox).on('input', function() { 
+            color = colorBox.value // get the current value of the input field.
+            console.log(color)
+            colorBox.style.color = color
+            colorBox.style.fontWeight = "800"
+            computedStyle = window.getComputedStyle(colorBox)
+            computedColor = computedStyle.color
+            d3.select(this)
+                .transition()
+                .duration(hoverOverTime*5)
+                .style("background-color", calculate_brackground(computedColor))
+        });
 
         function make_coloring_nodes() {
             property = document.getElementById("node_property").value
             value = document.getElementById("node_value").value
-            color = document.getElementById("node_colour").value
+            color = document.getElementById("node_color").value
             equality = document.getElementById("equality").value
             color_nodes(property, value, color, equality)
         }
@@ -488,6 +501,16 @@
           // ****************************************** //
          //              RANDOM FUNCTIONS              //
         // ****************************************** //
+
+        function calculate_brackground(color) {
+            c = convertRGB(color)
+            brightness = Math.sqrt(c[0] * c[0] * .241 + c[1] * c[1] * .691 + c[2] * c[2] * .068);
+
+            if (brightness < 130){
+                return "white"
+            }
+            else {return "#696773"}
+        }
 
         function check_quantitative(options){
             for (o in options) {
@@ -503,9 +526,18 @@
           return radians / Math.PI * 180 - 90;
         }
 
-        function capitalize(string)
+        function convertRGB(rgb)
         {
-            return string.charAt(0).toUpperCase() + string.slice(1);
+            var regex = /rgb *\( *([0-9]{1,3}) *, *([0-9]{1,3}) *, *([0-9]{1,3}) *\)/;
+            var values = regex.exec(rgb);
+            if(values.length != 4)
+            {
+                return rgb; // fall back to what was given.              
+            }
+            var r = Math.round(parseFloat(values[1]));
+            var g = Math.round(parseFloat(values[2]));
+            var b = Math.round(parseFloat(values[3]));
+            return [r,g,b]
         }
         </script>
     </body>

@@ -4,10 +4,6 @@ body {
 	margin: 50px 50px 50px 50px;
 }
 
-h1 {
-	font: 300 34px "Helvetica Neue";
-}
-
 #container {
 	font: normal 13px "Helvetica Neue";
 	height: 750px;
@@ -20,6 +16,7 @@ h1 {
 
 
 #title {
+	font: 300 34px "Helvetica Neue";
 	height: 60px;
 	width: 100%;
 	float: left;
@@ -59,13 +56,13 @@ h1 {
 }
 
 #search, #reveal, #controlpanel {
+	color: #3F3E45;
 	width: 285px;
 	padding-left: 10px;
 	float: right;
 	border-radius: 7px;
 	border-bottom: 3px groove #D2CFE7;
 	border-left: 2px groove #D2CFE7;
-    text-align: left;
 }
 
 select, input, input[type="button"] {
@@ -92,11 +89,15 @@ p {
 	display: inline-block; 
 }
 
-.ex {
-	font-style: italic;
+.viztext {
+	font: normal 17px "Helvetica Neue";
+	text-transform: capitalize;
+	color:#4E3D54;
 }
 
-
+.darktext {
+	color: #4E3D54;
+}
 
 
 
