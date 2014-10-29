@@ -37,8 +37,8 @@
                         <option>value</option>
                     </select>
                     <br>then color:   
-                    <input type="text" id="node_color" size="6" value="color"/>  
-                    <input value ="Highlight" onclick="make_coloring();" type = "button" class = "darktext"/><br>
+                    <input type="text" id="node_color" size="6" value=""/>  
+                    <input value ="Highlight" id = "color_button" onclick="make_coloring();" type = "button" class = "darktext"/><br>
                 </form>
             </div>
         </div>
@@ -530,13 +530,24 @@
             color = document.getElementById("node_color").value
             equality = document.getElementById("equality").value
             console.log(mark, property,value, color, equality)
-            if (mark == "node"){
-                color_marks("circle", "fill", property, value, color, equality)
-            } else if (mark == "link"){
-                color_marks("path", "stroke", property, value, color, equality)
+            if (color != "") {
+                if (mark == "node"){
+                    color_marks("circle", "fill", property, value, color, equality)
+                } else if (mark == "link"){
+                    color_marks("path", "stroke", property, value, color, equality)
+                }
+                switch_button(document.getElementById("color_button"), "Highlight", "Undo")
             }
         }
 
+        function switch_button(button, name1, name2) {
+            if (button.value == name1){
+                button.value = name2
+            } else if (button.value == name2) {
+                button.value = name1
+            }
+
+        }
 
           // ****************************************** //
          //              RANDOM FUNCTIONS              //
