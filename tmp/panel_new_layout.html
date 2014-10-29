@@ -21,13 +21,13 @@
             </div>
             <div id="reveal"></div>
             <div id="controlpanel" class = "darktext">
-                <form action="" class = "darktext">
+                <form action="" class = "darktext rules">
                     If a 
                     <select id= "node_or_link" onchange="make_property_options()" class = "darktext">
                         <option>node</option>
                         <option>link</option>
-                    </select>'s  <br>
-                    <select id= "property" onchange="make_value_options()" class = "darktext">
+                    </select>'s
+                    <select id= "property" onchange="make_value_options()" class = "darktext" maxwidth="5px">
                         <option>property</option>
                     </select>
                     <select id= "equality" class = "darktext">
@@ -36,9 +36,12 @@
                     <select id= "value" class = "darktext">
                         <option>value</option>
                     </select>
-                    <br>then color:   
-                    <input type="text" id="node_color" size="6" value=""/>  
+                    , color:   
+                    <input type="text" id="node_color" size="7" value=""/>  
                     <input value ="Highlight" id = "color_button" onclick="make_coloring();" type = "button" class = "darktext"/><br>
+                </form>
+                <form action="" class = "darktext">
+                    <input value ="Add coloring rule" id = "addRule" onclick="add_rule();" type = "button" class = "darktext"/><br>
                 </form>
             </div>
         </div>
@@ -549,6 +552,15 @@
 
         }
 
+        function add_rule(){
+            count = 1
+            oldRule = document.getElementById("addRule")
+            oldRule.parentNode.removeChild(oldRule)
+            var newRule = ruleTemplate.format(1,1)
+            d3.select("body").select("#controlpanel").append("div")
+                .html(newRule)
+        }
+
           // ****************************************** //
          //              RANDOM FUNCTIONS              //
         // ****************************************** //
@@ -589,6 +601,38 @@
             var b = Math.round(parseFloat(values[3]));
             return [r,g,b]
         }
+
+        String.prototype.format = function () {
+            var i = 0, args = arguments;
+            return this.replace(/{}/g, function () {
+                return typeof args[i] != 'undefined' ? args[i++] : '';
+            });
+        };
+
+        ruleTemplate = "<form action='' class = 'darktext rules rule{}'>"+
+"                    If a "+
+"                    <select id= 'node_or_link' onchange='make_property_options()' class = 'darktext'>"+
+"                        <option>node</option>"+
+"                        <option>link</option>"+
+"                    </select>'s"+
+"                    <select id= 'property' onchange='make_value_options()' class = 'darktext' maxwidth='5px'>"+
+"                        <option>property</option>"+
+"                    </select>"+
+"                    <select id= 'equality' class = 'darktext'>"+
+"                        <option>=</option>"+
+"                    </select>"+
+"                    <select id= 'value' class = 'darktext'>"+
+"                        <option>value</option>"+
+"                    </select>"+
+"                    , color:   "+
+"                    <input type='text' id='node_color' size='7' value=''/>  "+
+"                    <input value ='Highlight' id = 'color_button' onclick='make_coloring();' type = 'button' class = 'darktext'/><br>"+
+"                </form>"+
+"                <form action='' class = 'darktext'>"+
+"                    <input value ='Add coloring rule' id = 'add_rule' name = 'rule{}' onclick='add_rule();' type = 'button' class = 'darktext'/><br>"+
+"                </form>"
+
+        
         </script>
     </body>
 </html>

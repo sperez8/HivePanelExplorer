@@ -1,5 +1,4 @@
 
-
 body {
 	margin: 50px 50px 50px 50px;
 }
@@ -52,13 +51,12 @@ body {
 	clear: right;
 	margin-top: 10px;
 	padding-top: 10px;
-	padding-left: 15px;
 }
 
 #search, #reveal, #controlpanel {
 	color: #3F3E45;
 	width: 285px;
-	padding-left: 10px;
+	padding-left: 5px;
 	float: right;
 	border-radius: 7px;
 	border-bottom: 3px groove #D2CFE7;
@@ -69,20 +67,30 @@ select, input, input[type="button"] {
 	margin-top: 6px;
 	margin-bottom: 6px;
 	margin-left: 3px;
-	padding-right: 5px;
-	padding-left: 5px;
-    border: 0;
+	padding-right: 1px;
+	padding-left: 1px;
     background: transparent;
     height: 28px;
     border: 1px solid #d4ccd4;
     border-radius: 4px;
 	font: normal 13px "Helvetica Neue";
+    max-width: 120px !important;
+    overflow: hidden;
+}
+
+.rules {
+    border: 1px solid #D2CFE7;
+    padding-right: 2px;
+	padding-left: 4px;
 }
 
 input[type="button"] {
     border: 2px solid #B1AFC4;
     height: 32px;
     border-radius: 0px;
+    float: right;
+    margin-right: 5px;
+    min-width: 65px;
 }
 
 p { 
