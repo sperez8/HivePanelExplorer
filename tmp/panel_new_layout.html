@@ -272,17 +272,12 @@
                 .call(highlight_nodes)
                 revealNode(d, node.style("fill"));
             d3.selectAll(".node")
-                .transition()
-                .duration(hoverOverTime*0.2)
                 .each(function(n){
                     if (n.name == d.name){
                         d3.select(this).call(highlight_nodes)
                     }
                 })
             d3.selectAll(".link")
-                .transition()
-                .delay(hoverOverTime*0.1)
-                .duration(hoverOverTime*0.2)
                 .each(function(l){
                     if (l.source.name == d.name || l.target.name == d.name){
                         d3.select(this).call(highlight_links)
@@ -327,7 +322,10 @@
             };
 
         var highlight_links = function(selection) {
-            selection
+            selection            
+                .transition()
+                .delay(hoverOverTime*0.1)
+                .duration(hoverOverTime*0.2)
                 .style("stroke-opacity", 1)
                 .style("stroke-width", linkwidth*2)
             };
