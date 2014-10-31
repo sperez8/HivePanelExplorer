@@ -9,12 +9,15 @@
         <script src="http://d3js.org/d3.v3.min.js"></script>
         <script src="http://d3js.org/d3.hive.v0.min.js"></script>
         <div id="container">
-            <div id="title" class = "darktext"></div>
+            <div id="title">
+                <div id="thetitle" class = "darktext"></div>
+                <div id="info" class = "darktext"></div>
+            </div>
             <div id="panel" ></div>
             <div id="search">
                 <center>
                     <form>
-                        <input type="text" id="lostNode"/>
+                        <input type="text" id="lostNode" size = "25"/>
                         <input value ="Search" onclick="show_node();" type = "button" class = "darktext"/><br>
                     </form>
                 </center>
@@ -89,10 +92,13 @@
             .domain(d3.range(0,edgeColor.length,1.0))
             .range(edgeColor);
 
-        d3.select("body").select("#title")
-            .attr("class", "darktext")
-            .html('<center>'+SVGTitle+'</center>')
+        d3.select("body").select("#title").select("#thetitle")
+            .html(SVGTitle)
 
+        N = nodes.length
+        E = links.length
+        d3.select("body").select("#title").select("#info")
+            .html(N+' nodes, '+E+' edges')
 
           // ****************************************** //
          //       ORGANIZING PANEL TABLE ITEMS         //
@@ -192,8 +198,16 @@
                             .domain(scales[p.x])
                             .range(d3.range(num_axis));
 
+            console.log(asgScale)
             // Uncomment to see the cutoffs of the scale
             //console.log(asgScale.invertExtent(0), asgScale.invertExtent(1), asgScale.invertExtent(2)) 
+            // cell.selectAll(".axis")
+            //     .data(angle)
+            //   .enter().append("text")
+            //     .attr("transform", function(d) { return "rotate(" + degrees(angles(d)) + ")translate("+radius.range()[1] + 40+","+0+")"; })
+            //     //.attr("x", function(d) {return Math.sin(angles(d))*(radius.range()[1])} )
+            //     //.attr("y", function(d) {return - Math.cos(angles(d))*(radius.range()[1])} )
+            //     .text(function(d,i) {return asgScale(i)})
 
             cell.selectAll(".axis")
                 .data(angle)

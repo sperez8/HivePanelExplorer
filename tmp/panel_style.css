@@ -15,12 +15,20 @@ body {
 
 
 #title {
-	font: 300 34px "Helvetica Neue";
 	height: 60px;
 	width: 100%;
-	float: left;
+	float: center;
 	border-bottom: 3px groove #D2CFE7;
-	padding-bottom: 25px;
+	padding-bottom: 20px;
+	padding-left: 32px;
+}
+
+#thetitle {
+	font: 300 34px "Helvetica Neue";
+}
+
+#info {
+	font: 100 20px "Helvetica Neue";
 }
 
 #panel {
@@ -76,6 +84,10 @@ select, input, input[type="button"] {
 	font: normal 13px "Helvetica Neue";
     max-width: 120px !important;
     overflow: hidden;
+}
+
+input {
+	max-width: 4000px !important;
 }
 
 .rules {
