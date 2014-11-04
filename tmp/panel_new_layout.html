@@ -488,7 +488,6 @@
         function make_property_options(formNumber) {
             var mark = document.getElementById("node_or_link" + formNumber).value
             var property = document.getElementById("property" + formNumber)
-            console.log(formNumber, mark, property)
             remove_options(property)
             if (mark == "node"){
                 for (var key in nodes[0]) {
@@ -561,10 +560,11 @@
         create_color_box(1)
         
         function color_or_undo(sel) {
+            console.log('sel', sel)
             formNumber = sel.id.slice(-1)
             button = document.getElementById("colorButton"+formNumber)
             if (button.value == 'Highlight') {
-                make_coloring(form_number)
+                make_coloring(formNumber)
             } else if (button.value == 'Undo') {
                 d3.selectAll(".link")
                     .transition()
@@ -574,7 +574,6 @@
                     .transition()
                     .duration(hoverOverTime)
                     .style("fill", nodeColor)
-
                 switch_button(button, "Highlight", "Undo")
             }
         }
@@ -585,14 +584,13 @@
             value = document.getElementById("value"+formNumber).value
             color = document.getElementById("node_color"+formNumber).value
             equality = document.getElementById("equality"+formNumber).value
-            console.log(mark, property,value, color, equality)
             if (color != "") {
                 if (mark == "node"){
                     color_marks("circle", "fill", property, value, color, equality)
                 } else if (mark == "link"){
                     color_marks("path", "stroke", property, value, color, equality)
                 }
-                switch_button(document.getElementById("colorButton"), "Highlight", "Undo")
+                switch_button(document.getElementById("colorButton"+formNumber), "Highlight", "Undo")
             }
         }
 
@@ -690,7 +688,7 @@
 "                    </select>"+
 "                    , color:   "+
 "                    <input type='text' id='node_color{}' size='7' value=''/>  "+
-"                    <input value ='Highlight' id = 'colorButton{}' name = 'colorButton' onclick='color_or_undo();' type = 'button' class = 'darktext'/><br>"+
+"                    <input value ='Highlight' id = 'colorButton{}' name = 'colorButton' onclick='color_or_undo(this);' type = 'button' class = 'darktext'/><br>"+
 "                </form>"
         
         </script>
