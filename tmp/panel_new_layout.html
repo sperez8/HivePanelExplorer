@@ -25,22 +25,22 @@
             </div>
             <div id="reveal"></div>
             <div id="controlpanel" class="darktext">
-                <form action="" class="darktext rules" id="colorRule1">If a
-                    <select id="node_or_link" onchange="make_property_options()" class="darktext">
+                <form action="" class="darktext rules" id="colorForm1" name = "colorForm" >If a
+                    <select id="node_or_link1" onchange="send_form(this)" class="darktext">
                         <option>node</option>
                         <option>link</option>
                     </select>'s
-                    <select id="property" onchange="make_value_options()" class="darktext" maxwidth="5px">
+                    <select id="property1" onchange="make_value_options()" class="darktext" maxwidth="5px">
                         <option>property</option>
                     </select>
-                    <select id="equality" class="darktext">
+                    <select id="equality1" class="darktext">
                         <option>=</option>
                     </select>
-                    <select id="value" class="darktext">
+                    <select id="value1" class="darktext">
                         <option>value</option>
                     </select>, color:
-                    <input type="text" id="node_color" size="7" value="" />
-                    <input value="Highlight" id="color_button" onclick="color_or_undo();" type="button" class="darktext" />
+                    <input type="text" id="node_color1" size="7" value="" />
+                    <input value="Highlight" id="colorButton1" name = "colorButton" onclick="color_or_undo(this);" type="button" class="darktext" />
                     <br>
                 </form>
                 <form action="" class="darktext">
@@ -301,7 +301,6 @@
 
         var node_mouseout = function(node) {
             removeReveal();
-            console.log('here')
             d3.selectAll(".link")
                 .transition()
                 .duration(hoverOverTime)
@@ -310,7 +309,7 @@
             d3.selectAll(".node")
                 .transition()
                 .duration(hoverOverTime)
-                .attr("r", function(d) {console.log(d); return nodesize})
+                .attr("r", nodesize)
                 .attr("stroke-width", nodestroke)
                 .attr("stroke", nodestrokecolor)
                 .style("fill-opacity", opnode)
@@ -463,9 +462,33 @@
             return quantitative
         }
 
-        function make_property_options() {
-            var mark = document.getElementById("node_or_link").value
-            var property = document.getElementById("property")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        function send_form(sel) {
+            if (sel) {
+                formNumber = sel.id.slice(-1)
+                make_property_options(formNumber)
+            } else {
+                make_property_options(1)
+            }
+        }
+
+        function make_property_options(formNumber) {
+            var mark = document.getElementById("node_or_link" + formNumber).value
+            var property = document.getElementById("property" + formNumber)
+            console.log(formNumber, mark, property)
             remove_options(property)
             if (mark == "node"){
                 for (var key in nodes[0]) {
@@ -482,15 +505,17 @@
                     }
                 };
             }
-            make_value_options()
+            make_value_options(formNumber)
         };
-        make_property_options()
-        //Want this to run when page is loaded
+        make_property_options(1)
 
-        function make_value_options() {
-            mark = document.getElementById("node_or_link").value
-            property = document.getElementById("property").value
-            valueSelector = document.getElementById("value")
+
+        function make_value_options(formNumber) {
+            formNumber = typeof formNumber !== 'undefined' ? formNumber : 1;
+
+            mark = document.getElementById("node_or_link"+formNumber).value
+            property = document.getElementById("property"+formNumber).value
+            valueSelector = document.getElementById("value"+formNumber)
 
             //first remove all the previous options:
             remove_options(valueSelector)
@@ -501,7 +526,7 @@
                 quantitative = add_options(valueSelector, links, property)
             }
 
-            equality = document.getElementById("equality")
+            equality = document.getElementById("equality"+formNumber)
             remove_options(equality)
             equal = document.createElement("option")
             equal.text = '='
@@ -517,24 +542,29 @@
             }
         }
 
-        colorBox = document.getElementById("node_color")
-        d3.select(colorBox).on('input', function() { 
-            color = colorBox.value // get the current value of the input field.
-            colorBox.style.fontWeight = "800"
-            colorBox.style.backgroundColor = "white"
-            colorBox.style.color = color
-            computedStyle = window.getComputedStyle(colorBox)
-            computedColor = computedStyle.color
-            d3.select(this)
-                .transition()
-                .duration(hoverOverTime*2)
-                .style("background-color", calculate_brackground(computedColor));
-        });
+        function create_color_box(formNumber) {
+
+            colorBox = document.getElementById("node_color" + formNumber)
+            d3.select(colorBox).on('input', function() { 
+                color = colorBox.value // get the current value of the input field.
+                colorBox.style.fontWeight = "800"
+                colorBox.style.backgroundColor = "white"
+                colorBox.style.color = color
+                computedStyle = window.getComputedStyle(colorBox)
+                computedColor = computedStyle.color
+                d3.select(this)
+                    .transition()
+                    .duration(hoverOverTime*2)
+                    .style("background-color", calculate_brackground(computedColor));
+            });
+        }
+        create_color_box(1)
         
-        function color_or_undo() {
-            button = document.getElementById("color_button")
+        function color_or_undo(sel) {
+            formNumber = sel.id.slice(-1)
+            button = document.getElementById("colorButton"+formNumber)
             if (button.value == 'Highlight') {
-                make_coloring()
+                make_coloring(form_number)
             } else if (button.value == 'Undo') {
                 d3.selectAll(".link")
                     .transition()
@@ -549,12 +579,12 @@
             }
         }
 
-        function make_coloring() {
-            mark = document.getElementById("node_or_link").value
-            property = document.getElementById("property").value
-            value = document.getElementById("value").value
-            color = document.getElementById("node_color").value
-            equality = document.getElementById("equality").value
+        function make_coloring(formNumber) {
+            mark = document.getElementById("node_or_link"+formNumber).value
+            property = document.getElementById("property"+formNumber).value
+            value = document.getElementById("value"+formNumber).value
+            color = document.getElementById("node_color"+formNumber).value
+            equality = document.getElementById("equality"+formNumber).value
             console.log(mark, property,value, color, equality)
             if (color != "") {
                 if (mark == "node"){
@@ -562,7 +592,7 @@
                 } else if (mark == "link"){
                     color_marks("path", "stroke", property, value, color, equality)
                 }
-                switch_button(document.getElementById("color_button"), "Highlight", "Undo")
+                switch_button(document.getElementById("colorButton"), "Highlight", "Undo")
             }
         }
 
@@ -575,13 +605,24 @@
 
         }
 
+        function count_rules() {
+            return 1
+        }
+
+        function remove_add_rule_button() {
+            addRule = document.getElementById("addRule")
+            addRule.parentNode.removeChild(addRule)
+        }
         function add_rule(){
-            count = 1
-            oldRule = document.getElementById("addRule")
-            oldRule.parentNode.removeChild(oldRule)
-            var newRule = ruleTemplate.format(1,1)
+            count = count_rules()
+            remove_add_rule_button()
+            ruleNumber = count + 1
+            var newRule = ruleTemplate.format(ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber)
             d3.select("body").select("#controlpanel").append("div")
                 .html(newRule)
+
+            make_property_options(ruleNumber)
+            create_color_box(ruleNumber)
         }
 
           // ****************************************** //
@@ -632,29 +673,25 @@
             });
         };
 
-        ruleTemplate = "<form action='' class = 'darktext rules rule{}'>"+
+        ruleTemplate = "<form action='' class = 'darktext rules' id = 'colorForm{}' name = 'colorForm'>"+
 "                    If a "+
-"                    <select id= 'node_or_link' onchange='make_property_options()' class = 'darktext'>"+
+"                    <select id= 'node_or_link{}' onchange='send_form(this)' class = 'darktext'>"+
 "                        <option>node</option>"+
 "                        <option>link</option>"+
 "                    </select>'s"+
-"                    <select id= 'property' onchange='make_value_options()' class = 'darktext' maxwidth='5px'>"+
+"                    <select id= 'property{}' onchange='make_value_options()' class = 'darktext' maxwidth='5px'>"+
 "                        <option>property</option>"+
 "                    </select>"+
-"                    <select id= 'equality' class = 'darktext'>"+
+"                    <select id= 'equality{}' class = 'darktext'>"+
 "                        <option>=</option>"+
 "                    </select>"+
-"                    <select id= 'value' class = 'darktext'>"+
+"                    <select id= 'value{}' class = 'darktext'>"+
 "                        <option>value</option>"+
 "                    </select>"+
 "                    , color:   "+
-"                    <input type='text' id='node_color' size='7' value=''/>  "+
-"                    <input value ='Highlight' id = 'color_button' onclick='make_coloring();' type = 'button' class = 'darktext'/><br>"+
-"                </form>"+
-"                <form action='' class = 'darktext'>"+
-"                    <input value ='Add coloring rule' id = 'add_rule' name = 'rule{}' onclick='add_rule();' type = 'button' class = 'darktext'/><br>"+
+"                    <input type='text' id='node_color{}' size='7' value=''/>  "+
+"                    <input value ='Highlight' id = 'colorButton{}' name = 'colorButton' onclick='color_or_undo();' type = 'button' class = 'darktext'/><br>"+
 "                </form>"
-
         
         </script>
     </body>
