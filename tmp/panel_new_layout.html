@@ -39,7 +39,7 @@
                         <option>value</option>
                     </select>, color:
                     <input type="text" id="node_color1" size="7" value="" />
-                    <input value="Highlight" id="colorButton1" name = "colorButton" onclick="color_filter_or_undo(this);" type="button" class="darktext" />
+                    <input value="Highlight" id="colorButton1" class = "highlight" name = "colorButton" onclick="color_filter_or_undo(this);" type="button" class="darktext" />
                 </form>
                 <form action="" class="darktext leftrule">
                     <input value="Add coloring rule" id="addColorRule" onclick="add_rule(this);" type="button" class="darktext" />
@@ -599,27 +599,65 @@
             });
         }
         create_color_box(1)
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         function color_filter_or_undo(sel) {
             ruleNumber = find_number_from_selection(sel)
             button = document.getElementById("colorButton"+ruleNumber)
-            if (button.value == 'Filter') {
-                make_coloring(ruleNumber)
-                switch_button(button, "Filter", "Undo")
+            ruleState = button.value //Can be Highlight, Filter or Undo
+            if (ruleState == 'Filter') {
+                success = make_coloring(ruleNumber)
+                if (success) {
+                    switch_button(button, "Filter", "Undo")
+                }
             }
-            if (button.value == 'Highlight') {
-                make_coloring(ruleNumber)
-                switch_button(button, "Highlight", "Undo")
-            } else if (button.value == 'Undo') {
+            else if (ruleState == 'Highlight') {
+                success = make_coloring(ruleNumber)
+                if (success) {
+                    switch_button(button, "Highlight", "Undo")
+                }
+
+            } else if (ruleState == 'Undo') {
                 //reset all links and nodes to defaults
                 d3.selectAll(".link")
                     .style("stroke", edgeColor)
+                    .style("visibility", "visible");
+
                 d3.selectAll(".node")
                     .style("fill", nodeColor)
-                switch_button(button, "Highlight", "Undo")
+                    .style("visibility", "visible");
+
+                if (hasClass(button, "highlight")){
+                    switch_button(button, "Highlight", "Undo")
+                } else if (hasClass(button, "filter")){
+                    switch_button(button, "Filter", "Undo")
+                }
                 redo_rules(ruleNumber)
             }
         }
+
+
+
+
+
+
+
+
+
+
 
         function make_coloring(ruleNumber) {
             mark = document.getElementById("node_or_link"+ruleNumber).value
@@ -628,17 +666,29 @@
             colorButton = document.getElementById("node_color"+ruleNumber)
             filterButton = document.getElementById("filter_type"+ruleNumber)
             equality = document.getElementById("equality"+ruleNumber).value
+            success = false
             if (colorButton != null) {
                 color = colorButton.value
-                if (mark == "node"){
-                    color_marks("circle", "fill", property, value, color, equality)
-                } else if (mark == "link"){
-                    color_marks("path", "stroke", property, value, color, equality)
+                if (color != ''){
+                    if (mark == "node"){
+                        color_marks("circle", "fill", property, value, color, equality)
+                        success = true
+                    } else if (mark == "link"){
+                        color_marks("path", "stroke", property, value, color, equality)
+                        success = true
+                    }
                 }
             } else if (filterButton != null) {
                 filter = filterButton.value
+                if (mark == "node"){
+                    color_marks("circle", "visibility", property, value, "hidden", equality)
+                    success = true
+                } else if (mark == "link"){
+                    color_marks("path", "visibility", property, value, "hidden", equality)
+                    success = true
+                }
             }
-
+            return success
         }
 
         function switch_button(button, name1, name2) {
@@ -773,6 +823,10 @@
             return [r,g,b]
         }
 
+        function hasClass(element, cls) {
+            return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
+        }
+
         String.prototype.format = function () {
             var i = 0, args = arguments;
             return this.replace(/{}/g, function () {
@@ -797,7 +851,7 @@
 "                    </select>"+
 "                    , color:   "+
 "                    <input type='text' id='node_color{}' size='7' value=''/>  "+
-"                    <input value ='Highlight' id = 'colorButton{}' name = 'colorButton' onclick='color_filter_or_undo(this);' type = 'button' class = 'darktext'/>"+
+"                    <input value ='Highlight' id = 'colorButton{}' class = 'highlight' name = 'colorButton' onclick='color_filter_or_undo(this);' type = 'button' class = 'darktext'/>"+
 "                </form>"
 
         FilterRuleTemplate = "<form action='' class = 'darktext rules' id = 'colorForm{}' name = 'colorForm'>"+
@@ -815,11 +869,11 @@
 "                    <select id= 'value{}' class = 'darktext'>"+
 "                        <option>value</option>"+
 "                    </select>"+
-"                    <select id= 'filterType{}' class = 'darktext'>"+
+"                    <select id= 'filter_type{}' class = 'darktext'>"+
 "                        <option>keep</option>"+
 "                        <option>hide</option>"+
 "                    </select>"+
-"                    <input value ='Filter' id = 'colorButton{}' name = 'colorButton' onclick='color_filter_or_undo(this);' type = 'button' class = 'darktext'/>"+
+"                    <input value ='Filter' id = 'colorButton{}' class = 'filter' name = 'colorButton' onclick='color_filter_or_undo(this);' type = 'button' class = 'darktext'/>"+
 "                </form>"    
         </script>
     </body>
