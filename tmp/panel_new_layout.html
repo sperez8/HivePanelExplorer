@@ -570,7 +570,8 @@
         function create_color_box(ruleNumber) {
 
             colorBox = document.getElementById("node_color" + ruleNumber)
-            d3.select(colorBox).on('input', function() { 
+            d3.select(colorBox).on('input', function() {
+                colorBox = document.getElementById("node_color" + ruleNumber) //need to do this again or it grabs the recent colorBox
                 color = colorBox.value // get the current value of the input field.
                 colorBox.style.fontWeight = "800"
                 colorBox.style.backgroundColor = "white"
@@ -579,8 +580,9 @@
                 computedColor = computedStyle.color
                 d3.select(this)
                     .transition()
-                    .duration(hoverOverTime*2)
-                    .style("background-color", calculate_brackground(computedColor));
+                    .duration(hoverOverTime)
+                    .style("background-color", calculate_brackground(computedColor))
+                    .style("color", color)
             });
         }
         create_color_box(1)
