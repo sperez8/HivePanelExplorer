@@ -26,11 +26,11 @@
             <div id="reveal"></div>
             <div id="controlpanel" class="darktext">
                 <form action="" class="darktext rules" id="colorForm1" name = "colorForm" >If a
-                    <select id="node_or_link1" onchange="send_form(this)" class="darktext">
+                    <select id="node_or_link1" onchange="update_properties(this)" class="darktext">
                         <option>node</option>
                         <option>link</option>
                     </select>'s
-                    <select id="property1" onchange="make_value_options()" class="darktext" maxwidth="5px">
+                    <select id="property1" onchange="update_values(this)" class="darktext" maxwidth="5px">
                         <option>property</option>
                     </select>
                     <select id="equality1" class="darktext">
@@ -55,7 +55,11 @@
         <script>
 
           // ****************************************** //
+
+
          //         USER DEFINED PARAMETERS            //
+
+
         // ****************************************** //
 
         var SVGTitle = 'Friends Forever' + ' Hive Panel'
@@ -63,8 +67,8 @@
         var num_axis = 3
             angle = [0.0001, 2.09, 4.19]
 
-        var nodeColor = 'blue'
-            edgeColor = ['blue']
+        var nodeColor = 'darkgrey'
+            edgeColor = ['darkgrey']
             linkwidth = 1.3
             oplink = 0.8
             opnode = 0.8
@@ -80,7 +84,11 @@
 
 
           // ****************************************** //
+
+
          //         WEB PAGE LAYOUT PARAMETERS         //
+
+
         // ****************************************** //
 
 
@@ -102,7 +110,11 @@
             .html(N+' nodes, '+E+' edges')
 
           // ****************************************** //
+
+
          //       ORGANIZING PANEL TABLE ITEMS         //
+
+
         // ****************************************** //
 
 
@@ -143,7 +155,11 @@
 
 
           // ****************************************** //
+
+
          //          MAKING THE SVG AND HIVES          //
+
+
         // ****************************************** //
 
 
@@ -278,7 +294,11 @@
 
 
           // ****************************************** //
+
+
          //         SOME DISPLAY FUNCTIONS             //
+
+
         // ****************************************** //
 
         var node_mouseover = function(node,d) {
@@ -394,7 +414,11 @@
 
 
           // ****************************************** //
+
+
          //              SEARCH FUNCTIONS              //
+
+
         // ****************************************** //
 
 
@@ -420,7 +444,11 @@
 
 
           // ****************************************** //
+
+
          //         CONTROL PANEL FUNCTIONS            //
+
+
         // ****************************************** //
 
         function remove_options(selector) {
@@ -462,32 +490,30 @@
             return quantitative
         }
 
+        function update_properties(sel) {
+            ruleNumber = find_number_from_selection(sel)
+            make_property_options(ruleNumber)
+        }
 
+        function update_values(sel) {
+            ruleNumber = find_number_from_selection(sel)
+            make_value_options(ruleNumber)
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-        function send_form(sel) {
+        function find_number_from_selection(sel) {
             if (sel) {
-                formNumber = sel.id.slice(-1)
-                make_property_options(formNumber)
+                ruleNumber = sel.id.slice(-1)
+                if (ruleNumber == parseInt(ruleNumber)){
+                    return ruleNumber
+                }
             } else {
-                make_property_options(1)
+                console.log("Error, couldn't find appropriate selection.")
             }
         }
 
-        function make_property_options(formNumber) {
-            var mark = document.getElementById("node_or_link" + formNumber).value
-            var property = document.getElementById("property" + formNumber)
+        function make_property_options(ruleNumber) {
+            var mark = document.getElementById("node_or_link" + ruleNumber).value
+            var property = document.getElementById("property" + ruleNumber)
             remove_options(property)
             if (mark == "node"){
                 for (var key in nodes[0]) {
@@ -504,17 +530,17 @@
                     }
                 };
             }
-            make_value_options(formNumber)
+            make_value_options(ruleNumber)
         };
         make_property_options(1)
 
 
-        function make_value_options(formNumber) {
-            formNumber = typeof formNumber !== 'undefined' ? formNumber : 1;
+        function make_value_options(ruleNumber) {
+            ruleNumber = typeof ruleNumber !== 'undefined' ? ruleNumber : 1;
 
-            mark = document.getElementById("node_or_link"+formNumber).value
-            property = document.getElementById("property"+formNumber).value
-            valueSelector = document.getElementById("value"+formNumber)
+            mark = document.getElementById("node_or_link"+ruleNumber).value
+            property = document.getElementById("property"+ruleNumber).value
+            valueSelector = document.getElementById("value"+ruleNumber)
 
             //first remove all the previous options:
             remove_options(valueSelector)
@@ -525,7 +551,7 @@
                 quantitative = add_options(valueSelector, links, property)
             }
 
-            equality = document.getElementById("equality"+formNumber)
+            equality = document.getElementById("equality"+ruleNumber)
             remove_options(equality)
             equal = document.createElement("option")
             equal.text = '='
@@ -541,9 +567,9 @@
             }
         }
 
-        function create_color_box(formNumber) {
+        function create_color_box(ruleNumber) {
 
-            colorBox = document.getElementById("node_color" + formNumber)
+            colorBox = document.getElementById("node_color" + ruleNumber)
             d3.select(colorBox).on('input', function() { 
                 color = colorBox.value // get the current value of the input field.
                 colorBox.style.fontWeight = "800"
@@ -560,37 +586,34 @@
         create_color_box(1)
         
         function color_or_undo(sel) {
-            console.log('sel', sel)
-            formNumber = sel.id.slice(-1)
-            button = document.getElementById("colorButton"+formNumber)
+            ruleNumber = find_number_from_selection(sel)
+            button = document.getElementById("colorButton"+ruleNumber)
             if (button.value == 'Highlight') {
-                make_coloring(formNumber)
+                make_coloring(ruleNumber)
+                switch_button(button, "Highlight", "Undo")
             } else if (button.value == 'Undo') {
+                //reset all links and nodes to defaults
                 d3.selectAll(".link")
-                    .transition()
-                    .duration(hoverOverTime)
                     .style("stroke", edgeColor)
                 d3.selectAll(".node")
-                    .transition()
-                    .duration(hoverOverTime)
                     .style("fill", nodeColor)
                 switch_button(button, "Highlight", "Undo")
+                redo_rules(ruleNumber)
             }
         }
 
-        function make_coloring(formNumber) {
-            mark = document.getElementById("node_or_link"+formNumber).value
-            property = document.getElementById("property"+formNumber).value
-            value = document.getElementById("value"+formNumber).value
-            color = document.getElementById("node_color"+formNumber).value
-            equality = document.getElementById("equality"+formNumber).value
+        function make_coloring(ruleNumber) {
+            mark = document.getElementById("node_or_link"+ruleNumber).value
+            property = document.getElementById("property"+ruleNumber).value
+            value = document.getElementById("value"+ruleNumber).value
+            color = document.getElementById("node_color"+ruleNumber).value
+            equality = document.getElementById("equality"+ruleNumber).value
             if (color != "") {
                 if (mark == "node"){
                     color_marks("circle", "fill", property, value, color, equality)
                 } else if (mark == "link"){
                     color_marks("path", "stroke", property, value, color, equality)
                 }
-                switch_button(document.getElementById("colorButton"+formNumber), "Highlight", "Undo")
             }
         }
 
@@ -604,27 +627,62 @@
         }
 
         function count_rules() {
-            return 1
+            count = 1
+            while (true) {
+                form = document.getElementById("colorForm"+count)
+                if (form == null) {
+                    return count
+                } else {
+                    count = count + 1
+                }
+            }
         }
 
         function remove_add_rule_button() {
             addRule = document.getElementById("addRule")
             addRule.parentNode.removeChild(addRule)
+            return addRule
+        }
+
+        function place_add_rule() {
+            d3.select("body").select("#controlpanel").append("div").html("<form action='' class='darktext'><input value='Add coloring rule' "
+                + "id='addRule' onclick='add_rule();' type='button' class='darktext' /> <br> </form>")
         }
         function add_rule(){
-            count = count_rules()
-            remove_add_rule_button()
-            ruleNumber = count + 1
+            ruleNumber = count_rules()
+            ruleButton = remove_add_rule_button()
             var newRule = ruleTemplate.format(ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber)
             d3.select("body").select("#controlpanel").append("div")
                 .html(newRule)
 
             make_property_options(ruleNumber)
             create_color_box(ruleNumber)
+            place_add_rule()
         }
 
+        function redo_rules(undoneRule) {
+            ruleNumber = 1
+            while(true){
+                if (ruleNumber != undoneRule){
+                    button = document.getElementById("colorButton"+ruleNumber)
+                    if (button == null){
+                        return null
+                    } else {
+                        make_coloring(ruleNumber)
+                    }
+                }
+                ruleNumber++
+            }
+
+        }
+
+
           // ****************************************** //
+
+
          //              RANDOM FUNCTIONS              //
+
+
         // ****************************************** //
 
         function calculate_brackground(color) {
@@ -673,11 +731,11 @@
 
         ruleTemplate = "<form action='' class = 'darktext rules' id = 'colorForm{}' name = 'colorForm'>"+
 "                    If a "+
-"                    <select id= 'node_or_link{}' onchange='send_form(this)' class = 'darktext'>"+
+"                    <select id= 'node_or_link{}' onchange='update_properties(this)' class = 'darktext'>"+
 "                        <option>node</option>"+
 "                        <option>link</option>"+
 "                    </select>'s"+
-"                    <select id= 'property{}' onchange='make_value_options()' class = 'darktext' maxwidth='5px'>"+
+"                    <select id= 'property{}' onchange='update_values(this)' class = 'darktext' maxwidth='5px'>"+
 "                        <option>property</option>"+
 "                    </select>"+
 "                    <select id= 'equality{}' class = 'darktext'>"+
