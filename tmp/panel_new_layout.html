@@ -19,7 +19,6 @@
                     <form>
                         <input type="text" id="lostNode" size="25" />
                         <input value="Search" onclick="show_node();" type="button" class="darktext" />
-                        <br>
                     </form>
                 </center>
             </div>
@@ -41,11 +40,9 @@
                     </select>, color:
                     <input type="text" id="node_color1" size="7" value="" />
                     <input value="Highlight" id="colorButton1" name = "colorButton" onclick="color_or_undo(this);" type="button" class="darktext" />
-                    <br>
                 </form>
                 <form action="" class="darktext">
                     <input value="Add coloring rule" id="addRule" onclick="add_rule();" type="button" class="darktext" />
-                    <br>
                 </form>
             </div>
         </div>
@@ -642,13 +639,19 @@
 
         function remove_add_rule_button() {
             addRule = document.getElementById("addRule")
-            addRule.parentNode.removeChild(addRule)
+            form = addRule.parentNode
+            form.removeChild(addRule)
+            form.parentNode.removeChild(form)
+            div = form.parentNode
+            if (div != null) {
+                div.parentNode.removeChild(div)
+            }
             return addRule
         }
 
         function place_add_rule() {
             d3.select("body").select("#controlpanel").append("div").html("<form action='' class='darktext'><input value='Add coloring rule' "
-                + "id='addRule' onclick='add_rule();' type='button' class='darktext' /> <br> </form>")
+                + "id='addRule' onclick='add_rule();' type='button' class='darktext' /> </form>")
         }
         function add_rule(){
             ruleNumber = count_rules()
@@ -670,7 +673,11 @@
                     if (button == null){
                         return null
                     } else {
-                        make_coloring(ruleNumber)
+                        //check if button that button hasn't already been undone, ie isn't coloring anything
+                        if (button.value == 'Undo') {
+                            make_coloring(ruleNumber)
+                        }
+
                     }
                 }
                 ruleNumber++
@@ -748,7 +755,7 @@
 "                    </select>"+
 "                    , color:   "+
 "                    <input type='text' id='node_color{}' size='7' value=''/>  "+
-"                    <input value ='Highlight' id = 'colorButton{}' name = 'colorButton' onclick='color_or_undo(this);' type = 'button' class = 'darktext'/><br>"+
+"                    <input value ='Highlight' id = 'colorButton{}' name = 'colorButton' onclick='color_or_undo(this);' type = 'button' class = 'darktext'/>"+
 "                </form>"
         
         </script>

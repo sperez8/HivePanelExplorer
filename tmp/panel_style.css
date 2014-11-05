@@ -116,3 +116,8 @@ p {
 .darktext {
     color: #4E3D54;
 }
+
+
+.filter {
+    float: left;
+}
