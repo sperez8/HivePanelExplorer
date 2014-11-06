@@ -42,10 +42,10 @@
                     <input value="Highlight" id="ruleButton1" name = "ruleButton" onclick="color_filter_or_undo(this);" type="button" class="darktext highlight" />
                 </form>
                 <form action="" class="darktext leftrule">
-                    <input value="Add coloring rule" id="addColorRule" onclick="add_rule(this);" type="button" class="darktext" />
+                    <input value="Add coloring rule" id="addColorRule" onclick="add_rule(this);" type="button" class="darktext addbutton" />
                 </form>
                 <form action="" class="darktext">
-                    <input value="Add filtering rule" id="addFilterRule" onclick="add_rule(this);" type="button" class="darktext filter" />
+                    <input value="Add filtering rule" id="addFilterRule" onclick="add_rule(this);" type="button" class="darktext filter addbutton" />
                 </form>
             </div>
         </div>
@@ -413,11 +413,11 @@
             }
         };
 
-        color_marks("circle", "fill",'Gender', 'girl', '#FFAE00','=')
-        color_marks("circle", "fill",'Gender', 'alien', '#7700D9','=')
-        color_marks("circle", "fill",'Gender', 'boy', '#62D900','=')
-        color_marks('path', 'stroke', 'relationship', 'friends', 'darkgrey','=')
-        color_marks('path', 'stroke', 'relationship', 'enemies', 'black','=')
+        // color_marks("circle", "fill",'Gender', 'girl', '#FFAE00','=')
+        // color_marks("circle", "fill",'Gender', 'alien', '#7700D9','=')
+        // color_marks("circle", "fill",'Gender', 'boy', '#62D900','=')
+        // color_marks('path', 'stroke', 'relationship', 'friends', 'darkgrey','=')
+        // color_marks('path', 'stroke', 'relationship', 'enemies', 'black','=')
 
 
           // ****************************************** //
@@ -744,10 +744,10 @@
         function place_add_rule() {
             d3.select("body").select("#controlpanel").append("div").html("<form action='' class='darktext leftrule'>"
                 +"<input value='Add coloring rule' id='addColorRule' onclick='add_rule(this);' "
-                +"type='button' class='darktext' /> </form>")
+                +"type='button' class='darktext addbutton' /> </form>")
             d3.select("body").select("#controlpanel").append("div").html("<form action='' class='darktext'>"
                 +"<input value='Add filtering rule' id='addFilterRule' onclick='add_rule(this);' "
-                +"type='button' class='darktext' /> </form>")
+                +"type='button' class='darktext addbutton filter' /> </form>")
         }
 
         function add_rule(sel){

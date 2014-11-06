@@ -56,19 +56,19 @@ body {
     height: 430px;
     clear: right;
     margin-top: 10px;
-    padding-top: 10px;
 }
 
 #search, #reveal, #controlpanel {
     color: #3F3E45;
-    width: 285px;
-    padding-left: 5px;
+    width: 290px;
     float: right;
     border-radius: 7px;
     border-left: 2px groove #D2CFE7;
 }
 
 #search, #reveal {
+    width: 285px;
+    padding-left: 5px;
     border-bottom: 3px groove #D2CFE7;
 }
 
@@ -76,8 +76,8 @@ select, input, input[type="button"] {
     margin-top: 5px;
     margin-bottom: 5px;
     margin-left: 2px;
-    padding-right: 1px;
-    padding-left: 1px;
+    padding-right: 4px;
+    padding-left: 4px;
     background: transparent;
     height: 26px;
     border: 1px solid #d4ccd4;
@@ -92,28 +92,32 @@ input {
 }
 
 .rules {
-    border: 1px solid #D2CFE7;
-    border-left: 5px groove #D2CFE7;
-    border-bottom: 2px groove #D2CFE7;
+    border-left: 6px solid #D2CFE7;
+    border-bottom: 2px solid #D2CFE7;
     margin-top: 5px;
-    margin-bottom: 5px;
+    margin-bottom: 15px;
     padding-right: 2px;
     padding-left: 4px;
 }
 
 .filter {
-    border-left: 5px groove #3f3d3f;
-    border-bottom: 2px solid #3f3d3f;
+    border-left: 6px solid #a9a3a9;
+    border-bottom: 2px solid #a9a3a9;
     padding-bottom: 4px;
 }
 
 input[type="button"] {
+    margin-left: 10px;
     border: 2px solid #B1AFC4;
     height: 32px;
     border-radius: 0px;
     float: right;
     margin-right: 5px;
     min-width: 65px;
+}
+
+input.filter{
+    border: 2px solid #a9a3a9;
 }
 
 p {
@@ -130,6 +134,10 @@ p {
     color: #4E3D54;
 }
 
+input.addbutton{
+    border: 1px solid #B1AFC4;
+    border-radius: 4px;
+}
 
 .leftrule {
     float: left;
