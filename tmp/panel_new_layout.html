@@ -192,7 +192,7 @@
                 .attr("y", function(d) { return d.j-size/2 - padding/2})
                 .attr("text-anchor", "middle")
                 .attr("class","viztext")
-                .text(p.y.split('_')[0])
+                .text(capitalize(p.y.split('_')[0]))
                 .attr("transform", function(d) { 
                     return "rotate(-90)"; //"translate("+ d.i-size/2 + "," + d.j-size/2+")
                     })
@@ -204,7 +204,7 @@
                 .attr("y", function(d) { return d.j-size/2 - padding/2; })
                 .attr("text-anchor", "middle")
                 .attr("class","viztext")
-                .text(p.x.split('_')[0])
+                .text(capitalize(p.x.split('_')[0]))
 
             }
 
@@ -267,6 +267,12 @@
                             .style("stroke-width", linkwidth)
                     });
             
+            //format all viz text the same
+            cell.selectAll("text")
+                .attr("font-family", "Helvetica Neue")
+                .attr("fill", "#4E3D54")
+                .attr("font-size", "17px")
+
             //removes any edges between nodes on same axis.
             cell.selectAll("path[show="+false+"]").remove()
 
@@ -835,6 +841,13 @@
 
         function hasClass(element, cls) {
             return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
+        }
+
+        function capitalize(str) {
+            var lower = str.toLowerCase();
+            return lower.replace(/(^| )(\w)/g, function(x) {
+                return x.toUpperCase();
+                });
         }
 
         String.prototype.format = function () {

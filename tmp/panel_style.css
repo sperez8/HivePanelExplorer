@@ -124,12 +124,6 @@ p {
     display: inline-block;
 }
 
-.viztext {
-    font: normal 17px"Helvetica Neue";
-    text-transform: capitalize;
-    color: #4E3D54;
-}
-
 .darktext {
     color: #4E3D54;
 }
