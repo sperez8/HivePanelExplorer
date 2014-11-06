@@ -24,7 +24,7 @@
             </div>
             <div id="reveal"></div>
             <div id="controlpanel" class="darktext">
-                <form action="" class="darktext rules" id="colorForm1" name = "colorForm" >If a
+                <form action="" class="darktext rules" id="ruleForm1" name = "ruleForm" >If a
                     <select id="node_or_link1" onchange="update_properties(this)" class="darktext">
                         <option>node</option>
                         <option>link</option>
@@ -39,13 +39,13 @@
                         <option>value</option>
                     </select>, color:
                     <input type="text" id="node_color1" size="7" value="" />
-                    <input value="Highlight" id="colorButton1" class = "highlight" name = "colorButton" onclick="color_filter_or_undo(this);" type="button" class="darktext" />
+                    <input value="Highlight" id="ruleButton1" name = "ruleButton" onclick="color_filter_or_undo(this);" type="button" class="darktext highlight" />
                 </form>
                 <form action="" class="darktext leftrule">
                     <input value="Add coloring rule" id="addColorRule" onclick="add_rule(this);" type="button" class="darktext" />
                 </form>
                 <form action="" class="darktext">
-                    <input value="Add filtering rule" id="addFilterRule" onclick="add_rule(this);" type="button" class="darktext" />
+                    <input value="Add filtering rule" id="addFilterRule" onclick="add_rule(this);" type="button" class="darktext filter" />
                 </form>
             </div>
         </div>
@@ -396,9 +396,16 @@
                    }
                 })
             }
-            else {
+            else if (equality == '='){
                 d3.selectAll(mark).each(function(d){
                     if (d[property] == value) {
+                        d3.select(this)
+                            .style(styling, color)
+                   }
+                })
+            } else if (equality == '!='){
+                d3.selectAll(mark).each(function(d){
+                    if (d[property] != value) {
                         d3.select(this)
                             .style(styling, color)
                    }
@@ -406,11 +413,11 @@
             }
         };
 
-        color_marks("circle", "fill",'Gender', 'girl', '#FFAE00')
-        color_marks("circle", "fill",'Gender', 'alien', '#7700D9')
-        color_marks("circle", "fill",'Gender', 'boy', '#62D900')
-        color_marks('path', 'stroke', 'relationship', 'friends', 'darkgrey')
-        color_marks('path', 'stroke', 'relationship', 'enemies', 'black')
+        color_marks("circle", "fill",'Gender', 'girl', '#FFAE00','=')
+        color_marks("circle", "fill",'Gender', 'alien', '#7700D9','=')
+        color_marks("circle", "fill",'Gender', 'boy', '#62D900','=')
+        color_marks('path', 'stroke', 'relationship', 'friends', 'darkgrey','=')
+        color_marks('path', 'stroke', 'relationship', 'enemies', 'black','=')
 
 
           // ****************************************** //
@@ -616,7 +623,7 @@
 
         function color_filter_or_undo(sel) {
             ruleNumber = find_number_from_selection(sel)
-            button = document.getElementById("colorButton"+ruleNumber)
+            button = document.getElementById("ruleButton"+ruleNumber)
             ruleState = button.value //Can be Highlight, Filter or Undo
             if (ruleState == 'Filter') {
                 success = make_coloring(ruleNumber)
@@ -663,12 +670,12 @@
             mark = document.getElementById("node_or_link"+ruleNumber).value
             property = document.getElementById("property"+ruleNumber).value
             value = document.getElementById("value"+ruleNumber).value
-            colorButton = document.getElementById("node_color"+ruleNumber)
+            ruleButton = document.getElementById("node_color"+ruleNumber)
             filterButton = document.getElementById("filter_type"+ruleNumber)
             equality = document.getElementById("equality"+ruleNumber).value
             success = false
-            if (colorButton != null) {
-                color = colorButton.value
+            if (ruleButton != null) {
+                color = ruleButton.value
                 if (color != ''){
                     if (mark == "node"){
                         color_marks("circle", "fill", property, value, color, equality)
@@ -680,6 +687,9 @@
                 }
             } else if (filterButton != null) {
                 filter = filterButton.value
+                if (filter == 'hide') {equality = '='}
+                else {equality = '!='}
+                console.log(filter, equality)
                 if (mark == "node"){
                     color_marks("circle", "visibility", property, value, "hidden", equality)
                     success = true
@@ -703,7 +713,7 @@
         function count_rules() {
             count = 1
             while (true) {
-                form = document.getElementById("colorForm"+count)
+                form = document.getElementById("ruleForm"+count)
                 if (form == null) {
                     return count
                 } else {
@@ -761,7 +771,7 @@
             ruleNumber = 1
             while(true){
                 if (ruleNumber != undoneRule){
-                    button = document.getElementById("colorButton"+ruleNumber)
+                    button = document.getElementById("ruleButton"+ruleNumber)
                     if (button == null){
                         return null
                     } else {
@@ -834,7 +844,7 @@
             });
         };
 
-        ColorRuleTemplate = "<form action='' class = 'darktext rules' id = 'colorForm{}' name = 'colorForm'>"+
+        ColorRuleTemplate = "<form action='' class = 'darktext rules' id = 'ruleForm{}' name = 'ruleForm'>"+
 "                    If a "+
 "                    <select id= 'node_or_link{}' onchange='update_properties(this)' class = 'darktext'>"+
 "                        <option>node</option>"+
@@ -851,10 +861,10 @@
 "                    </select>"+
 "                    , color:   "+
 "                    <input type='text' id='node_color{}' size='7' value=''/>  "+
-"                    <input value ='Highlight' id = 'colorButton{}' class = 'highlight' name = 'colorButton' onclick='color_filter_or_undo(this);' type = 'button' class = 'darktext'/>"+
+"                    <input value ='Highlight' id = 'ruleButton{}' name = 'ruleButton' onclick='color_filter_or_undo(this);' type = 'button' class = 'darktext highlight'/>"+
 "                </form>"
 
-        FilterRuleTemplate = "<form action='' class = 'darktext rules' id = 'colorForm{}' name = 'colorForm'>"+
+        FilterRuleTemplate = "<form action='' class = 'darktext rules filter' id = 'ruleForm{}' name = 'ruleForm'>"+
 "                    If a "+
 "                    <select id= 'node_or_link{}' onchange='update_properties(this)' class = 'darktext'>"+
 "                        <option>node</option>"+
@@ -870,10 +880,10 @@
 "                        <option>value</option>"+
 "                    </select>"+
 "                    <select id= 'filter_type{}' class = 'darktext'>"+
-"                        <option>keep</option>"+
 "                        <option>hide</option>"+
+"                        <option>keep</option>"+
 "                    </select>"+
-"                    <input value ='Filter' id = 'colorButton{}' class = 'filter' name = 'colorButton' onclick='color_filter_or_undo(this);' type = 'button' class = 'darktext'/>"+
+"                    <input value ='Filter' id = 'ruleButton{}' name = 'ruleButton' onclick='color_filter_or_undo(this);' type = 'button' class = 'darktext filter'/>"+
 "                </form>"    
         </script>
     </body>
