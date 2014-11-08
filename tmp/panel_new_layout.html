@@ -49,8 +49,8 @@
                 </form>
             </div>
         </div>
-        <script src="friends_panel_test_nodes.js"></script>
-        <script src="friends_panel_test_edges.js"></script>
+        <script src="new_nodes.js"></script>
+        <script src="new_edges.js"></script>
 
         <script>
 
@@ -118,9 +118,10 @@
         // ****************************************** //
 
 
-        var columntraits = ["Gender","degree"];
-            rowtraits = ["betweeness","Height"];
-            scales = {};
+        var columntraits = ["Gender", "clustering","degree"];
+            rowtraits = ["Height","betweeness","centrality"];
+            asgScales = {};
+            posScales = {};
 
         var width = document.getElementById("panel").offsetWidth
             height = width
@@ -128,27 +129,49 @@
             panels = Math.max(columntraits.length, rowtraits.length)
             size = (width-padding)/panels
 
+
         for (var i in columntraits) {
-            trait = columntraits[i]+'_axis';
-            max = d3.max(nodes, function(d) {
-                return d[trait]});
-            min = d3.min(nodes, function(d) {
-                return d[trait]});
-            scales[trait] = [min,max];
+            trait = columntraits[i];
+            categorical = !check_quantitative([nodes[0][trait]])
+            if (categorical){
+                values = d3.nest().key(function(d) {return d[trait]})
+                                .rollup(function(leaves) { return leaves.length; })
+                                .entries(nodes);
+                var keys = [];
+
+                for (var key in values) {
+                    if (values.hasOwnProperty(key)) {
+                    keys.push(values[key].key);
+                    }
+                }
+                asgScales[trait] = d3.scale.ordinal()
+                    .domain(keys)
+                    .range(d3.range(num_axis));
+            } else {
+                max = d3.max(nodes, function(d) {
+                    return d[trait]});
+                min = d3.min(nodes, function(d) {
+                    return d[trait]});
+                asgScales[trait] = d3.scale.quantile()
+                                        .domain([min,max])
+                                        .range(d3.range(num_axis));
             }
+        }
 
         for (var i in rowtraits) {
-            trait = rowtraits[i]+'_pos';
+            trait = rowtraits[i];
             max = d3.max(nodes, function(d) {
                 return d[trait]});
             min = d3.min(nodes, function(d) {
                 return d[trait]});
-            scales[trait] = [min,max];
-            }
+            posScales[trait] = d3.scale.linear()
+                                    .domain([min,max])
+                                    .range([0, 1]);
+        }
 
         function cross(a, b){
             var c = [], n = a.length, m = b.length, i, j;
-            for (i = -1; ++i < n;) for (j = -1; ++j < m;) c.push({x: a[i]+'_axis', i: i, y: b[j] + '_pos', j: j});
+            for (i = -1; ++i < n;) for (j = -1; ++j < m;) c.push({x: a[i], i: i, y: b[j], j: j});
             return c;
 
         };
@@ -192,7 +215,7 @@
                 .attr("y", function(d) { return d.j-size/2 - padding/2})
                 .attr("text-anchor", "middle")
                 .attr("class","viztext")
-                .text(capitalize(p.y.split('_')[0]))
+                .text(capitalize(p.y))
                 .attr("transform", function(d) { 
                     return "rotate(-90)"; //"translate("+ d.i-size/2 + "," + d.j-size/2+")
                     })
@@ -204,26 +227,19 @@
                 .attr("y", function(d) { return d.j-size/2 - padding/2; })
                 .attr("text-anchor", "middle")
                 .attr("class","viztext")
-                .text(capitalize(p.x.split('_')[0]))
+                .text(capitalize(p.x))
 
             }
 
-            var posScale = d3.scale.linear()
-                            .domain(scales[p.y])
-                            .range([0, 1]);
-            var asgScale = d3.scale.quantile()
-                            .domain(scales[p.x])
-                            .range(d3.range(num_axis));
-
             // Uncomment to see the cutoffs of the scale
-            //console.log(asgScale.invertExtent(0), asgScale.invertExtent(1), asgScale.invertExtent(2)) 
+            //console.log(asgScales[p.x].invertExtent(0), asgScales[p.x].invertExtent(1), asgScales[p.x].invertExtent(2)) 
             // cell.selectAll(".axis")
             //     .data(angle)
             //   .enter().append("text")
             //     .attr("transform", function(d) { return "rotate(" + degrees(angles(d)) + ")translate("+radius.range()[1] + 40+","+0+")"; })
             //     //.attr("x", function(d) {return Math.sin(angles(d))*(radius.range()[1])} )
             //     //.attr("y", function(d) {return - Math.cos(angles(d))*(radius.range()[1])} )
-            //     .text(function(d,i) {return asgScale(i)})
+            //     .text(function(d,i) {return asgScales[p.x](i)})
 
             cell.selectAll(".axis")
                 .data(angle)
@@ -240,8 +256,8 @@
               .enter().append("path")
                 .attr("class", "link")
                 .attr("d", d3.hive.link()
-                .angle(function(d) { return angles(asgScale(d[p.x])); })
-                .radius(function(d) { return radius(posScale(d[p.y])); }))
+                .angle(function(d) { return angles(asgScales[p.x](d[p.x])); })
+                .radius(function(d) {return radius(posScales[p.y](d[p.y])); }))
                 .attr("show", function (d) {
                     if (d.source[p.x] == d.target[p.x]) {return false}
                     else {return true}
@@ -280,9 +296,9 @@
                 .data(nodes)
               .enter().append("circle")
                 .attr("class", "node")
-                .attr("transform", function(d) { return "rotate(" + degrees(angles(asgScale(d[p.x]))) + ")"; })
+                .attr("transform", function(d) { return "rotate(" + degrees(angles(asgScales[p.x](d[p.x]))) + ")"; })
                 .attr("cx", function(d) {
-                        return radius(posScale(d[p.y]));})
+                        return radius(posScales[p.y](d[p.y]));})
                 .attr("r", nodesize)
                 .attr("stroke-width", nodestroke)
                 .attr("stroke", nodestrokecolor)
@@ -504,16 +520,16 @@
         }
 
         function update_properties(sel) {
-            ruleNumber = find_number_from_selection(sel)
+            ruleNumber = find_rule_number_from_selection(sel)
             make_property_options(ruleNumber)
         }
 
         function update_values(sel) {
-            ruleNumber = find_number_from_selection(sel)
+            ruleNumber = find_rule_number_from_selection(sel)
             make_value_options(ruleNumber)
         }
 
-        function find_number_from_selection(sel) {
+        function find_rule_number_from_selection(sel) {
             if (sel) {
                 ruleNumber = sel.id.slice(-1)
                 if (ruleNumber == parseInt(ruleNumber)){
@@ -628,7 +644,7 @@
 
 
         function color_filter_or_undo(sel) {
-            ruleNumber = find_number_from_selection(sel)
+            ruleNumber = find_rule_number_from_selection(sel)
             button = document.getElementById("ruleButton"+ruleNumber)
             ruleState = button.value //Can be Highlight, Filter or Undo
             if (ruleState == 'Filter') {
