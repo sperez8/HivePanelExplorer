@@ -129,24 +129,16 @@
             panels = Math.max(columntraits.length, rowtraits.length)
             size = (width-padding)/panels
 
-
+        console.log('\nAssignment values for grouping of nodes on axes:')
         for (var i in columntraits) {
             trait = columntraits[i];
             categorical = !check_quantitative([nodes[0][trait]])
             if (categorical){
-                values = d3.nest().key(function(d) {return d[trait]})
-                                .rollup(function(leaves) { return leaves.length; })
-                                .entries(nodes);
-                var keys = [];
-
-                for (var key in values) {
-                    if (values.hasOwnProperty(key)) {
-                    keys.push(values[key].key);
-                    }
-                }
+                keys = get_categories(trait)
                 asgScales[trait] = d3.scale.ordinal()
                     .domain(keys)
                     .range(d3.range(num_axis));
+                console.log('Categorical trait ', trait, ' has categories: ', keys)
             } else {
                 max = d3.max(nodes, function(d) {
                     return d[trait]});
@@ -155,18 +147,33 @@
                 asgScales[trait] = d3.scale.quantile()
                                         .domain([min,max])
                                         .range(d3.range(num_axis));
+                console.log('Quantitative trait ', trait, ' has values and cut offs: ')
+                for (var i = 0; i <= num_axis-1; i++) {
+                    console.log('\t axis', i, asgScales[trait].invertExtent(i))
+                };
             }
         }
 
+        console.log('\nScaled values for positioning of nodes onto axes:')
         for (var i in rowtraits) {
             trait = rowtraits[i];
-            max = d3.max(nodes, function(d) {
-                return d[trait]});
-            min = d3.min(nodes, function(d) {
-                return d[trait]});
-            posScales[trait] = d3.scale.linear()
-                                    .domain([min,max])
-                                    .range([0, 1]);
+            categorical = !check_quantitative([nodes[0][trait]])
+            if (categorical){
+                console.log('categorical trait:', trait)
+                keys = get_categories(trait)
+                asgScales[trait] = d3.scale.ordinal()
+                    .domain(keys)
+                    .range([0, 1]);
+            } else {
+                max = d3.max(nodes, function(d) {
+                    return d[trait]});
+                min = d3.min(nodes, function(d) {
+                    return d[trait]});
+                posScales[trait] = d3.scale.linear()
+                                        .domain([min,max])
+                                        .range([0, 1]);
+                console.log('Quantitative trait ', trait, ' has min and max value: ', min, ',', max)
+            }
         }
 
         function cross(a, b){
@@ -873,6 +880,20 @@
             });
         };
 
+        function get_categories(trait){
+            values = d3.nest().key(function(d) {return d[trait]})
+                            .rollup(function(leaves) { return leaves.length; })
+                            .entries(nodes);
+            var keys = [];
+
+            for (var key in values) {
+                if (values.hasOwnProperty(key)) {
+                keys.push(values[key].key);
+                }
+            }
+
+            return keys
+        }
         ColorRuleTemplate = "<form action='' class = 'darktext rules' id = 'ruleForm{}' name = 'ruleForm'>"+
 "                    If a "+
 "                    <select id= 'node_or_link{}' onchange='update_properties(this)' class = 'darktext'>"+
