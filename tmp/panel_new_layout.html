@@ -141,9 +141,9 @@
                 console.log('Categorical trait ', trait, ' has categories: ', keys)
             } else {
                 max = d3.max(nodes, function(d) {
-                    return d[trait]});
+                    return Number(d[trait])});
                 min = d3.min(nodes, function(d) {
-                    return d[trait]});
+                    return Number(d[trait])});
                 asgScales[trait] = d3.scale.quantile()
                                         .domain([min,max])
                                         .range(d3.range(num_axis));
@@ -166,9 +166,9 @@
                     .range([0, 1]);
             } else {
                 max = d3.max(nodes, function(d) {
-                    return d[trait]});
+                    return Number(d[trait])});
                 min = d3.min(nodes, function(d) {
-                    return d[trait]});
+                    return Number(d[trait])});
                 posScales[trait] = d3.scale.linear()
                                         .domain([min,max])
                                         .range([0, 1]);
