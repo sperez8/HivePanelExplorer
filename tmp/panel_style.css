@@ -38,18 +38,26 @@ body {
 }
 
 #search {
-    height: 70px;
+    height: 48px;
     margin-top: 25px;
     text-align: center;
     vertical-align: middle;
 }
 
-#reveal {
+#revealwrapper {
     height: 100px;
     clear: right;
     margin-top: 10px;
     text-align: center;
     vertical-align: middle;
+    padding-bottom: 5px;
+}
+
+#reveal {
+    height: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis; 
+    font: normal 15px"Helvetica Neue";
 }
 
 #controlpanel {
@@ -58,7 +66,7 @@ body {
     margin-top: 10px;
 }
 
-#search, #reveal, #controlpanel {
+#search, #revealwrapper, #controlpanel {
     color: #3F3E45;
     width: 290px;
     float: right;
@@ -66,7 +74,7 @@ body {
     border-left: 2px groove #D2CFE7;
 }
 
-#search, #reveal {
+#search, #revealwrapper {
     width: 285px;
     padding-left: 5px;
     border-bottom: 3px groove #D2CFE7;
@@ -83,14 +91,13 @@ select, input, input[type="button"] {
     border: 1px solid #d4ccd4;
     border-radius: 4px;
     font: normal 13px"Helvetica Neue";
-    max-width: 120px !important;
+    max-width: 80px !important;
     overflow: hidden;
 }
 
-input {
-    max-width: 4000px !important;
+#lostNode {
+    max-width:  170px !important;
 }
-
 .rules {
     border-left: 6px solid #D2CFE7;
     border-bottom: 2px solid #D2CFE7;
