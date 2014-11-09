@@ -118,8 +118,8 @@
         // ****************************************** //
 
 
-        var columntraits = ["Gender", "clustering","degree"];
-            rowtraits = ["Height","betweeness","centrality"];
+        var columntraits = ["Gender", "degree"];
+            rowtraits = ["Gender", "Height"];
             asgScales = {};
             posScales = {};
 
@@ -159,11 +159,11 @@
             trait = rowtraits[i];
             categorical = !check_quantitative([nodes[0][trait]])
             if (categorical){
-                console.log('categorical trait:', trait)
                 keys = get_categories(trait)
-                asgScales[trait] = d3.scale.ordinal()
+                posScales[trait] = d3.scale.ordinal()
                     .domain(keys)
-                    .range([0, 1]);
+                    .rangeBands([0, 1], 1.0/keys.length/3);
+                console.log('Categorical trait ', trait, ' has categories: ', keys)
             } else {
                 max = d3.max(nodes, function(d) {
                     return Number(d[trait])});
