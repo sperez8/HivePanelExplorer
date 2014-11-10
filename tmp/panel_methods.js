@@ -7,12 +7,7 @@
 // ****************************************** //
 
 
-
-var angles = d3.scale.ordinal()
-    .domain(d3.range(num_axis))
-    .range(angle);
-
-var link_color = d3.scale.linear()
+var link_color = d3.scale.linear() //not used anymore
     .domain(d3.range(0,edgeColor.length,1.0))
     .range(edgeColor);
 
@@ -31,12 +26,6 @@ d3.select("body").select("#title").select("#info")
 
 
 // ****************************************** //
-
-
-var columntraits = ["Gender", "degree"];
-    rowtraits = ["Gender", "Height"];
-    asgScales = {};
-    posScales = {};
 
 var width = document.getElementById("panel").offsetWidth
     height = width
@@ -352,47 +341,6 @@ var removeReveal = function(){
         .remove();
     };
 
-function color_marks(mark, styling, property, value, color, equality) {
-    if (equality == '>'){
-        d3.selectAll(mark).each(function(d){
-            if (Number(d[property]) > Number(value)) {
-                d3.select(this)
-                    .style(styling, color)
-           }
-        })
-    }            
-    else if (equality == '<'){
-        d3.selectAll(mark).each(function(d){
-            if (Number(d[property]) < Number(value)) {
-                d3.select(this)
-                    .style(styling, color)
-           }
-        })
-    }
-    else if (equality == '='){
-        d3.selectAll(mark).each(function(d){
-            if (d[property] == value) {
-                d3.select(this)
-                    .style(styling, color)
-           }
-        })
-    } else if (equality == '!='){
-        d3.selectAll(mark).each(function(d){
-            if (d[property] != value) {
-                d3.select(this)
-                    .style(styling, color)
-           }
-        })
-    }
-};
-
-// color_marks("circle", "fill",'Gender', 'girl', '#FFAE00','=')
-// color_marks("circle", "fill",'Gender', 'alien', '#7700D9','=')
-// color_marks("circle", "fill",'Gender', 'boy', '#62D900','=')
-// color_marks('path', 'stroke', 'relationship', 'friends', 'darkgrey','=')
-// color_marks('path', 'stroke', 'relationship', 'enemies', 'black','=')
-
-
   // ****************************************** //
 
 
@@ -580,20 +528,6 @@ function create_color_box(ruleNumber) {
 }
 create_color_box(1)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function color_filter_or_undo(sel) {
     ruleNumber = find_rule_number_from_selection(sel)
     button = document.getElementById("ruleButton"+ruleNumber)
@@ -629,16 +563,6 @@ function color_filter_or_undo(sel) {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
 function make_coloring(ruleNumber) {
     mark = document.getElementById("node_or_link"+ruleNumber).value
     property = document.getElementById("property"+ruleNumber).value
@@ -649,6 +573,7 @@ function make_coloring(ruleNumber) {
     success = false
     if (ruleButton != null) {
         color = ruleButton.value
+        console.log('Coloring ' + ' ' + mark + 's' + ' with a ' + property + equality + value + ' ' + color)
         if (color != ''){
             if (mark == "node"){
                 color_marks("circle", "fill", property, value, color, equality)
@@ -660,6 +585,7 @@ function make_coloring(ruleNumber) {
         }
     } else if (filterButton != null) {
         filter = filterButton.value
+        console.log('Filtering (' + filter + ') ' + mark + 's' + ' with a ' + property + equality + value)
         if (filter == 'keep') {
             if (equality == '='){
                 equality = '!='
@@ -669,7 +595,6 @@ function make_coloring(ruleNumber) {
                 equality = '<'
             }
         }
-        console.log(filter, equality)
         if (mark == "node"){
             color_marks("circle", "visibility", property, value, "hidden", equality)
             success = true
@@ -680,6 +605,73 @@ function make_coloring(ruleNumber) {
     }
     return success
 }
+
+function color_marks(mark, styling, property, value, color, equality) {
+    console.log(mark, styling, property, value, color, equality)
+    if (equality == '>'){
+        d3.selectAll(mark).each(function(d){
+            if (Number(d[property]) > Number(value)) {
+                d3.select(this)
+                    .style(styling, color)
+                if (styling == 'visibility' && mark == 'circle'){
+                    d3.selectAll(".link")
+                        .each(function(l){
+                            if (l.source.name == d.name || l.target.name == d.name){
+                                d3.select(this).style(styling, color)
+                            }
+                        });
+                }
+            }
+        })
+    }
+    else if (equality == '<'){
+        d3.selectAll(mark).each(function(d){
+            if (Number(d[property]) < Number(value)) {
+                d3.select(this)
+                    .style(styling, color)
+                if (styling == 'visibility' && mark == 'circle'){
+                    d3.selectAll(".link")
+                        .each(function(l){
+                            if (l.source.name == d.name || l.target.name == d.name){
+                                d3.select(this).style(styling, color)
+                            }
+                        });
+                }
+           }
+        })
+    }
+    else if (equality == '='){
+        d3.selectAll(mark).each(function(d){
+            if (d[property] == value) {
+                d3.select(this)
+                    .style(styling, color)
+                if (styling == 'visibility' && mark == 'circle'){
+                    d3.selectAll(".link")
+                        .each(function(l){
+                            if (l.source.name == d.name || l.target.name == d.name){
+                                d3.select(this).style(styling, color)
+                            }
+                        });
+                }
+           }
+        })
+    } else if (equality == '!='){
+        d3.selectAll(mark).each(function(d){
+            if (d[property] != value) {
+                d3.select(this)
+                    .style(styling, color)
+                if (styling == 'visibility' && mark == 'circle'){
+                    d3.selectAll(".link")
+                        .each(function(l){
+                            if (l.source.name == d.name || l.target.name == d.name){
+                                d3.select(this).style(styling, color)
+                            }
+                        });
+                }
+           }
+        })
+    }
+};
 
 function switch_button(button, name1, name2) {
     if (button.value == name1){

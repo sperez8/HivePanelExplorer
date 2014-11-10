@@ -10,7 +10,12 @@
 var SVGTitle = 'Friends Forever' + ' Hive Panel'
 
 var num_axis = 3
-    angle = [0.0001, 2.09, 4.19]
+
+var angle = d3.range(0.0001,2*Math.PI,2.0*Math.PI/num_axis)
+
+var angles = d3.scale.ordinal()
+    .domain(d3.range(num_axis))
+    .range(angle);
 
 var nodeColor = 'darkgrey'
     edgeColor = ['darkgrey']
