@@ -69,11 +69,14 @@ class Hive():
         return None
  
     
-    def make_hive(self, nodeFile, edgeFile, cutoffValues = None, filter = False, makeAllEdges = False):
+    def make_hive(self, nodeFile, edgeFile, cutoffValues = None, filter = False, makeAllEdges = False, graphml = False):
         '''runs Hive methods to create an instance from user input'''  
-            
-        self.get_nodes(nodeFile)
-        self.get_edges(edgeFile)               
+        
+        if graphml:
+            self.get_graphml(nodeFile)
+        else:
+            self.get_nodes(nodeFile)
+            self.get_edges(edgeFile)               
         self.check_nodes(self.sources, self.targets, self.nodes, self.doubleAxes, self.debug)
         self.make_axes()
         self.node_assignment(cutoffValues = cutoffValues)
@@ -165,6 +168,12 @@ class Hive():
 
         return self.edgeProperties
 
+    def get_graphml(self, inputFile):
+        graph = nx.read_graphml(inputFile)
+        self.nodes = graph.nodes()
+        edges = graph.edges()
+        self.sources, self.targets = zip(*edges)
+        print self.nodes, self.sources
 
     def make_axes(self):
         '''creates axes and angles given the number of axes desired

@@ -6,6 +6,8 @@
 
 // ****************************************** //
 
+var asgScales = {};
+    posScales = {};
 
 var link_color = d3.scale.linear() //not used anymore
     .domain(d3.range(0,edgeColor.length,1.0))

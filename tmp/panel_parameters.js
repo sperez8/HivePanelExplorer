@@ -35,5 +35,3 @@ var hoverOverTime = 900
 
 var columntraits = ["Gender", "degree"];
     rowtraits = ["Gender", "Height"];
-    asgScales = {};
-    posScales = {};

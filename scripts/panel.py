@@ -74,7 +74,10 @@ class Panel():
                     rawMeasures = self.rawMeasures
                     )
             
-            hive.make_hive(nodefile, edgefile, makeAllEdges = True) 
+            if nodefile.split('.')[-1] == 'graphml':
+                hive.make_hive(nodefile, None, makeAllEdges = True, graphml = True) 
+            else:
+                hive.make_hive(nodefile, edgefile, makeAllEdges = True) 
             Hives[(a,p)] = hive
             hive = None
         
