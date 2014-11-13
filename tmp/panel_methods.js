@@ -267,7 +267,7 @@ var node_mouseout = function(node) {
         .attr("r", nodesize)
         .attr("stroke-width", nodestroke)
         .attr("stroke", nodestrokecolor)
-        .style("fill-opacity", opnode)
+        //.style("fill-opacity", opnode)
     }
 
 var highlight_nodes = function(selection, temporary) {
@@ -410,7 +410,7 @@ function add_options(selector, data, property){
         options = newOptions
     }
 
-    options.sort(function(a, b){return a-b}) //sort in ascending order
+    options.sort() //sort in ascending order
 
     for (i in options) {
         option = document.createElement("option")
@@ -459,13 +459,24 @@ function make_property_options(ruleNumber) {
     var property = document.getElementById("property" + ruleNumber)
     remove_options(property)
     if (mark == "node"){
-        for (var key in nodes[0]) {
+        options = []
+        for (key in nodes[0]){
+            options.push(key.toLowerCase())
+        }
+        options.sort()
+        for (var i in options) {
             option = document.createElement("option")
-            option.text = key
+            option.text = options[i]
             property.add(option)
         };
     } else if (mark == "link") {
-        for (var key in links[0]) {
+        options = []
+        for (key in links[0]){
+            options.push(key.toLowerCase())
+        }
+        options.sort()
+        for (var i in options) {
+            key = options[i]
             if (key != "source" && key != "target"){
                 option = document.createElement("option")
                 option.text = key
@@ -550,11 +561,13 @@ function color_filter_or_undo(sel) {
         //reset all links and nodes to defaults
         d3.selectAll(".link")
             .style("stroke", edgeColor)
-            .style("visibility", "visible");
+            .style("visibility", "visible")
+            .style("fill-opacity", oplink);
 
         d3.selectAll(".node")
             .style("fill", nodeColor)
-            .style("visibility", "visible");
+            .style("visibility", "visible")
+            .style("fill-opacity", opnode);
 
         if (hasClass(button, "highlight")){
             switch_button(button, "Highlight", "Undo")
@@ -615,11 +628,13 @@ function color_marks(mark, styling, property, value, color, equality) {
             if (Number(d[property]) > Number(value)) {
                 d3.select(this)
                     .style(styling, color)
+                    .style("fill-opacity", opnode_more)
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
                         .each(function(l){
                             if (l.source.name == d.name || l.target.name == d.name){
                                 d3.select(this).style(styling, color)
+                                .style("fill-opacity", opnode_more)
                             }
                         });
                 }
@@ -631,11 +646,13 @@ function color_marks(mark, styling, property, value, color, equality) {
             if (Number(d[property]) < Number(value)) {
                 d3.select(this)
                     .style(styling, color)
+                    .style("fill-opacity", opnode_more)
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
                         .each(function(l){
                             if (l.source.name == d.name || l.target.name == d.name){
                                 d3.select(this).style(styling, color)
+                                .style("fill-opacity", opnode_more)
                             }
                         });
                 }
@@ -647,11 +664,13 @@ function color_marks(mark, styling, property, value, color, equality) {
             if (d[property] == value) {
                 d3.select(this)
                     .style(styling, color)
+                    .style("fill-opacity", opnode_more)
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
                         .each(function(l){
                             if (l.source.name == d.name || l.target.name == d.name){
                                 d3.select(this).style(styling, color)
+                                .style("fill-opacity", opnode_more)
                             }
                         });
                 }
@@ -662,11 +681,13 @@ function color_marks(mark, styling, property, value, color, equality) {
             if (d[property] != value) {
                 d3.select(this)
                     .style(styling, color)
+                    .style("fill-opacity", opnode_more)
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
                         .each(function(l){
                             if (l.source.name == d.name || l.target.name == d.name){
                                 d3.select(this).style(styling, color)
+                                .style("fill-opacity", opnode_more)
                             }
                         });
                 }
@@ -837,6 +858,8 @@ function get_categories(trait){
         }
     }
 
+    keys.sort()
+    console.log(keys)
     return keys
 }
 ColorRuleTemplate = "<form action='' class = 'darktext rules' id = 'ruleForm{}' name = 'ruleForm'>"+
