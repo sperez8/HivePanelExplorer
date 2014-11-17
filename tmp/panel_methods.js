@@ -175,7 +175,7 @@ function plot(p){
         .angle(function(d) { return angles(asgScales[p.x](d[p.x])); })
         .radius(function(d) {return radius(posScales[p.y](d[p.y])); }))
         .attr("show", function (d) {
-            if (d.source[p.x] == d.target[p.x]) {return false}
+            if (asgScales[p.x](d.source[p.x]) == asgScales[p.x](d.target[p.x])) {return false}
             else {return true}
         })
         .style("fill", linkfill)
@@ -700,7 +700,7 @@ function reveal_count(mark, filter, color, count){
     if (filter == 'hide' || filter == 'keep'){action = 'filtered out'
     } else {action = 'colored'}
 
-    if (mark == 'link'){beginning = 'About '
+    if (mark == 'link'){beginning = 'On average, per hive, '
     } else {beginning = ''}
 
     if (count > 1){mark = mark + 's were'
