@@ -60,14 +60,14 @@ def convert_graphml(graphmlFile):
     print keys
     
     #write header
-    nf.write('Node'+','.join(keys))
+    nf.write('Node'+','+','.join(keys))
     
     for node, nodeProperties in G.nodes(data=True):
         row = []
         row.append(node)
         for k in keys:
             if k in nodeProperties.keys():
-                row.append(str(nodeProperties[k]))
+                row.append(str(nodeProperties[k]).replace(',', ';'))
             else:
                 row.append('None')
         print row
@@ -86,7 +86,7 @@ def convert_graphml(graphmlFile):
     keys = set(keys)
     print keys
     
-    ef.write('source' + ',' + 'target' + ','.join(keys))
+    ef.write('source' + ',' + 'target' + ',' +','.join(keys))
     for source, target, edgeProperties in G.edges(data=True):
         row = []
         row.append(source)
@@ -103,7 +103,8 @@ def convert_graphml(graphmlFile):
     print "writing edgefile", edgeFile
     return None    
 
-file = "C:\Users\Sarah\Desktop\c.elegans.herm_pharynx_1.graphml"
+file = "C:\Users\Sarah\Dropbox\\0-HalLab\Hive panel examples\C.elegans\c.elegans.herm_pharynx_1.graphml"
+print file
 convert_graphml(file)
 
 
