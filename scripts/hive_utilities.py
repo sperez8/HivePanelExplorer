@@ -37,6 +37,13 @@ def node_analysis(G, rule):
         return nx.betweenness_centrality(G)
     elif rule == 'average neighbor degree':
         return nx.average_neighbor_degree(G)
+    elif rule == 'component':
+        comp = nx.connected_components(G)
+        components = {}
+        for i,c in enumerate(comp):
+            for node in c:
+                components[node] = i
+        return components
     else:
         print "Node assignment rule {0} not recognized.".format(rule)
         sys.exit()

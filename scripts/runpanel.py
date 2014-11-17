@@ -19,9 +19,9 @@ from panel import Panel
 _cur_dir = os.path.dirname(os.path.realpath(__file__))
 _root_dir = os.path.dirname(_cur_dir)
 
-SIZE = (4,4) #assignment by position rules
-ASSIGNMENT_RULES = ['degree', 'betweeness', 'clustering', 'centrality']
-POSITION_RULES = ['degree', 'betweeness', 'clustering', 'centrality']
+SIZE = (5,5) #assignment by position rules
+ASSIGNMENT_RULES = ['degree', 'betweeness', 'clustering', 'centrality','component']
+POSITION_RULES = ['degree', 'betweeness', 'clustering', 'centrality','component']
 NODES = os.path.join(_root_dir, 'tests', 'test_nodes_friends.txt')
 EDGES = os.path.join(_root_dir, 'tests', 'test_edges_friends.txt')
 TITLE = 'friends_panel_test'

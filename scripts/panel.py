@@ -19,8 +19,8 @@ _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 
 SIZE = (4,4) #assignment by position rules
-ASSIGNMENT_RULES = ['degree', 'betweeness', 'clustering', 'centrality']
-POSITION_RULES = ['degree', 'betweeness', 'clustering', 'centrality']
+ASSIGNMENT_RULES = ['degree', 'betweeness', 'clustering', 'centrality', 'component']
+POSITION_RULES = ['degree', 'betweeness', 'clustering', 'centrality', 'component']
 
 class Panel():
     '''contains a set of hives'''
