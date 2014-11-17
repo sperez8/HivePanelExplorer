@@ -34,6 +34,7 @@ var width = document.getElementById("panel").offsetWidth
     padding = width/0.7*0.05;
     panels = Math.max(columntraits.length, rowtraits.length)
     size = (width-padding)/panels
+    num_panels = columntraits.length*rowtraits.length
 
 console.log('\nAssignment values for grouping of nodes on axes:')
 for (var i in columntraits) {
@@ -324,7 +325,6 @@ var link_full_reveal = function(link,d,source,target) {
         })
     d3.selectAll(".node")
         .each(function(n){
-            console.log(source, target, n.name)
             if (n.name == source || n.name == target){
                 d3.select(this).call(highlight_nodes)
             }
@@ -390,6 +390,7 @@ function make_link_reveal_text(link) {
 }
 
 var revealNode = function(d,color){
+    removeReveal()
     d3.select("body").select("#reveal").append("p")
         .html(make_node_full_reveal_text(d))
         .style("color", color)
@@ -401,6 +402,7 @@ var revealNode = function(d,color){
     };
 
 var revealLink = function(d,color){
+    removeReveal()
     d3.select("body").select("#reveal").append("p")
         .html(make_link_reveal_text(d))
         .style("color", color)
@@ -628,6 +630,7 @@ function color_filter_or_undo(sel) {
         }
 
     } else if (ruleState == 'Undo') {
+        removeReveal()
         //reset all links and nodes to defaults
         d3.selectAll(".link")
             .style("stroke", edgeColor)
@@ -656,16 +659,16 @@ function make_coloring(ruleNumber) {
     filterButton = document.getElementById("filter_type"+ruleNumber)
     equality = document.getElementById("equality"+ruleNumber).value
     success = false
+    color = '#B1AFC4'
+    filter = ''
     if (ruleButton != null) {
         color = ruleButton.value
         console.log('Coloring ' + ' ' + mark + 's' + ' with a ' + property + equality + value + ' ' + color)
         if (color != ''){
             if (mark == "node"){
-                color_marks("circle", "fill", property, value, color, equality)
-                success = true
+                count = color_marks("circle", "fill", property, value, color, equality)
             } else if (mark == "link"){
-                color_marks("path", "stroke", property, value, color, equality)
-                success = true
+                count = color_marks("path", "stroke", property, value, color, equality)
             }
         }
     } else if (filterButton != null) {
@@ -681,21 +684,44 @@ function make_coloring(ruleNumber) {
             }
         }
         if (mark == "node"){
-            color_marks("circle", "visibility", property, value, "hidden", equality)
-            success = true
+            count = color_marks("circle", "visibility", property, value, "hidden", equality)
         } else if (mark == "link"){
-            color_marks("path", "visibility", property, value, "hidden", equality)
-            success = true
+            count = color_marks("path", "visibility", property, value, "hidden", equality)
         }
+    }
+    if (count > 0){
+        success = true
+        reveal_count(mark, filter, color, count)
     }
     return success
 }
 
+function reveal_count(mark, filter, color, count){
+    if (filter == 'hide' || filter == 'keep'){action = 'filtered out'
+    } else {action = 'colored'}
+
+    if (mark == 'link'){beginning = 'About '
+    } else {beginning = ''}
+
+    if (count > 1){mark = mark + 's were'
+    } else {mark = mark + ' was'}
+
+    text = beginning + Math.ceil(count) + ' ' + mark + ' ' + action + '.'
+
+
+    removeReveal()
+    d3.select("body").select("#reveal").append("p")
+        .html(text)
+        .style("color", color)
+};
+
 function color_marks(mark, styling, property, value, color, equality) {
     console.log(mark, styling, property, value, color, equality)
+    count = 0
     if (equality == '>'){
         d3.selectAll(mark).each(function(d){
             if (Number(d[property]) > Number(value)) {
+                count ++
                 d3.select(this)
                     .each(function(){
                         if (mark == 'cirle'){
@@ -717,6 +743,7 @@ function color_marks(mark, styling, property, value, color, equality) {
     else if (equality == '<'){
         d3.selectAll(mark).each(function(d){
             if (Number(d[property]) < Number(value)) {
+                count ++
                 d3.select(this)
                     .each(function(){
                         if (mark == 'cirle'){
@@ -738,6 +765,7 @@ function color_marks(mark, styling, property, value, color, equality) {
     else if (equality == '='){
         d3.selectAll(mark).each(function(d){
             if (d[property] == value) {
+                count ++
                 d3.select(this)
                     .each(function(){
                         if (mark == 'cirle'){
@@ -758,6 +786,7 @@ function color_marks(mark, styling, property, value, color, equality) {
     } else if (equality == '!='){
         d3.selectAll(mark).each(function(d){
             if (d[property] != value) {
+                count ++
                 d3.select(this)
                     .each(function(){
                         if (mark == 'cirle'){
@@ -776,6 +805,7 @@ function color_marks(mark, styling, property, value, color, equality) {
            }
         })
     }
+    return count/num_panels
 };
 
 function switch_button(button, name1, name2) {
