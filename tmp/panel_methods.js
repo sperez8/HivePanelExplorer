@@ -185,17 +185,18 @@ function plot(p){
             else {return link_color(d.type)}
             })
         .style("stroke-width", linkwidth)
+        .on("click", function(d){
+            d3.select(this)
+                .call(link_full_reveal,d,d.source.name, d.target.name)
+        })
         .on("mouseover", function(d){
-            revealLink(d, d3.select(this).style("stroke"));
+            d3.select(this).call(link_tooltip,d,d.source.name, d.target.name)
             d3.select(this).call(highlight_links)
         })
         .on("mouseout", function(d){
-            removeReveal();
-            d3.select(this)
-                .transition()
-                .duration(800)
-                .style("stroke-opacity", oplink)
-                .style("stroke-width", linkwidth)
+            remove_tooltip()
+            node_mouseout()
+            link_mouseout()
         });
     
     //format all viz text the same
@@ -221,14 +222,14 @@ function plot(p){
         .style("fill", nodeColor)
         .on("click", function(d){
             d3.select(this)
-                .call(node_reveal,d)
+                .call(node_full_reveal,d)
         })
         .on("mouseover", function(d){
-            d3.select(this).call(show_properties,d,p.x,p.y, d[p.x], d[p.y])
+            d3.select(this).call(node_tooltip,d,p.x,p.y, d[p.x], d[p.y])
         })
         .on("mouseout", function(d){
             node_mouseout()
-            d3.select(this).call(remove_properties)
+            remove_tooltip()
 
         })
 };
@@ -242,7 +243,21 @@ function plot(p){
 
 // ****************************************** //
 
-var node_reveal = function(node,d) {
+var node_tooltip = function(node, d, px, py, x, y){
+    node.transition()
+        .delay(hoverOverTime/2)   
+        .duration(100)
+        .call(highlight_nodes)
+    tooltip.transition()
+        .delay(hoverOverTime/2)   
+        .duration(400)      
+        .style("opacity", .7);
+    tooltip.html(px + ': ' + round_value(x) + ', <br>' + py + ': ' + round_value(y))
+        .style("left", (d3.event.pageX + 5) + "px")     
+        .style("top", (d3.event.pageY - 28) + "px");
+}
+
+var node_full_reveal = function(node,d) {
     node
         .call(highlight_nodes)
         revealNode(d, node.style("fill"));
@@ -276,22 +291,7 @@ var node_mouseout = function(node) {
         //.style("fill-opacity", opnode)
     }
 
-var show_properties = function(node, d, px, py, x, y){
-    node.transition()
-        .delay(hoverOverTime/2)   
-        .duration(100)
-        .call(highlight_nodes)
-    tooltip.transition()
-        .delay(hoverOverTime/2)   
-        .duration(400)      
-        .style("opacity", .7);
-    tooltip.html(px + ': ' + round_value(x) + ', <br>' + py + ': ' + round_value(y))
-        .style("left", (d3.event.pageX + 5) + "px")     
-        .style("top", (d3.event.pageY - 28) + "px");
-}
-
-
-var remove_properties = function(d){
+var remove_tooltip = function(){
     tooltip.transition()        
         .duration(500)      
         .style("opacity", 0);  
@@ -312,6 +312,47 @@ var highlight_nodes = function(selection) {
         .attr("r", nodesize*1.8)
     };
 
+var link_full_reveal = function(link,d,source,target) {
+    link
+        .call(highlight_links)
+    revealLink(d, link.style("stroke"));
+    d3.selectAll(".link")
+        .each(function(l){
+            if (l.source.name == source && l.target.name == target){
+                d3.select(this).call(highlight_links)
+            }
+        })
+    d3.selectAll(".node")
+        .each(function(n){
+            console.log(source, target, n.name)
+            if (n.name == source || n.name == target){
+                d3.select(this).call(highlight_nodes)
+            }
+        })
+}
+
+var link_tooltip = function(link, d, source, target){
+    link.transition()
+        .delay(hoverOverTime/2)   
+        .duration(100)
+        .call(highlight_links)
+    tooltip.transition()
+        .delay(hoverOverTime/2)   
+        .duration(400)      
+        .style("opacity", .7);
+    tooltip.html('source: ' + source + ', <br>' + 'target: ' + target)
+        .style("left", (d3.event.pageX + 5) + "px")     
+        .style("top", (d3.event.pageY - 28) + "px");
+}
+
+var link_mouseout = function(node) {
+    d3.selectAll(".link")
+        .transition()
+        .duration(hoverOverTime)
+        .style("stroke-opacity", oplink)
+        .style("stroke-width", linkwidth)
+    }
+
 var highlight_links = function(selection) {
     selection            
         .transition()
@@ -321,7 +362,7 @@ var highlight_links = function(selection) {
         .style("stroke-width", linkwidth*2)
     };
 
-function make_node_reveal_text(node) {
+function make_node_full_reveal_text(node) {
     text = ''
     for (key in node) {
         if (key == 'name'){
@@ -350,7 +391,7 @@ function make_link_reveal_text(link) {
 
 var revealNode = function(d,color){
     d3.select("body").select("#reveal").append("p")
-        .html(make_node_reveal_text(d))
+        .html(make_node_full_reveal_text(d))
         .style("color", color)
         .style("background-color", "white")
         .transition()

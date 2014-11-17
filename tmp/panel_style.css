@@ -149,7 +149,7 @@ div.tooltip {
   position: absolute;           
   text-align: center;           
   min-width: 60px; 
-  max-width: 100px;                 
+  max-width: 180px;                 
   height: 32px;                 
   padding: 5px;               
   background: #B1AFC4;   
