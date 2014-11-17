@@ -296,9 +296,9 @@ function make_node_reveal_text(node) {
     text = ''
     for (key in node) {
         if (key == 'name'){
-            text = text + "<b>" + key + ": " + node[key] + "</b>"
+            text = text + "<b><big>" + key + ": " + node[key] + "</big></b>"
         } else {
-            text = text +", "+key+": " + node[key]
+            text = text +", <b>"+key+"</b>: " + node[key]
         }
     };
     console.log(text)
@@ -309,12 +309,12 @@ function make_link_reveal_text(link) {
     text = ''
     for (key in link) {
         if (key == 'source'){
-            text = text + "<b>" + key + ": " + link[key].name + "</b>"
+            text = text + "<b><big>" + key + ": " + link[key].name + "</big></b>"
         }
         else if (key == 'target'){
-            text = text + ", <b>" + key + ": " + link[key].name + "</b>"
+            text = text + ", <b><big>" + key + ": " + link[key].name + "</big></b>"
         } else {
-            text = text +", "+key+": " + link[key]
+            text = text +", <b>"+key+"</b>: " + link[key]
         }
     };
     console.log(text)
