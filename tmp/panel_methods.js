@@ -221,10 +221,10 @@ function plot(p){
         .style("fill", nodeColor)
         .on("click", function(d){
             d3.select(this)
-                .call(node_mouseover,d)
+                .call(node_reveal,d)
         })
         .on("mouseover", function(d){
-            d3.select(this).call(show_properties,p.x,p.y, d[p.x], d[p.y])
+            d3.select(this).call(show_properties,d,p.x,p.y, d[p.x], d[p.y])
         })
         .on("mouseout", function(d){
             node_mouseout()
@@ -242,7 +242,7 @@ function plot(p){
 
 // ****************************************** //
 
-var node_mouseover = function(node,d) {
+var node_reveal = function(node,d) {
     node
         .call(highlight_nodes)
         revealNode(d, node.style("fill"));
@@ -276,15 +276,18 @@ var node_mouseout = function(node) {
         //.style("fill-opacity", opnode)
     }
 
-var show_properties = function(d, px, py, x, y){
+var show_properties = function(node, d, px, py, x, y){
+    node.transition()
+        .delay(hoverOverTime/2)   
+        .duration(100)
+        .call(highlight_nodes)
     tooltip.transition()
-        .delay(hoverOverTime)   
+        .delay(hoverOverTime/2)   
         .duration(400)      
-        .style("opacity", .7);      
-    tooltip.html(px + ': ' + x + ', ' + py + ': ' + y) 
-        .style("left", (d3.event.pageX) + "px")     
-        .style("top", (d3.event.pageY - 28) + "px"); 
-    console.log(px + ': ' + x + ', ' + py + ': ' + y)
+        .style("opacity", .7);
+    tooltip.html(px + ': ' + round_value(x) + ', <br>' + py + ': ' + round_value(y))
+        .style("left", (d3.event.pageX + 5) + "px")     
+        .style("top", (d3.event.pageY - 28) + "px");
 }
 
 
@@ -294,17 +297,19 @@ var remove_properties = function(d){
         .style("opacity", 0);  
 }
 
-var highlight_nodes = function(selection, temporary) {
+d3.selection.prototype.moveToFront = function() {
+  console.log('moving to front')
+  return this.each(function(){
+    this.parentNode.appendChild(this);
+  });
+};
+
+var highlight_nodes = function(selection) {
     selection
-        .transition()
-        .duration(function (d) {
-            if (temporary) {return hoverOverTime*1} 
-            else {return 0}
-            })
         .style("fill-opacity", 1)
         .style("stroke-width", nodestroke*3)
         .attr("stroke", 'black')
-        .attr("r", nodesize*1.5)
+        .attr("r", nodesize*1.8)
     };
 
 var highlight_links = function(selection) {
@@ -320,12 +325,11 @@ function make_node_reveal_text(node) {
     text = ''
     for (key in node) {
         if (key == 'name'){
-            text = text + "<b><big>" + key + ": " + node[key] + "</big></b>"
+            text = text + "<b><big>" + key + ": " + round_value(node[key]) + "</big></b>"
         } else {
-            text = text +", <b>"+key+"</b>: " + node[key]
+            text = text +", <b>"+key+"</b>: " + round_value(node[key])
         }
     };
-    console.log(text)
     return text
 }
 
@@ -341,7 +345,6 @@ function make_link_reveal_text(link) {
             text = text +", <b>"+key+"</b>: " + link[key]
         }
     };
-    console.log(text)
     return text
 }
 
@@ -381,7 +384,9 @@ function show_node() {
     var revealed = false
     d3.selectAll("circle").each(function(d) {
         if (d['name'] == node) {
-            d3.select(this).call(highlight_nodes,true)
+            d3.select(this)
+                .moveToFront()
+                .call(highlight_nodes,true)
             if (!revealed){
                 revealNode(d, d3.select(this).style("fill"))
                 revealed = true
@@ -485,7 +490,7 @@ function make_property_options(ruleNumber) {
     if (mark == "node"){
         options = []
         for (key in nodes[0]){
-            options.push(key.toLowerCase())
+            options.push(key)
         }
         options.sort()
         for (var i in options) {
@@ -496,7 +501,7 @@ function make_property_options(ruleNumber) {
     } else if (mark == "link") {
         options = []
         for (key in links[0]){
-            options.push(key.toLowerCase())
+            options.push(key)
         }
         options.sort()
         for (var i in options) {
@@ -651,6 +656,10 @@ function color_marks(mark, styling, property, value, color, equality) {
         d3.selectAll(mark).each(function(d){
             if (Number(d[property]) > Number(value)) {
                 d3.select(this)
+                    .each(function(){
+                        if (mark == 'cirle'){
+                            d3.select(this).moveToFront()}
+                    })
                     .style(styling, color)
                     .style("fill-opacity", opnode_more)
                 if (styling == 'visibility' && mark == 'circle'){
@@ -658,7 +667,6 @@ function color_marks(mark, styling, property, value, color, equality) {
                         .each(function(l){
                             if (l.source.name == d.name || l.target.name == d.name){
                                 d3.select(this).style(styling, color)
-                                .style("fill-opacity", opnode_more)
                             }
                         });
                 }
@@ -669,6 +677,10 @@ function color_marks(mark, styling, property, value, color, equality) {
         d3.selectAll(mark).each(function(d){
             if (Number(d[property]) < Number(value)) {
                 d3.select(this)
+                    .each(function(){
+                        if (mark == 'cirle'){
+                            d3.select(this).moveToFront()}
+                    })
                     .style(styling, color)
                     .style("fill-opacity", opnode_more)
                 if (styling == 'visibility' && mark == 'circle'){
@@ -676,7 +688,6 @@ function color_marks(mark, styling, property, value, color, equality) {
                         .each(function(l){
                             if (l.source.name == d.name || l.target.name == d.name){
                                 d3.select(this).style(styling, color)
-                                .style("fill-opacity", opnode_more)
                             }
                         });
                 }
@@ -687,6 +698,10 @@ function color_marks(mark, styling, property, value, color, equality) {
         d3.selectAll(mark).each(function(d){
             if (d[property] == value) {
                 d3.select(this)
+                    .each(function(){
+                        if (mark == 'cirle'){
+                            d3.select(this).moveToFront()}
+                    })
                     .style(styling, color)
                     .style("fill-opacity", opnode_more)
                 if (styling == 'visibility' && mark == 'circle'){
@@ -694,7 +709,6 @@ function color_marks(mark, styling, property, value, color, equality) {
                         .each(function(l){
                             if (l.source.name == d.name || l.target.name == d.name){
                                 d3.select(this).style(styling, color)
-                                .style("fill-opacity", opnode_more)
                             }
                         });
                 }
@@ -704,6 +718,10 @@ function color_marks(mark, styling, property, value, color, equality) {
         d3.selectAll(mark).each(function(d){
             if (d[property] != value) {
                 d3.select(this)
+                    .each(function(){
+                        if (mark == 'cirle'){
+                            d3.select(this).moveToFront()}
+                    })
                     .style(styling, color)
                     .style("fill-opacity", opnode_more)
                 if (styling == 'visibility' && mark == 'circle'){
@@ -711,7 +729,6 @@ function color_marks(mark, styling, property, value, color, equality) {
                         .each(function(l){
                             if (l.source.name == d.name || l.target.name == d.name){
                                 d3.select(this).style(styling, color)
-                                .style("fill-opacity", opnode_more)
                             }
                         });
                 }
@@ -870,6 +887,24 @@ String.prototype.format = function () {
     });
 };
 
+function round_value(value){
+    if (isNaN(value)){
+        return value
+    } else {
+        new_value = Math.round(Number(value) * 1000) / 1000
+        if (new_value == 0){
+            new_value = Math.round(Number(value) * 100000) / 100000
+            if (new_value == 0){
+                new_value = Math.round(Number(value) * 10000000) / 10000000
+            } else {
+                return new_value
+            }
+        } else {
+            return new_value
+        }
+    }
+}
+
 function get_categories(trait){
     values = d3.nest().key(function(d) {return d[trait]})
                     .rollup(function(leaves) { return leaves.length; })
@@ -883,9 +918,9 @@ function get_categories(trait){
     }
 
     keys.sort()
-    console.log(keys)
     return keys
 }
+
 ColorRuleTemplate = "<form action='' class = 'darktext rules' id = 'ruleForm{}' name = 'ruleForm'>"+
 "                    If a "+
 "                    <select id= 'node_or_link{}' onchange='update_properties(this)' class = 'darktext'>"+
