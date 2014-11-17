@@ -98,7 +98,9 @@ function cross(a, b){
 
 // ****************************************** //
 
-
+var tooltip = d3.select("body").append("div")   
+    .attr("class", "tooltip")               
+    .style("opacity", 0);
 
 var svg = d3.select("body").select("#container").select("#panel").append("svg")
     .attr("class", SVGTitle)
@@ -184,17 +186,17 @@ function plot(p){
             })
         .style("stroke-width", linkwidth)
         .on("mouseover", function(d){
-                revealLink(d, d3.select(this).style("stroke"));
-                d3.select(this).call(highlight_links)
-            })
+            revealLink(d, d3.select(this).style("stroke"));
+            d3.select(this).call(highlight_links)
+        })
         .on("mouseout", function(d){
-                removeReveal();
-                d3.select(this)
-                    .transition()
-                    .duration(800)
-                    .style("stroke-opacity", oplink)
-                    .style("stroke-width", linkwidth)
-            });
+            removeReveal();
+            d3.select(this)
+                .transition()
+                .duration(800)
+                .style("stroke-opacity", oplink)
+                .style("stroke-width", linkwidth)
+        });
     
     //format all viz text the same
     cell.selectAll("text")
@@ -217,14 +219,18 @@ function plot(p){
         .attr("stroke", nodestrokecolor)
         .style("fill-opacity", opnode)
         .style("fill", nodeColor)
-        .on("mouseover", function(d){
+        .on("click", function(d){
             d3.select(this)
                 .call(node_mouseover,d)
-            })
+        })
+        .on("mouseover", function(d){
+            d3.select(this).call(show_properties,p.x,p.y, d[p.x], d[p.y])
+        })
         .on("mouseout", function(d){
             node_mouseout()
-            })
-        .attr()
+            d3.select(this).call(remove_properties)
+
+        })
 };
 
 
@@ -269,6 +275,24 @@ var node_mouseout = function(node) {
         .attr("stroke", nodestrokecolor)
         //.style("fill-opacity", opnode)
     }
+
+var show_properties = function(d, px, py, x, y){
+    tooltip.transition()
+        .delay(hoverOverTime)   
+        .duration(400)      
+        .style("opacity", .7);      
+    tooltip.html(px + ': ' + x + ', ' + py + ': ' + y) 
+        .style("left", (d3.event.pageX) + "px")     
+        .style("top", (d3.event.pageY - 28) + "px"); 
+    console.log(px + ': ' + x + ', ' + py + ': ' + y)
+}
+
+
+var remove_properties = function(d){
+    tooltip.transition()        
+        .duration(500)      
+        .style("opacity", 0);  
+}
 
 var highlight_nodes = function(selection, temporary) {
     selection
