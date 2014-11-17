@@ -246,21 +246,21 @@ var node_mouseover = function(node,d) {
                 d3.select(this).call(highlight_nodes)
             }
         })
-    d3.selectAll(".link")
+/*    d3.selectAll(".link")
         .each(function(l){
             if (l.source.name == d.name || l.target.name == d.name){
                 d3.select(this).call(highlight_links)
             }
-        })
+        })*/
 }
 
 var node_mouseout = function(node) {
     removeReveal();
-    d3.selectAll(".link")
+/*    d3.selectAll(".link")
         .transition()
         .duration(hoverOverTime)
         .style("stroke-opacity", oplink)
-        .style("stroke-width", linkwidth)
+        .style("stroke-width", linkwidth)*/
     d3.selectAll(".node")
         .transition()
         .duration(hoverOverTime)
@@ -364,7 +364,7 @@ function show_node() {
 
                 d3.select(this)
                     .transition()
-                    .delay(1000000000)
+                    .delay(1000)
                     .call(removeReveal)
                 }
             }
