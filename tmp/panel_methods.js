@@ -6,13 +6,6 @@
 
 // ****************************************** //
 
-var asgScales = {};
-    posScales = {};
-
-var link_color = d3.scale.linear() //not used anymore
-    .domain(d3.range(0,edgeColor.length,1.0))
-    .range(edgeColor);
-
 d3.select("body").select("#title").select("#thetitle")
     .html(SVGTitle)
 
@@ -24,10 +17,14 @@ d3.select("body").select("#title").select("#info")
   // ****************************************** //
 
 
- //       ORGANIZING PANEL TABLE ITEMS         //
+ //       ASSIGNMENT AND POSITION SCALES       //
 
 
 // ****************************************** //
+
+
+var asgScales = {};
+    posScales = {};
 
 var width = document.getElementById("panel").offsetWidth
     height = width
@@ -181,9 +178,9 @@ function plot(p){
         .style("fill", linkfill)
         .style("stroke-opacity", oplink)
         .style("stroke", function(d) {
-            if (edgeColor.length == 1){
-                return edgeColor}
-            else {return link_color(d.type)}
+            if (edgeColor){
+            return edgeColor} else {
+                return "grey"
             })
         .style("stroke-width", linkwidth)
         .on("click", function(d){
@@ -593,6 +590,15 @@ function make_value_options(ruleNumber) {
     }
 }
 
+
+  // ****************************************** //
+
+
+ //        COLOR AND FILTER FUNCTIONS          //
+
+
+// ****************************************** //
+
 function create_color_box(ruleNumber) {
 
     colorBox = document.getElementById("node_color" + ruleNumber)
@@ -807,6 +813,16 @@ function color_marks(mark, styling, property, value, color, equality) {
     }
     return count/num_panels
 };
+
+
+
+  // ****************************************** //
+
+
+ //        MANIPULATING RULES AND BUTTONS      //
+
+
+// ****************************************** //
 
 function switch_button(button, name1, name2) {
     if (button.value == name1){
