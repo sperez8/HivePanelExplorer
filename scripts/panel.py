@@ -106,17 +106,6 @@ class Panel():
                 rules.append((a,p))
         return rules
 
-if __name__ == "__main__":
-    '''testing purposes'''
-    P = Panel()
-    NODES = os.path.join(_root_dir, 'tests', 'test_nodes_friends.txt')
-    EDGES = os.path.join(_root_dir, 'tests', 'test_edges_friends.txt')
-    TITLE = 'friends_panel_test'
-    FOLDER = os.path.join(_root_dir, 'tests')
-    P.make_panel(NODES, EDGES)
-    P.open_panel(TITLE, FOLDER)
-
-
 
 
 

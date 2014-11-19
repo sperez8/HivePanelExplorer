@@ -20,6 +20,7 @@ _cur_dir = os.path.dirname(os.path.realpath(__file__))
 _root_dir = os.path.dirname(_cur_dir)
 
 SIZE = (5,5) #assignment by position rules
+AXES = 3
 ASSIGNMENT_RULES = ['degree', 'betweeness', 'clustering', 'centrality','component']
 POSITION_RULES = ['degree', 'betweeness', 'clustering', 'centrality','component']
 NODES = os.path.join(_root_dir, 'tests', 'test_nodes_friends.txt')
@@ -34,7 +35,7 @@ def main(*argv):
     parser.add_argument('-n', help='The node file', default = NODES)
     parser.add_argument('-e', help='The edge file', default = EDGES)
     parser.add_argument('-path', help='Path where hive plot will be saved', default = FOLDER)
-    parser.add_argument('-axes', help='Number of axes', type = int)
+    parser.add_argument('-axes', help='Number of axes', type = int, default = AXES)
     parser.add_argument('-double', help='Doubles the number of axes', action = 'store_true')
 #     parser.add_argument('-assignment', help=assignmentHelp)
 #     parser.add_argument('-position', help=positionHelp)
@@ -49,6 +50,8 @@ def main(*argv):
         
     title = args.t
     nodeFile = args.n
+    if nodeFile != NODES and title == TITLE:
+    	title = os.path.basename(nodeFile).split('_nodes')[0]
     edgeFile = args.e
     axes = args.axes
     double = args.double
@@ -57,10 +60,6 @@ def main(*argv):
 #     size = gui_options.sizes[args.size]
     debug = args.debug
     folder = args.path
-    
-    if not axes:
-        print "You must specify a number of axes"
-        sys.exit()
             
     P = Panel(size = SIZE,
               debug = debug,

@@ -207,7 +207,7 @@ function plot(p){
                     if (!doubleAxes){
                         a = angles(asgScales[p.x](d[p.x]))
                     } else if (isSource){ //keep track of source and target to make link
-                        a = angles(asgScales[p.x](d[p.x])*2+h)
+                        a = angles(asgScales[p.x](d[p.x])*2+h) //on h==0, want the source to be on the 1st axis but on h==1 we want the source to become the target
                         isSource = false
                     } else {
                         a = angles(asgScales[p.x](d[p.x])*2+1-h)
@@ -227,25 +227,32 @@ function plot(p){
                     } else {
                         return true}
                 } else {
-                    s = s*2
-                    t = t*2 +1
+                    s = s*2+h
+                    t = t*2+1-h
                     if (h==0){
-                        if (t+1 == s) {
-                            return true
-                        } else if (s+1 == t) {
-                            return true
+                        if (t+1 == s) { //from one axes group to another
+                            show = true
+                        } else if (s+1 == t) { //within doubled axes link
+                            show = true
                         }  else if (t==numAxes*2-1 && s==0) {
-                            return true
+                            show = true
                         } else {
-                            return false
+                            show = false
                         }
-                    } else if (h==1){ //the second we build links, we only show the double of inner axes links
-                        if (s+1 == t) {
-                            return true
+                    } else if (h==1){ //the second time around, the source plays the role of the target and vice versa
+                        if (t+1 == s) {
+                            show = true
+                        }
+                        else if (s+1 == t) {
+                            show = true
+                        }
+                        else if (s==numAxes*2-1 && t==0) {
+                            show = true
                         } else {
-                            return false
+                            show = false
                         }
                     }
+                    return show
                 }
             })
             .style("fill", linkfill)
@@ -327,7 +334,7 @@ var node_tooltip = function(node, d, px, py, x, y){
     tooltip.transition()
         .delay(hoverOverTime/2)   
         .duration(400)      
-        .style("opacity", .7);
+        .style("opacity", opnode_more);
     tooltip.html(px + ': ' + round_value(x) + ', <br>' + py + ': ' + round_value(y))
         .style("left", (d3.event.pageX + 5) + "px")     
         .style("top", (d3.event.pageY - 28) + "px");
@@ -364,7 +371,7 @@ var node_mouseout = function(node) {
         .attr("r", nodesize)
         .attr("stroke-width", nodestroke)
         .attr("stroke", nodestrokecolor)
-        //.style("fill-opacity", opnode)
+        .style("fill-opacity", opnode)
     }
 
 var remove_tooltip = function(){
