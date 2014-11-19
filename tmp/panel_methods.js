@@ -221,6 +221,8 @@ function plot(p){
                 if (!doubleAxes){
                     if (t == s) {
                         return false
+                    } else if (numAxes > 3 && Math.abs(s-t) >1 ) {
+                        return false
                     } else {
                         return true}
                 } else {
