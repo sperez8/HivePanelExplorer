@@ -9,19 +9,15 @@
 
 var SVGTitle = 'Friends Forever' + ' Hive Panel'
 
-var num_axis = 3
-
-var angle = d3.range(0.0001,2*Math.PI,2.0*Math.PI/num_axis)
-
-var angles = d3.scale.ordinal()
-    .domain(d3.range(num_axis))
-    .range(angle);
+var numAxes = 3
+    doubleAxes = true
 
 var nodeColor = 'darkgrey'
     edgeColor = ['darkgrey']
     linkwidth = 1.3
     oplink = 0.8
-    opnode = 0.8
+    opnode = 0.1
+    opnode_more = 0.8
 
 var nodesize = 5
     nodestroke = 0.4
@@ -33,5 +29,5 @@ var linkfill = "none"
 var hoverOverTime = 900
 
 
-var columntraits = ["Gender", "degree"];
-    rowtraits = ["Gender", "Height"];
+var columntraits = ["Gender",'degree'];
+    rowtraits = ["Height","betweeness"];

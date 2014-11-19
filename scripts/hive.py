@@ -630,4 +630,14 @@ class Hive():
                 print "\n\n***WARNING: {0} of the {1} nodes were not found in the edge file! You may filter them out using filter_data.py and rerun HivePlotter or continue.***".format(old-new,old)                        
             
         return None
+    
+if __name__ == "__main__":
+    hive = Hive()
+    for d in [True, False]:
+        for a in [2,3,4]:
+            print d, a
+            hive.numAxes = a
+            hive.doubleAxes = d
+            hive.make_axes()
+            print hive.angles
 
