@@ -25,21 +25,18 @@ d3.select("body").select("#title").select("#info")
 var angle = get_angles(numAxes,doubleAxes)
 
 if (doubleAxes){
-    var seriesNames = [0,1]
+    var seriesLinksNames = [0,1]
+    var seriesNodesNames = [0,1]
     var angleRange = d3.range(numAxes*2)
 } else {
-    var seriesNames = [0]
+    var seriesLinksNames = [0]
+    var seriesNodesNames = [0]
     var angleRange = d3.range(numAxes)
 };
-
-console.log(angleRange)
-
 
 var angles = d3.scale.ordinal()
     .domain(angleRange)
     .range(angle);
-
-console.log(angles.range(), angles.domain())
 
 var asgScales = {};
     posScales = {};
@@ -188,13 +185,13 @@ function plot(p){
         .attr("fill", "#4E3D54")
         .attr("font-size", "17px")
 
-    var series = cell.selectAll(".series")
-                        .data(seriesNames)
+    var seriesLinks = cell.selectAll(".seriesLinks")
+                        .data(seriesLinksNames)
                       .enter().append("g")
-                        .attr("class", "series")
-                        .each(hive);
+                        .attr("class", "seriesLinks")
+                        .each(hiveLinks);
 
-    function hive(h){
+    function hiveLinks(h){
         var axesType = d3.select(this);
         var isSource = true
 
@@ -281,6 +278,16 @@ function plot(p){
         //removes any edges between nodes on same axis.
         axesType.selectAll("path[show="+false+"]").remove()
 
+        };
+
+    var seriesNodes = cell.selectAll(".seriesNodes")
+                    .data(seriesLinksNames)
+                  .enter().append("g")
+                    .attr("class", "seriesNodes")
+                    .each(hiveNodes);
+
+    function hiveNodes(h){
+        var axesType = d3.select(this);
         axesType.selectAll(".node")
             .data(nodes)
           .enter().append("circle")
@@ -314,7 +321,8 @@ function plot(p){
                 remove_tooltip()
 
             })
-        };
+    };
+
     };
 
 
@@ -708,6 +716,7 @@ function color_filter_or_undo(sel) {
     ruleNumber = find_rule_number_from_selection(sel)
     button = document.getElementById("ruleButton"+ruleNumber)
     ruleState = button.value //Can be Highlight, Filter or Undo
+    removeReveal()
     if (ruleState == 'Filter') {
         success = make_coloring(ruleNumber)
         if (success) {
@@ -721,7 +730,6 @@ function color_filter_or_undo(sel) {
         }
 
     } else if (ruleState == 'Undo') {
-        removeReveal()
         //reset all links and nodes to defaults
         d3.selectAll(".link")
             .style("stroke", edgeColor)
@@ -739,6 +747,7 @@ function color_filter_or_undo(sel) {
             switch_button(button, "Filter", "Undo")
         }
         redo_rules(ruleNumber)
+        removeReveal()
     }
 }
 
