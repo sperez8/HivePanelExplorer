@@ -67,7 +67,7 @@ for (var i in columntraits) {
                                 .domain([min,max])
                                 .range(d3.range(numAxes));
         console.log('Quantitative trait ', trait, ' has values and cut offs: ')
-        for (var i = 0; i <= numAxes-1; i++) {
+        for (var i = 0;i <= numAxes-1;i++) {
             console.log('\t axis', i, asgScales[trait].invertExtent(i))
         };
     }
@@ -97,7 +97,7 @@ for (var i in rowtraits) {
 
 function cross(a, b){
     var c = [], n = a.length, m = b.length, i, j;
-    for (i = -1; ++i < n;) for (j = -1; ++j < m;) c.push({x: a[i], i: i, y: b[j], j: j});
+    for (i = -1;++i < n;) for (j = -1;++j < m;) c.push({x: a[i], i: i, y: b[j], j: j});
     return c;
 
 };
@@ -121,13 +121,13 @@ var svg = d3.select("body").select("#container").select("#panel").append("svg")
     .attr("height", width)
     .style("background-color", bkgcolor)
   .append("g")
-    .attr("transform", "translate(" + (size/2 + padding) + "," + (size/2 + padding) + ")"); //(0,0) coordinates correspond to the center of the first hive.
+    .attr("transform", "translate(" + (size/2 + padding) + "," + (size/2 + padding) + ")");//(0,0) coordinates correspond to the center of the first hive.
 
 var cell = svg.selectAll(".cell")
   .data(cross(columntraits,rowtraits))
 .enter().append("g")
   .attr("class", "cell")
-  .attr("transform", function(d) { return "translate(" + (d.i) * size + "," + d.j * size + ")"; })
+  .attr("transform", function(d) { return "translate(" + (d.i) * size + "," + d.j * size + ")";})
   .each(plot);
   
 function plot(p){
@@ -139,20 +139,20 @@ function plot(p){
 
     if (p.i == 0){
     cell.append("text")
-        .attr("x", function(d) { return d.i; })
+        .attr("x", function(d) { return d.i;})
         .attr("y", function(d) { return d.j-size/2 - padding/2})
         .attr("text-anchor", "middle")
         .attr("class","viztext")
         .text(capitalize(p.y))
         .attr("transform", function(d) { 
-            return "rotate(-90)"; //"translate("+ d.i-size/2 + "," + d.j-size/2+")
+            return "rotate(-90)";//"translate("+ d.i-size/2 + "," + d.j-size/2+")
             })
     }
 
     if (p.j==0){
     cell.append("text")
-        .attr("x", function(d) { return d.i; })
-        .attr("y", function(d) { return d.j-size/2 - padding/2; })
+        .attr("x", function(d) { return d.i;})
+        .attr("y", function(d) { return d.j-size/2 - padding/2;})
         .attr("text-anchor", "middle")
         .attr("class","viztext")
         .text(capitalize(p.x))
@@ -164,7 +164,7 @@ function plot(p){
     // cell.selectAll(".axis")
     //     .data(angle)
     //   .enter().append("text")
-    //     .attr("transform", function(d) { return "rotate(" + degrees(angles(d)) + ")translate("+radius.range()[1] + 40+","+0+")"; })
+    //     .attr("transform", function(d) { return "rotate(" + degrees(angles(d)) + ")translate("+radius.range()[1] + 40+","+0+")";})
     //     //.attr("x", function(d) {return Math.sin(angles(d))*(radius.range()[1])} )
     //     //.attr("y", function(d) {return - Math.cos(angles(d))*(radius.range()[1])} )
     //     .text(function(d,i) {return asgScales[p.x](i)})
@@ -173,7 +173,7 @@ function plot(p){
         .data(angle)
       .enter().append("line")
         .attr("class", "axis")
-        .attr("transform", function(d) { return "rotate(" + degrees(angles(d)) + ")"; })
+        .attr("transform", function(d) { return "rotate(" + degrees(angles(d)) + ")";})
         .attr("x1", radius.range()[0])
         .attr("x2", radius.range()[1])
         .attr("stroke-width",0.7)
@@ -213,7 +213,7 @@ function plot(p){
                     return a
                 })
                 .radius(function(d) {
-                    return radius(posScales[p.y](d[p.y])); })
+                    return radius(posScales[p.y](d[p.y]));})
             )
             .attr("show", function (d) {
                 s = asgScales[p.x](d.source[p.x])
@@ -343,7 +343,8 @@ var node_tooltip = function(node, d, px, py, x, y){
         .delay(hoverOverTime/2)   
         .duration(400)      
         .style("opacity", opnode_more);
-    tooltip.html(px + ': ' + round_value(x) + ', <br>' + py + ': ' + round_value(y))
+    tooltip.html('<b>' + d.name +'</b><br>'+ px + ': ' + round_value(x) + '<br>' + py + ': ' + round_value(y))
+        .style("height", "45px")
         .style("left", (d3.event.pageX + 5) + "px")     
         .style("top", (d3.event.pageY - 28) + "px");
 }
@@ -385,7 +386,7 @@ var node_mouseout = function(node) {
 var remove_tooltip = function(){
     tooltip.transition()        
         .duration(500)      
-        .style("opacity", 0);  
+        .style("opacity", 0);
 }
 
 d3.selection.prototype.moveToFront = function() {
@@ -430,7 +431,8 @@ var link_tooltip = function(link, d, source, target){
         .delay(hoverOverTime/2)   
         .duration(400)      
         .style("opacity", .7);
-    tooltip.html('source: ' + source + ', <br>' + 'target: ' + target)
+    tooltip.html('source: ' + source + '<br>' + 'target: ' + target)
+        .style("height", "32px")
         .style("left", (d3.event.pageX + 5) + "px")     
         .style("top", (d3.event.pageY - 28) + "px");
 }
@@ -546,7 +548,7 @@ function show_node() {
 function remove_options(selector) {
     //first remove all the previous options:
     if (selector.length > 0){
-        for (var i = selector.length - 1; i >= 0; i--) {
+        for (var i = selector.length - 1;i >= 0;i--) {
             selector.remove(i);
         }
     }
@@ -555,7 +557,7 @@ function remove_options(selector) {
 
 function add_options(selector, data, property){
     options = []
-    for (var i = data.length - 1; i >= 0; i--) {
+    for (var i = data.length - 1;i >= 0;i--) {
         value = data[i][property]
         if (options.indexOf(value)>=0){}
         else{
@@ -1065,7 +1067,7 @@ function convertRGB(rgb)
     var values = regex.exec(rgb);
     if(values.length != 4)
     {
-        return rgb; // fall back to what was given.              
+        return rgb;// fall back to what was given.              
     }
     var r = Math.round(parseFloat(values[1]));
     var g = Math.round(parseFloat(values[2]));
@@ -1111,7 +1113,7 @@ function round_value(value){
 
 function get_categories(trait){
     values = d3.nest().key(function(d) {return d[trait]})
-                    .rollup(function(leaves) { return leaves.length; })
+                    .rollup(function(leaves) { return leaves.length;})
                     .entries(nodes);
     var keys = [];
 
