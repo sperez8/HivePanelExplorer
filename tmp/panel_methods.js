@@ -22,6 +22,24 @@ d3.select("body").select("#title").select("#info")
 
 // ****************************************** //
 
+var angle = get_angles(numAxes,doubleAxes)
+
+if (doubleAxes){
+    var seriesNames = [0,1]
+    var angleRange = d3.range(numAxes*2)
+} else {
+    var seriesNames = [0]
+    var angleRange = d3.range(numAxes)
+};
+
+console.log(angleRange)
+
+
+var angles = d3.scale.ordinal()
+    .domain(angleRange)
+    .range(angle);
+
+console.log(angles.range(), angles.domain())
 
 var asgScales = {};
     posScales = {};
@@ -41,7 +59,7 @@ for (var i in columntraits) {
         keys = get_categories(trait)
         asgScales[trait] = d3.scale.ordinal()
             .domain(keys)
-            .range(d3.range(num_axis));
+            .range(d3.range(numAxes));
         console.log('Categorical trait ', trait, ' has categories: ', keys)
     } else {
         max = d3.max(nodes, function(d) {
@@ -50,9 +68,9 @@ for (var i in columntraits) {
             return Number(d[trait])});
         asgScales[trait] = d3.scale.quantile()
                                 .domain([min,max])
-                                .range(d3.range(num_axis));
+                                .range(d3.range(numAxes));
         console.log('Quantitative trait ', trait, ' has values and cut offs: ')
-        for (var i = 0; i <= num_axis-1; i++) {
+        for (var i = 0; i <= numAxes-1; i++) {
             console.log('\t axis', i, asgScales[trait].invertExtent(i))
         };
     }
@@ -164,73 +182,133 @@ function plot(p){
         .attr("stroke-width",0.7)
         .attr("stroke", "black");
 
-    cell.selectAll(".link")
-        .data(links)
-      .enter().append("path")
-        .attr("class", "link")
-        .attr("d", d3.hive.link()
-        .angle(function(d) { return angles(asgScales[p.x](d[p.x])); })
-        .radius(function(d) {return radius(posScales[p.y](d[p.y])); }))
-        .attr("show", function (d) {
-            if (asgScales[p.x](d.source[p.x]) == asgScales[p.x](d.target[p.x])) {return false}
-            else {return true}
-        })
-        .style("fill", linkfill)
-        .style("stroke-opacity", oplink)
-        .style("stroke", function(d) {
-            if (edgeColor){
-            return edgeColor} else {
-                return "grey"
-            })
-        .style("stroke-width", linkwidth)
-        .on("click", function(d){
-            d3.select(this)
-                .call(link_full_reveal,d,d.source.name, d.target.name)
-        })
-        .on("mouseover", function(d){
-            d3.select(this).call(link_tooltip,d,d.source.name, d.target.name)
-            d3.select(this).call(highlight_links)
-        })
-        .on("mouseout", function(d){
-            remove_tooltip()
-            node_mouseout()
-            link_mouseout()
-        });
-    
     //format all viz text the same
     cell.selectAll("text")
         .attr("font-family", "Helvetica Neue")
         .attr("fill", "#4E3D54")
         .attr("font-size", "17px")
 
-    //removes any edges between nodes on same axis.
-    cell.selectAll("path[show="+false+"]").remove()
+    var series = cell.selectAll(".series")
+                        .data(seriesNames)
+                      .enter().append("g")
+                        .attr("class", "series")
+                        .each(hive);
 
-    cell.selectAll(".node")
-        .data(nodes)
-      .enter().append("circle")
-        .attr("class", "node")
-        .attr("transform", function(d) { return "rotate(" + degrees(angles(asgScales[p.x](d[p.x]))) + ")"; })
-        .attr("cx", function(d) {
-                return radius(posScales[p.y](d[p.y]));})
-        .attr("r", nodesize)
-        .attr("stroke-width", nodestroke)
-        .attr("stroke", nodestrokecolor)
-        .style("fill-opacity", opnode)
-        .style("fill", nodeColor)
-        .on("click", function(d){
-            d3.select(this)
-                .call(node_full_reveal,d)
-        })
-        .on("mouseover", function(d){
-            d3.select(this).call(node_tooltip,d,p.x,p.y, d[p.x], d[p.y])
-        })
-        .on("mouseout", function(d){
-            node_mouseout()
-            remove_tooltip()
+    function hive(h){
+        var axesType = d3.select(this);
+        var isSource = true
 
-        })
-};
+        axesType.selectAll(".link")
+            .data(links)
+          .enter().append("path")
+            .attr("class", "link")
+            .attr("d", d3.hive.link()
+                .angle(function(d) {
+                    if (!doubleAxes){
+                        a = angles(asgScales[p.x](d[p.x]))
+                    } else if (isSource){ //keep track of source and target to make link
+                        a = angles(asgScales[p.x](d[p.x])*2+h)
+                        isSource = false
+                    } else {
+                        a = angles(asgScales[p.x](d[p.x])*2+1-h)
+                        isSource = true
+                    }
+                    return a
+                })
+                .radius(function(d) {
+                    return radius(posScales[p.y](d[p.y])); })
+            )
+            .attr("show", function (d) {
+                s = asgScales[p.x](d.source[p.x])
+                t = asgScales[p.x](d.target[p.x])
+                if (!doubleAxes){
+                    if (t == s) {
+                        return false
+                    } else {
+                        return true}
+                } else {
+                    s = s*2
+                    t = t*2 +1
+                    if (h==0){
+                        if (t+1 == s) {
+                            return true
+                        } else if (s+1 == t) {
+                            return true
+                        }  else if (t==numAxes*2-1 && s==0) {
+                            return true
+                        } else {
+                            return false
+                        }
+                    } else if (h==1){ //the second we build links, we only show the double of inner axes links
+                        if (s+1 == t) {
+                            return true
+                        } else {
+                            return false
+                        }
+                    }
+                }
+            })
+            .style("fill", linkfill)
+            .style("stroke-opacity", oplink)
+            .style("stroke", function(d) {
+                if (edgeColor){
+                return edgeColor} else {
+                    return "grey"
+                }
+            })
+            .style("stroke-width", linkwidth)
+            .on("click", function(d){
+                d3.select(this)
+                    .call(link_full_reveal,d,d.source.name, d.target.name)
+            })
+            .on("mouseover", function(d){
+                d3.select(this).call(link_tooltip,d,d.source.name, d.target.name)
+                d3.select(this).call(highlight_links)
+            })
+            .on("mouseout", function(d){
+                remove_tooltip()
+                node_mouseout()
+                link_mouseout()
+            });
+
+        //removes any edges between nodes on same axis.
+        axesType.selectAll("path[show="+false+"]").remove()
+
+        axesType.selectAll(".node")
+            .data(nodes)
+          .enter().append("circle")
+            .attr("class", "node")
+            .attr("transform", function(d) { 
+                if (doubleAxes){
+                    return "rotate(" + degrees(angles(asgScales[p.x](d[p.x])*2 + h)) + ")"  
+                } else {
+                    return "rotate(" + degrees(angles(asgScales[p.x](d[p.x]))) + ")"
+               }
+            })
+
+            .attr("cx", function(d) {
+                    return radius(posScales[p.y](d[p.y]));})
+            .attr("r", nodesize)
+            .attr("stroke-width", nodestroke)
+            .attr("stroke", nodestrokecolor)
+            .style("fill-opacity", opnode)
+            .style("fill", function(d) { 
+                return nodeColor
+            })
+            .on("click", function(d){
+                d3.select(this)
+                    .call(node_full_reveal,d)
+            })
+            .on("mouseover", function(d){
+                d3.select(this).call(node_tooltip,d,p.x,p.y, d[p.x], d[p.y])
+            })
+            .on("mouseout", function(d){
+                node_mouseout()
+                remove_tooltip()
+
+            })
+        };
+    };
 
 
   // ****************************************** //
@@ -811,7 +889,8 @@ function color_marks(mark, styling, property, value, color, equality) {
            }
         })
     }
-    return count/num_panels
+    if (!doubleAxes){return count/num_panels}
+    else {return count/num_panels/2}
 };
 
 
@@ -918,6 +997,28 @@ function redo_rules(undoneRule) {
 
 
 // ****************************************** //
+
+function get_angles(numAxes,doubleAxes){
+    if (doubleAxes){
+        if (numAxes==3){
+            angles = [-0.35, 0.35, 1.75, 2.44, 3.84, 4.54]
+        } else if (numAxes == 2){
+            angles = [-2.09, -1.05, 1.05, 2.09]
+        } else if (numAxes == 4){
+            angles = [-0.26, 0.26, 1.31, 1.83, 2.88, 3.4, 4.45, 4.97]
+        }
+    } else {
+        if (numAxes==3){
+            angles = [0.0001, 2.09, 4.19]
+        } else if (numAxes == 2){
+            angles = [-1.57, 1.57]
+        } else if (numAxes == 4){
+            angles = [0.0001, 1.57, 3.14, 4.71]
+        }
+    }
+    return angles
+}
+
 
 function calculate_brackground(color) {
     c = convertRGB(color)
