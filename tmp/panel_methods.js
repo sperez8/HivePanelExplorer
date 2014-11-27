@@ -102,7 +102,6 @@ function cross(a, b){
 
 };
 
-
   // ****************************************** //
 
 
@@ -383,7 +382,9 @@ var node_mouseout = function(node) {
         .attr("stroke-width", nodestroke)
         .attr("stroke", nodestrokecolor)
         .style("fill-opacity", function(d,i){
+            console.log(d3.select(this).classed("important"), d.name)
             if (d3.select(this).classed("important")){
+
                 return opnode_more
             }else{
                 return opnode
@@ -743,17 +744,13 @@ function color_filter_or_undo(sel) {
         d3.selectAll(".link")
             .style("stroke", edgeColor)
             .style("visibility", "visible")
-            .style("fill-opacity", oplink);
+            .style("fill-opacity", oplink)
 
         d3.selectAll(".node")
             .style("fill", nodeColor)
             .style("visibility", "visible")
-            .style("fill-opacity", function(d,i){
-                if (hasClass(d, "important")){
-                    return opnode_more
-                }else{
-                    return opnode
-                }});
+            .style("fill-opacity", opnode)
+            .classed({"important":false})
 
         if (hasClass(button, "highlight")){
             switch_button(button, "Highlight", "Undo")
