@@ -382,7 +382,12 @@ var node_mouseout = function(node) {
         .attr("r", nodesize)
         .attr("stroke-width", nodestroke)
         .attr("stroke", nodestrokecolor)
-        .style("fill-opacity", opnode)
+        .style("fill-opacity", function(d,i){
+            if (d3.select(this).classed("important")){
+                return opnode_more
+            }else{
+                return opnode
+            }})
     }
 
 var remove_tooltip = function(){
@@ -743,7 +748,12 @@ function color_filter_or_undo(sel) {
         d3.selectAll(".node")
             .style("fill", nodeColor)
             .style("visibility", "visible")
-            .style("fill-opacity", opnode);
+            .style("fill-opacity", function(d,i){
+                if (hasClass(d, "important")){
+                    return opnode_more
+                }else{
+                    return opnode
+                }});
 
         if (hasClass(button, "highlight")){
             switch_button(button, "Highlight", "Undo")
@@ -833,6 +843,7 @@ function color_marks(mark, styling, property, value, color, equality) {
                     })
                     .style(styling, color)
                     .style("fill-opacity", opnode_more)
+                    .classed({"important":true})
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
                         .each(function(l){
@@ -855,6 +866,7 @@ function color_marks(mark, styling, property, value, color, equality) {
                     })
                     .style(styling, color)
                     .style("fill-opacity", opnode_more)
+                    .classed({"important":true})
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
                         .each(function(l){
@@ -877,6 +889,7 @@ function color_marks(mark, styling, property, value, color, equality) {
                     })
                     .style(styling, color)
                     .style("fill-opacity", opnode_more)
+                    .classed({"important":true})
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
                         .each(function(l){
@@ -898,6 +911,7 @@ function color_marks(mark, styling, property, value, color, equality) {
                     })
                     .style(styling, color)
                     .style("fill-opacity", opnode_more)
+                    .classed({"important":true})
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
                         .each(function(l){
