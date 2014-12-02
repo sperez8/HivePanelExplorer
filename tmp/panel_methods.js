@@ -88,9 +88,15 @@ for (var i in rowtraits) {
             return Number(d[trait])});
         min = d3.min(nodes, function(d) {
             return Number(d[trait])});
-        posScales[trait] = d3.scale.linear()
-                                .domain([min,max])
-                                .range([0, 1]);
+        if (true){
+            posScales[trait] = logspecial()
+                                    .domain([min,max])
+                                    .range([0, 1])
+        } else {
+            posScales[trait] = d3.scale.linear()
+                                    .domain([min,max])
+                                    .range([0, 1]);
+        }
         console.log('Quantitative trait ', trait, ' has min and max value: ', min, ',', max)
     }
 }
@@ -212,6 +218,7 @@ function plot(p){
                     return a
                 })
                 .radius(function(d) {
+                    console.log(p.y,d[p.y],posScales[p.y](d[p.y]),radius(posScales[p.y](d[p.y])))
                     return radius(posScales[p.y](d[p.y]));})
             )
             .attr("show", function (d) {
@@ -382,9 +389,7 @@ var node_mouseout = function(node) {
         .attr("stroke-width", nodestroke)
         .attr("stroke", nodestrokecolor)
         .style("fill-opacity", function(d,i){
-            console.log(d3.select(this).classed("important"), d.name)
             if (d3.select(this).classed("important")){
-
                 return opnode_more
             }else{
                 return opnode
@@ -398,7 +403,6 @@ var remove_tooltip = function(){
 }
 
 d3.selection.prototype.moveToFront = function() {
-  console.log('moving to front')
   return this.each(function(){
     this.parentNode.appendChild(this);
   });
@@ -827,7 +831,6 @@ function reveal_count(mark, filter, color, count){
 };
 
 function color_marks(mark, styling, property, value, color, equality) {
-    console.log(mark, styling, property, value, color, equality)
     count = 0
     if (equality == '>'){
         d3.selectAll(mark).each(function(d){
@@ -1139,6 +1142,50 @@ function get_categories(trait){
     keys.sort()
     return keys
 }
+
+function logspecial() {
+  return d3_scale_log(d3.scale.linear().domain([0, 1]), 10, true, [1, 10]);
+};
+
+function d3_scale_log(linear, base, positive, domain) {
+
+  function log(x) {
+    return (positive ? Math.log(x <= 0 ? 0.000000001 : x) : -Math.log(x > 0 ? 0 : -x)) / Math.log(base);
+  }
+
+  function pow(x) {
+    return positive ? Math.pow(base, x) : -Math.pow(base, -x);
+  }
+
+  function scale(x) {
+    return linear(log(x));
+  }
+
+  scale.invert = function(x) {
+    return pow(linear.invert(x));
+  };
+
+  scale.domain = function(x) {
+    if (!arguments.length) return domain;
+    positive = x[0] >= 0;
+    linear.domain((domain = x.map(Number)).map(log));
+    return scale;
+  };
+
+  scale.base = function(_) {
+    if (!arguments.length) return base;
+    base = +_;
+    linear.domain(domain.map(log));
+    return scale;
+  };
+
+    function d3_scale_linearRebind(scale, linear) {
+      return d3.rebind(scale, linear, "range", "rangeRound", "interpolate", "clamp");
+    }
+
+  return d3_scale_linearRebind(scale, linear);
+}
+
 
 ColorRuleTemplate = "<form action='' class = 'darktext rules' id = 'ruleForm{}' name = 'ruleForm'>"+
 "                    If a "+
