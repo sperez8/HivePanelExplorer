@@ -88,10 +88,19 @@ for (var i in rowtraits) {
             return Number(d[trait])});
         min = d3.min(nodes, function(d) {
             return Number(d[trait])});
-        if (true){
-            posScales[trait] = logspecial()
+        if (traitScales[trait]=="log"){
+            if (max > 0 && min == 0){
+                posScales[trait] = logspecial()
+                                        .domain([min,max])
+                                        .range([0, 1])
+            } else if (max == 0 && min < 0){                posScales[trait] = logspecial()
+                                        .domain([min,max])
+                                        .range([0, 1])
+            } else {
+                posScales[trait] = d3.scale.log()
                                     .domain([min,max])
-                                    .range([0, 1])
+                                    .range([0, 1]);
+            }
         } else {
             posScales[trait] = d3.scale.linear()
                                     .domain([min,max])
@@ -218,7 +227,6 @@ function plot(p){
                     return a
                 })
                 .radius(function(d) {
-                    console.log(p.y,d[p.y],posScales[p.y](d[p.y]),radius(posScales[p.y](d[p.y])))
                     return radius(posScales[p.y](d[p.y]));})
             )
             .attr("show", function (d) {
