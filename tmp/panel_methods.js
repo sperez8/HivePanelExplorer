@@ -93,11 +93,12 @@ for (var i in rowtraits) {
                 posScales[trait] = logspecial()
                                         .domain([min,max])
                                         .range([0, 1])
-            } else if (max == 0 && min < 0){                posScales[trait] = logspecial()
+            } else if (max == 0 && min < 0){ 
+                posScales[trait] = logspecial(false)
                                         .domain([min,max])
                                         .range([0, 1])
             } else {
-                posScales[trait] = d3.scale.log()
+                posScales[trait] = d3.scale.linear()
                                     .domain([min,max])
                                     .range([0, 1]);
             }
@@ -317,7 +318,8 @@ function plot(p){
             })
 
             .attr("cx", function(d) {
-                    return radius(posScales[p.y](d[p.y]));})
+                //console.log(d.name, p.y, d[p.y], posScales[p.y](d[p.y]))
+                return radius(posScales[p.y](d[p.y]));})
             .attr("r", nodesize)
             .attr("stroke-width", nodestroke)
             .attr("stroke", nodestrokecolor)
@@ -1121,11 +1123,13 @@ function round_value(value){
     if (isNaN(value)){
         return value
     } else {
-        new_value = Math.round(Number(value) * 1000) / 1000
+        value = Number(value)
+        if (value == 0 || value == -0){ return value}
+        new_value = Math.round(value * 1000) / 1000
         if (new_value == 0){
-            new_value = Math.round(Number(value) * 100000) / 100000
+            new_value = Math.round(value * 100000) / 100000
             if (new_value == 0){
-                new_value = Math.round(Number(value) * 10000000) / 10000000
+                return Number(value)
             } else {
                 return new_value
             }
@@ -1151,14 +1155,15 @@ function get_categories(trait){
     return keys
 }
 
-function logspecial() {
-  return d3_scale_log(d3.scale.linear().domain([0, 1]), 10, true, [1, 10]);
+function logspecial(positive) {
+  position = (typeof position === "undefined") ? true : position;
+  return d3_scale_log(d3.scale.linear().domain([0, 1]), 10, positive, [1, 10]);
 };
 
 function d3_scale_log(linear, base, positive, domain) {
 
   function log(x) {
-    return (positive ? Math.log(x <= 0 ? 0.000000001 : x) : -Math.log(x > 0 ? 0 : -x)) / Math.log(base);
+    return (positive ? Math.log(x <= 0 ? 0.00000000000000001 : x) : -Math.log(x >= 0 ? 0.0000000000001 : -x)) / Math.log(base);
   }
 
   function pow(x) {
