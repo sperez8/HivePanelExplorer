@@ -29,7 +29,8 @@ var linkfill = "none"
 var hoverOverTime = 900
 
 
-var columntraits = ["Gender",'degree'];
-    rowtraits = ["Height","betweeness"];
+var columntraits = ["Gender",'Height'];
+    rowtraits = ["degree","betweeness"];
 
-var traitScales = {"Gender":"linear", "degree":"linear", "Height": "log", "betweeness": "linear"}
+var columnTraitScales = {"Gender":"linear", "Height":"log"}
+var rowTraitScales = {"degree": "linear", "betweeness": "linear"}

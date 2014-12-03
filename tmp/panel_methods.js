@@ -48,6 +48,22 @@ var width = document.getElementById("panel").offsetWidth
     size = (width-padding)/panels
     num_panels = columntraits.length*rowtraits.length
 
+function thresholds(min,max){
+    span = Math.abs(max-min)
+    t = d3.range(Math.log(1),Math.log(span+1),Math.log(span+1)/numAxes)
+    console.log(t)
+    k = []
+    for (var i = 1; i < numAxes; i++) {
+        if (max<=0 && min <=0){
+            k.push(-Math.exp(t[i])+1)
+        } else{
+            k.push(Math.exp(t[i])-1)
+        }
+    };
+    if (max<=0 && min <=0){k.reverse()}
+    return k
+}
+
 console.log('\nAssignment values for grouping of nodes on axes:')
 for (var i in columntraits) {
     trait = columntraits[i];
@@ -57,16 +73,25 @@ for (var i in columntraits) {
         asgScales[trait] = d3.scale.ordinal()
             .domain(keys)
             .range(d3.range(numAxes));
-        console.log('Categorical trait ', trait, ' has categories: ', keys)
+        console.log('Categorical trait', trait, 'has categories: ', keys)
     } else {
         max = d3.max(nodes, function(d) {
             return Number(d[trait])});
         min = d3.min(nodes, function(d) {
             return Number(d[trait])});
-        asgScales[trait] = d3.scale.quantile()
+        type = 'linear'
+        if (columnTraitScales[trait]=="log" && ((max>=0&&min>=0 ) || (max<=0&&min<=0)) ){
+            t = thresholds(min,max)
+            asgScales[trait] = d3.scale.threshold()
+                                .domain(t)
+                                .range(d3.range(numAxes))
+            type = 'log'
+        } else {
+            asgScales[trait] = d3.scale.quantile()
                                 .domain([min,max])
                                 .range(d3.range(numAxes));
-        console.log('Quantitative trait ', trait, ' has values and cut offs: ')
+        }
+        console.log('Quantitative trait', trait, 'has a', type, 'scale, and cut offs: ')
         for (var i = 0;i <= numAxes-1;i++) {
             console.log('\t axis', i, asgScales[trait].invertExtent(i))
         };
@@ -82,18 +107,21 @@ for (var i in rowtraits) {
         posScales[trait] = d3.scale.ordinal()
             .domain(keys)
             .rangeBands([0, 1], 1.0/keys.length/3);
-        console.log('Categorical trait ', trait, ' has categories: ', keys)
+        console.log('Categorical trait', trait, 'has categories: ', keys)
     } else {
         max = d3.max(nodes, function(d) {
             return Number(d[trait])});
         min = d3.min(nodes, function(d) {
             return Number(d[trait])});
-        if (traitScales[trait]=="log"){
+        type = 'linear'
+        if (rowTraitScales[trait]=="log"){
             if (max > 0 && min == 0){
+                type = 'log'
                 posScales[trait] = logspecial()
                                         .domain([min,max])
                                         .range([0, 1])
             } else if (max == 0 && min < 0){ 
+                type = 'log'
                 posScales[trait] = logspecial(false)
                                         .domain([min,max])
                                         .range([0, 1])
@@ -107,7 +135,7 @@ for (var i in rowtraits) {
                                     .domain([min,max])
                                     .range([0, 1]);
         }
-        console.log('Quantitative trait ', trait, ' has min and max value: ', min, ',', max)
+        console.log('Quantitative trait', trait, 'has', type, 'scale with min and max value: ', min, ',', max)
     }
 }
 
