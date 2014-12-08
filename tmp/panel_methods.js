@@ -51,7 +51,7 @@ var width = document.getElementById("panel").offsetWidth
 function thresholds(min,max){
     span = Math.abs(max-min)
     t = d3.range(Math.log(1),Math.log(span+1),Math.log(span+1)/numAxes)
-    console.log(t)
+    console.log(span, t)
     k = []
     for (var i = 1; i < numAxes; i++) {
         if (max<=0 && min <=0){
@@ -115,7 +115,12 @@ for (var i in rowtraits) {
             return Number(d[trait])});
         type = 'linear'
         if (rowTraitScales[trait]=="log"){
-            if (max > 0 && min == 0){
+            if ((max > 0 && min > 0)||(max < 0 && min < 0)){
+                type = 'log'
+                posScales[trait] = d3.scale.log()
+                                        .domain([min,max])
+                                        .range([0, 1])
+            } else if (max > 0 && min == 0){
                 type = 'log'
                 posScales[trait] = logspecial()
                                         .domain([min,max])
