@@ -48,10 +48,9 @@ var width = document.getElementById("panel").offsetWidth
     size = (width-padding)/panels
     num_panels = columntraits.length*rowtraits.length
 
-function thresholds(min,max){
+function log_thresholds(min,max){
     span = Math.abs(max-min)
     t = d3.range(Math.log(1),Math.log(span+1),Math.log(span+1)/numAxes)
-    console.log(span, t)
     k = []
     for (var i = 1; i < numAxes; i++) {
         if (max<=0 && min <=0){
@@ -61,6 +60,32 @@ function thresholds(min,max){
         }
     };
     if (max<=0 && min <=0){k.reverse()}
+    return k
+}
+
+function log_thresholds(min,max){
+    span = Math.abs(max-min)
+    t = d3.range(Math.log(1),Math.log(span+1),Math.log(span+1)/numAxes)
+    k = []
+    for (var i = 1; i < numAxes; i++) {
+        if (max<=0 && min <=0){
+            k.push(-Math.exp(t[i])+1)
+        } else{
+            k.push(Math.exp(t[i])-1)
+        }
+    };
+    if (max<=0 && min <=0){k.reverse()}
+    return k
+}
+
+function even_thresholds(data){
+    total = data.length
+    data.sort()
+    k = []
+    for (var i = 1; i < numAxes; i++) {
+        index = parseInt(total*i/numAxes)
+        k.push(data[index])
+    };
     return k
 }
 
@@ -80,8 +105,15 @@ for (var i in columntraits) {
         min = d3.min(nodes, function(d) {
             return Number(d[trait])});
         type = 'linear'
-        if (columnTraitScales[trait]=="log" && ((max>=0&&min>=0 ) || (max<=0&&min<=0)) ){
-            t = thresholds(min,max)
+        if (columnTraitScales[trait]=="even"){
+            t = even_thresholds(nodes.map(function(d) {return Number(d[trait])}))
+            asgScales[trait] = d3.scale.threshold()
+                    .domain(t)
+                    .range(d3.range(numAxes))
+            type = "even-distribution"
+        }
+        else if (columnTraitScales[trait]=="log" && ((max>=0&&min>=0 ) || (max<=0&&min<=0)) ){
+            t = log_thresholds(min,max)
             asgScales[trait] = d3.scale.threshold()
                                 .domain(t)
                                 .range(d3.range(numAxes))
@@ -319,7 +351,7 @@ function plot(p){
                 d3.select(this).call(link_tooltip,d,d.source.name, d.target.name)
                 d3.select(this).call(highlight_links)
             })
-            .on("mouseout", function(d){
+            .on("mouseout", function(){
                 remove_tooltip()
                 node_mouseout()
                 link_mouseout()
