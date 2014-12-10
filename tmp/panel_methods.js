@@ -14,7 +14,6 @@ E = links.length
 d3.select("body").select("#title").select("#info")
     .html(N+' nodes, '+E+' edges')
 
-
   // ****************************************** //
 
 
@@ -1067,16 +1066,54 @@ function add_rule(sel){
     ruleNumber = count_rules()
     remove_add_rule_button()
     if (ruleType == 'Color') {
-        var newRule = ColorRuleTemplate.format(ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber)
+        var newRule = ColorRuleTemplate.format(ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber)
     } else if (ruleType == 'Filter') {
-        var newRule = FilterRuleTemplate.format(ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber)
+        var newRule = FilterRuleTemplate.format(ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber, ruleNumber)
     }
     d3.select("body").select("#controlpanel").append("div")
         .html(newRule)
 
     make_property_options(ruleNumber)
     create_color_box(ruleNumber)
+    place_remove_icon(ruleNumber)
     place_add_rule()
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function remove_rule(sel){
+    ruleNumber = find_rule_number_from_selection(sel)
+    rule = document.getElementById("ruleForm"+ruleNumber)
+    console.log(sel, rule, ruleNumber)
+    container = rule.parentNode
+    container.removeChild(rule)
+
 }
 
 function redo_rules(undoneRule) {
@@ -1307,3 +1344,16 @@ FilterRuleTemplate = "<form action='' class = 'darktext rules filter' id = 'rule
 "                    </select>"+
 "                    <input type = 'checkbox' value ='Filter' id = 'ruleButton{}' name = 'ruleButton' onclick='color_filter_or_undo(this);' type = 'button' class = 'darktext filter'/> Filter <br>"+
 "                </form>"
+
+//creates the icon to remove rules
+function place_remove_icon(ruleNumber) {
+
+    function insertAfter(referenceNode, newNode) {
+        referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+    }
+
+    var icon = document.createElement("d")
+    icon.innerHTML = "<img src='remove_icon.svg' class='icon' id = 'removeIcon"+ruleNumber+"' onclick='remove_rule(this)'>"
+    var div = document.getElementById("equality"+ruleNumber);
+    insertAfter(div, icon);
+}

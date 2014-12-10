@@ -110,7 +110,6 @@ select, input, input[type="button"] {
 .filter {
     border-left: 6px solid #a9a3a9;
     border-bottom: 2px solid #a9a3a9;
-    padding-bottom: 4px;
 }
 
 input[type="button"] {
@@ -162,3 +161,13 @@ div.tooltip {
   pointer-events: none;
 }
 
+
+.icon {
+    width: 15px;
+    height: 15px;
+    padding-top: 3px;
+    padding-bottom: 10px;
+    padding-right: 2px;
+    display:inline-block;
+    float: right;
+}
