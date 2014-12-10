@@ -125,6 +125,9 @@ input[type="button"] {
 
 input.filter{
     border: 2px solid #a9a3a9;
+    margin-left: 10px;
+    vertical-align: bottom;
+    padding-left: 4px;
 }
 
 p {

@@ -14,6 +14,7 @@ E = links.length
 d3.select("body").select("#title").select("#info")
     .html(N+' nodes, '+E+' edges')
 
+
   // ****************************************** //
 
 
@@ -1304,5 +1305,5 @@ FilterRuleTemplate = "<form action='' class = 'darktext rules filter' id = 'rule
 "                        <option>hide</option>"+
 "                        <option>keep</option>"+
 "                    </select>"+
-"                    <input value ='Filter' id = 'ruleButton{}' name = 'ruleButton' onclick='color_filter_or_undo(this);' type = 'button' class = 'darktext filter'/>"+
+"                    <input type = 'checkbox' value ='Filter' id = 'ruleButton{}' name = 'ruleButton' onclick='color_filter_or_undo(this);' type = 'button' class = 'darktext filter'/> Filter <br>"+
 "                </form>"
