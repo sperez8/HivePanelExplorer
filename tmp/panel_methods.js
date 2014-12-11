@@ -6,6 +6,7 @@
 
 // ****************************************** //
 
+//display title of panel and number of nodes and links
 d3.select("body").select("#title").select("#thetitle")
     .html(SVGTitle)
 
@@ -22,8 +23,10 @@ d3.select("body").select("#title").select("#info")
 
 // ****************************************** //
 
+//get the angles of the axis depending on the number of axes and if they are doubled or not
 var angle = get_angles(numAxes,doubleAxes)
 
+//if doubled axes are requested, then we need to bind twice the amount of DOM elements from the nodes{} and links{} datasets
 if (doubleAxes){
     var seriesLinksNames = [0,1]
     var seriesNodesNames = [0,1]
@@ -34,6 +37,7 @@ if (doubleAxes){
     var angleRange = d3.range(numAxes)
 };
 
+//scale to assign an axis number to an angle
 var angles = d3.scale.ordinal()
     .domain(angleRange)
     .range(angle);
@@ -41,6 +45,7 @@ var angles = d3.scale.ordinal()
 var asgScales = {};
     posScales = {};
 
+//get witdh of the "panel" div and the number of traits to figure out the number of hive plots and their size in the panel
 var width = document.getElementById("panel").offsetWidth
     height = width
     padding = width/0.7*0.05;
@@ -48,6 +53,7 @@ var width = document.getElementById("panel").offsetWidth
     size = (width-padding)/panels
     num_panels = columntraits.length*rowtraits.length
 
+//returns numerical thresholds to bin log scaled node assignment data into the number of axes required.
 function log_thresholds(min,max){
     span = Math.abs(max-min)
     t = d3.range(Math.log(1),Math.log(span+1),Math.log(span+1)/numAxes)
@@ -63,21 +69,7 @@ function log_thresholds(min,max){
     return k
 }
 
-function log_thresholds(min,max){
-    span = Math.abs(max-min)
-    t = d3.range(Math.log(1),Math.log(span+1),Math.log(span+1)/numAxes)
-    k = []
-    for (var i = 1; i < numAxes; i++) {
-        if (max<=0 && min <=0){
-            k.push(-Math.exp(t[i])+1)
-        } else{
-            k.push(Math.exp(t[i])-1)
-        }
-    };
-    if (max<=0 && min <=0){k.reverse()}
-    return k
-}
-
+//returns numerical thresholds to bin node assignment data into about equally sized bins.
 function even_thresholds(data){
     total = data.length
     data.sort()
@@ -89,10 +81,13 @@ function even_thresholds(data){
     return k
 }
 
+
+// get the columntraits used for node assignment onto axes and build the desired linear, log 
+//or evenly distributed scales to use later when plotting nodes and links
 console.log('\nAssignment values for grouping of nodes on axes:')
 for (var i in columntraits) {
     trait = columntraits[i];
-    categorical = !check_quantitative([nodes[0][trait]])
+    categorical = !check_quantitative([nodes[0][trait]]) //check if trait is a qualitative or categorical attribute
     if (categorical){
         keys = get_categories(trait)
         asgScales[trait] = d3.scale.ordinal()
@@ -130,10 +125,13 @@ for (var i in columntraits) {
     }
 }
 
+
+// get the columntraits used for node positionning on axes and build the desired linear orlog 
+//scales to use later when plotting nodes and links
 console.log('\nScaled values for positioning of nodes onto axes:')
 for (var i in rowtraits) {
     trait = rowtraits[i];
-    categorical = !check_quantitative([nodes[0][trait]])
+    categorical = !check_quantitative([nodes[0][trait]])  //check if trait is a qualitative or categorical attribute
     if (categorical){
         keys = get_categories(trait)
         posScales[trait] = d3.scale.ordinal()
@@ -176,6 +174,7 @@ for (var i in rowtraits) {
     }
 }
 
+//create all combinations of node assignment and position rules
 function cross(a, b){
     var c = [], n = a.length, m = b.length, i, j;
     for (i = -1;++i < n;) for (j = -1;++j < m;) c.push({x: a[i], i: i, y: b[j], j: j});
@@ -191,10 +190,12 @@ function cross(a, b){
 
 // ****************************************** //
 
+//default behaviour of tool tip
 var tooltip = d3.select("body").append("div")   
     .attr("class", "tooltip")               
     .style("opacity", 0);
 
+//create svg drawing without the "#oanel" 
 var svg = d3.select("body").select("#container").select("#panel").append("svg")
     .attr("class", SVGTitle)
     .attr("width", width)
@@ -203,39 +204,44 @@ var svg = d3.select("body").select("#container").select("#panel").append("svg")
   .append("g")
     .attr("transform", "translate(" + (size/2 + padding) + "," + (size/2 + padding) + ")");//(0,0) coordinates correspond to the center of the first hive.
 
+//each cell contains a hive plot and is characterized by a node assignment rule (columnttrait) and a node positionning rule. 
 var cell = svg.selectAll(".cell")
-  .data(cross(columntraits,rowtraits))
+  .data(cross(columntraits,rowtraits)) //data is the combination or column and row traits.
 .enter().append("g")
   .attr("class", "cell")
   .attr("transform", function(d) { return "translate(" + (d.i) * size + "," + d.j * size + ")";})
   .each(plot);
   
+//build each hive plot
 function plot(p){
     var cell = d3.select(this);
 
+    //calculate the slength and position of each axes depending on the size of the hive plot.
     var innerRadius = size*0.05
     var outerRadius = size*0.45
     var radius = d3.scale.linear().range([innerRadius, outerRadius]);
 
+    //column labels (when one plotting first row, where p.i=0)
     if (p.i == 0){
     cell.append("text")
         .attr("x", function(d) { return d.i;})
         .attr("y", function(d) { return d.j-size/2 - padding/2})
         .attr("text-anchor", "middle")
         .attr("class","viztext")
-        .text(capitalize(p.y))
+        .text(capitalize(p.y)) //add name of property used for node positionning, the rowtrait
         .attr("transform", function(d) { 
-            return "rotate(-90)";//"translate("+ d.i-size/2 + "," + d.j-size/2+")
+            return "rotate(-90)";
             })
     }
 
+    //column labels (when one plotting first column, where p.j=0)
     if (p.j==0){
     cell.append("text")
         .attr("x", function(d) { return d.i;})
         .attr("y", function(d) { return d.j-size/2 - padding/2;})
         .attr("text-anchor", "middle")
         .attr("class","viztext")
-        .text(capitalize(p.x))
+        .text(capitalize(p.x)) //add name of property used for node assignment, the columntrait
 
     }
 
@@ -249,6 +255,7 @@ function plot(p){
     //     //.attr("y", function(d) {return - Math.cos(angles(d))*(radius.range()[1])} )
     //     .text(function(d,i) {return asgScales[p.x](i)})
 
+    //build axes
     cell.selectAll(".axis")
         .data(angle)
       .enter().append("line")
@@ -265,12 +272,14 @@ function plot(p){
         .attr("fill", "#4E3D54")
         .attr("font-size", "17px")
 
+    //seriesLinks reflects the fact that double axes are being plotted.
     var seriesLinks = cell.selectAll(".seriesLinks")
                         .data(seriesLinksNames)
                       .enter().append("g")
                         .attr("class", "seriesLinks")
                         .each(hiveLinks);
 
+    //plot links as paths between nodes
     function hiveLinks(h){
         var axesType = d3.select(this);
         var isSource = true
@@ -279,7 +288,7 @@ function plot(p){
             .data(links)
           .enter().append("path")
             .attr("class", "link")
-            .attr("d", d3.hive.link()
+            .attr("d", d3.hive.link() //use Mbostocks hive plot library
                 .angle(function(d) {
                     if (!doubleAxes){
                         a = angles(asgScales[p.x](d[p.x]))
@@ -295,7 +304,8 @@ function plot(p){
                 .radius(function(d) {
                     return radius(posScales[p.y](d[p.y]));})
             )
-            .attr("show", function (d) {
+            .attr("show", function (d) { //the 'show' attribute is false when links are between nodes on the same axes
+                //or when the link connects nodes that are not on neighboring axes and cross over a third axes.
                 s = asgScales[p.x](d.source[p.x])
                 t = asgScales[p.x](d.target[p.x])
                 if (!doubleAxes){
@@ -334,7 +344,7 @@ function plot(p){
                     return show
                 }
             })
-            .style("fill", linkfill)
+            .style("fill", linkfill) //linkfill is "none" so that just the arc of the path is seen.
             .style("stroke-opacity", oplink)
             .style("stroke", function(d) {
                 if (edgeColor){
@@ -343,9 +353,19 @@ function plot(p){
                 }
             })
             .style("stroke-width", linkwidth)
+            .classed({"clicked":false})
             .on("click", function(d){
-                d3.select(this)
-                    .call(link_full_reveal,d,d.source.name, d.target.name)
+                if (d3.select(this).classed("clicked")){
+                    d3.select(this)
+                        .classed({"clicked":false})
+                    link_mouseout()
+                    node_mouseout()
+                    removeReveal()
+                } else {
+                    d3.select(this)
+                        .classed({"clicked":true})
+                        .call(link_full_reveal,d,d.source.name, d.target.name)
+                }
             })
             .on("mouseover", function(d){
                 d3.select(this).call(link_tooltip,d,d.source.name, d.target.name)
@@ -353,8 +373,9 @@ function plot(p){
             })
             .on("mouseout", function(){
                 remove_tooltip()
-                node_mouseout()
-                link_mouseout()
+                if (!d3.select(this).classed("clicked")){
+                    d3.select(this).call(link_mouseout)
+                }
             });
 
         //removes any edges between nodes on same axis.
@@ -368,6 +389,7 @@ function plot(p){
                     .attr("class", "seriesNodes")
                     .each(hiveNodes);
 
+    //plot nodes second so they appear on top of links
     function hiveNodes(h){
         var axesType = d3.select(this);
         axesType.selectAll(".node")
@@ -375,7 +397,7 @@ function plot(p){
           .enter().append("circle")
             .attr("class", "node")
             .attr("transform", function(d) { 
-                if (doubleAxes){
+                if (doubleAxes){ //plot nodes of even axes when h=0 then on odd axes when h=1
                     return "rotate(" + degrees(angles(asgScales[p.x](d[p.x])*2 + h)) + ")"  
                 } else {
                     return "rotate(" + degrees(angles(asgScales[p.x](d[p.x]))) + ")"
@@ -384,7 +406,7 @@ function plot(p){
 
             .attr("cx", function(d) {
                 //console.log(d.name, p.y, d[p.y], posScales[p.y](d[p.y]))
-                return radius(posScales[p.y](d[p.y]));})
+                return radius(posScales[p.y](d[p.y]));}) //pos
             .attr("r", nodesize)
             .attr("stroke-width", nodestroke)
             .attr("stroke", nodestrokecolor)
@@ -392,17 +414,30 @@ function plot(p){
             .style("fill", function(d) { 
                 return nodeColor
             })
+            .classed({"clicked":false})
             .on("click", function(d){
-                d3.select(this)
-                    .call(node_full_reveal,d)
+                if (d3.select(this).classed("clicked")){
+                    d3.select(this).classed({"clicked":false})
+                    node_mouseout()
+                    link_mouseout()
+                    removeReveal()
+                } else {
+                    d3.select(this)
+                        .classed({"clicked":true})
+                        .call(node_full_reveal,d)
+                }
             })
             .on("mouseover", function(d){
-                d3.select(this).call(node_tooltip,d,p.x,p.y, d[p.x], d[p.y])
+                d3.select(this)
+                    .call(node_tooltip,d,p.x,p.y, d[p.x], d[p.y])
+                    .call(highlight_nodes)
             })
             .on("mouseout", function(d){
-                node_mouseout()
-                remove_tooltip()
-
+                remove_tooltip() 
+                if (!d3.select(this).classed("clicked")){
+                    d3.select(this)
+                        .call(node_mouseout)  
+                } 
             })
     };
 
@@ -418,30 +453,30 @@ function plot(p){
 // ****************************************** //
 
 var node_tooltip = function(node, d, px, py, x, y){
-    node.transition()
-        .delay(hoverOverTime/2)   
-        .duration(100)
-        .call(highlight_nodes)
     tooltip.transition()
-        .delay(hoverOverTime/2)   
-        .duration(400)      
+        .delay(0)   
+        .duration(0)      
         .style("opacity", opnode_more);
-    tooltip.html('<b>' + d.name +'</b><br>'+ px + ': ' + round_value(x) + '<br>' + py + ': ' + round_value(y))
+    if (py!=px){
+        text = '<b>' + d.name +'</b><br>'+ px + ': ' + round_value(x) + '<br>' + py + ': ' + round_value(y)
+    } else { text = '<b>' + d.name +'</b><br>'+ px + ': ' + round_value(x)}
+    tooltip.html(text) 
         .style("height", "45px")
         .style("left", (d3.event.pageX + 5) + "px")     
         .style("top", (d3.event.pageY - 28) + "px");
 }
 
 var node_full_reveal = function(node,d) {
-    node
-        .call(highlight_nodes)
-        revealNode(d, node.style("fill"));
+    revealNode(d, node.style("fill"));
     d3.selectAll(".node")
         .each(function(n){
             if (n.name == d.name){
-                d3.select(this).call(highlight_nodes)
+                d3.select(this)
+                    .call(highlight_nodes)
+                    .classed({"clicked":true})
             }
         })
+
 /*    d3.selectAll(".link")
         .each(function(l){
             if (l.source.name == d.name || l.target.name == d.name){
@@ -451,25 +486,36 @@ var node_full_reveal = function(node,d) {
 }
 
 var node_mouseout = function(node) {
-    removeReveal();
-/*    d3.selectAll(".link")
-        .transition()
-        .duration(hoverOverTime)
-        .style("stroke-opacity", oplink)
-        .style("stroke-width", linkwidth)*/
-    d3.selectAll(".node")
-        .transition()
-        .duration(hoverOverTime)
-        .attr("r", nodesize)
-        .attr("stroke-width", nodestroke)
-        .attr("stroke", nodestrokecolor)
-        .style("fill-opacity", function(d,i){
-            if (d3.select(this).classed("important")){
-                return opnode_more
-            }else{
-                return opnode
-            }})
+    if (node){
+        node
+            .transition()
+            .duration(hoverOverTime/2)
+            .attr("r", nodesize)
+            .attr("stroke-width", nodestroke)
+            .attr("stroke", nodestrokecolor)
+            .style("fill-opacity", function(d,i){
+                if (d3.select(this).classed("important")){
+                    return opnode_more
+                }else{
+                    console.log(opnode)
+                    return opnode
+                }})
+    } else {
+        d3.selectAll(".node")
+            .transition()
+            .duration(hoverOverTime/2)
+            .attr("r", nodesize)
+            .attr("stroke-width", nodestroke)
+            .attr("stroke", nodestrokecolor)
+            .style("fill-opacity", function(d,i){
+                if (d3.select(this).classed("important")){
+                    return opnode_more
+                }else{
+                    return opnode
+                }})
     }
+}
+
 
 var remove_tooltip = function(){
     tooltip.transition()        
@@ -485,15 +531,13 @@ d3.selection.prototype.moveToFront = function() {
 
 var highlight_nodes = function(selection) {
     selection
-        .style("fill-opacity", 1)
-        .style("stroke-width", nodestroke*3)
-        .attr("stroke", 'black')
         .attr("r", nodesize*1.8)
+        .attr("stroke-width", nodestroke*3)
+        .attr("stroke", 'black')
+        .style("fill-opacity", 1)
     };
 
 var link_full_reveal = function(link,d,source,target) {
-    link
-        .call(highlight_links)
     revealLink(d, link.style("stroke"));
     d3.selectAll(".link")
         .each(function(l){
@@ -510,13 +554,9 @@ var link_full_reveal = function(link,d,source,target) {
 }
 
 var link_tooltip = function(link, d, source, target){
-    link.transition()
-        .delay(hoverOverTime/2)   
-        .duration(100)
-        .call(highlight_links)
     tooltip.transition()
-        .delay(hoverOverTime/2)   
-        .duration(400)      
+        .delay(0*hoverOverTime/2)   
+        .duration(0*400)      
         .style("opacity", .7);
     tooltip.html('source: ' + source + '<br>' + 'target: ' + target)
         .style("height", "32px")
@@ -524,19 +564,27 @@ var link_tooltip = function(link, d, source, target){
         .style("top", (d3.event.pageY - 28) + "px");
 }
 
-var link_mouseout = function(node) {
+var link_mouseout = function(link) {
+    if (link){
+        link
+            .transition()
+            .duration(hoverOverTime)
+            .style("stroke-opacity", oplink)
+            .style("stroke-width", linkwidth)
+    } else {
     d3.selectAll(".link")
         .transition()
         .duration(hoverOverTime)
         .style("stroke-opacity", oplink)
         .style("stroke-width", linkwidth)
     }
+}
 
 var highlight_links = function(selection) {
     selection            
         .transition()
-        .delay(hoverOverTime*0.1)
-        .duration(hoverOverTime*0.2)
+        .delay(0*hoverOverTime*0.1)
+        .duration(0*hoverOverTime*0.2)
         .style("stroke-opacity", 1)
         .style("stroke-width", linkwidth*2)
     };
