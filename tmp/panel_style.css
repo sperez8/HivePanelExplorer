@@ -151,6 +151,7 @@ div.tooltip {
   position: absolute;
   text-align: center;
   width: auto;
+  min-width: 20px;
   padding-top: 4px;
   padding-bottom: 4px;
   padding-left: 10px;

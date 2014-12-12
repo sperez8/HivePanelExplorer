@@ -195,6 +195,19 @@ var tooltip = d3.select("body").append("div")
     .attr("class", "tooltip")               
     .style("opacity", 0);
 
+var tooltipOpacity = 0.7
+
+//create a timer so that mouseover events are called successively
+//to speed up animation.
+var hoverTimer
+
+//delay for hover animations
+var hoverDelay = 500 //milliseconds
+
+function clearHoverTimer() {
+    clearTimeout(hoverTimer)
+}
+
 //create svg drawing without the "#oanel" 
 var svg = d3.select("body").select("#container").select("#panel").append("svg")
     .attr("class", SVGTitle)
@@ -368,10 +381,17 @@ function plot(p){
                 }
             })
             .on("mouseover", function(d){
-                d3.select(this).call(link_tooltip,d,d.source.name, d.target.name)
-                d3.select(this).call(highlight_links)
+                var link = d3.select(this)
+                var cx = d3.event.pageX
+                var cy = d3.event.pageY
+
+                hoverTimer = setTimeout(function(){
+                        link_tooltip(cx, cy, d, d.source.name, d.target.name);
+                        link.call(highlight_links)
+                    }, hoverDelay)
             })
             .on("mouseout", function(){
+                clearHoverTimer()
                 remove_tooltip()
                 if (!d3.select(this).classed("clicked")){
                     d3.select(this).call(link_mouseout)
@@ -428,11 +448,17 @@ function plot(p){
                 }
             })
             .on("mouseover", function(d){
-                d3.select(this)
-                    .call(node_tooltip,d,p.x,p.y, d[p.x], d[p.y])
-                    .call(highlight_nodes)
+                var node = d3.select(this)
+                var cx = d3.event.pageX
+                var cy = d3.event.pageY
+
+                hoverTimer = setTimeout(function(){
+                        node_tooltip(cx, cy, d, p.x,p.y, d[p.x], d[p.y]);
+                        node.call(highlight_nodes)
+                    }, hoverDelay)
             })
             .on("mouseout", function(d){
+                clearHoverTimer()
                 remove_tooltip() 
                 if (!d3.select(this).classed("clicked")){
                     d3.select(this)
@@ -452,18 +478,16 @@ function plot(p){
 
 // ****************************************** //
 
-var node_tooltip = function(node, d, px, py, x, y){
-    tooltip.transition()
-        .delay(0)   
-        .duration(0)      
-        .style("opacity", opnode_more);
+var node_tooltip = function(cx, cy, d, px, py, x, y){
     if (py!=px){
         text = '<b>' + d.name +'</b><br>'+ px + ': ' + round_value(x) + '<br>' + py + ': ' + round_value(y)
     } else { text = '<b>' + d.name +'</b><br>'+ px + ': ' + round_value(x)}
-    tooltip.html(text) 
-        .style("height", "45px")
-        .style("left", (d3.event.pageX + 5) + "px")     
-        .style("top", (d3.event.pageY - 28) + "px");
+    tooltip   
+        .style("opacity", tooltipOpacity)
+        .html(text) 
+            .style("height", "45px")
+            .style("left", (cx + 5) + "px")     
+            .style("top", (cy - 28) + "px");
 }
 
 var node_full_reveal = function(node,d) {
@@ -497,7 +521,6 @@ var node_mouseout = function(node) {
                 if (d3.select(this).classed("important")){
                     return opnode_more
                 }else{
-                    console.log(opnode)
                     return opnode
                 }})
     } else {
@@ -553,15 +576,13 @@ var link_full_reveal = function(link,d,source,target) {
         })
 }
 
-var link_tooltip = function(link, d, source, target){
-    tooltip.transition()
-        .delay(0*hoverOverTime/2)   
-        .duration(0*400)      
-        .style("opacity", .7);
+var link_tooltip = function(cx, cy, d, source, target){
+    tooltip    
+        .style("opacity", tooltipOpacity);
     tooltip.html('source: ' + source + '<br>' + 'target: ' + target)
         .style("height", "32px")
-        .style("left", (d3.event.pageX + 5) + "px")     
-        .style("top", (d3.event.pageY - 28) + "px");
+        .style("left", (cx + 5) + "px")     
+        .style("top", (cy - 28) + "px");
 }
 
 var link_mouseout = function(link) {
@@ -661,10 +682,11 @@ function show_node() {
                 revealNode(d, d3.select(this).style("fill"))
                 revealed = true
 
-                d3.select(this)
-                    .transition()
-                    .delay(1000)
-                    .call(removeReveal)
+                //BROCKEN
+                // d3.select(this)
+                //     .transition()
+                //     .delay(1000)
+                //     .call(removeReveal)
                 }
             }
         })
@@ -1126,34 +1148,6 @@ function add_rule(sel){
     place_remove_icon(ruleNumber)
     place_add_rule()
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 function remove_rule(sel){
     ruleNumber = find_rule_number_from_selection(sel)
