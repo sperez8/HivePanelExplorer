@@ -1,19 +1,19 @@
 
 body {
-    margin: 50px 50px 50px 50px;
+    margin: 10px 50px 50px 50px;
 }
 
 #container, div.tooltip {
     font: normal 13px"Helvetica Neue";
-    height: 750px;
-    width: 1000px;
+    height: 850px;
+    width: 1100px;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 20px;
+    margin-top: 5px;
 }
 
 #title {
-    height: 60px;
+    height: 5%;
     width: 100%;
     float: center;
     border-bottom: 3px groove #D2CFE7;
@@ -30,22 +30,21 @@ body {
 }
 
 #panel {
-    width: 700px;
-    height: 700px;
+    width: 76%;
+    height: 95%;
     float: left;
     clear: right;
-    margin-top: 20px;
+    margin-top: 5px;
 }
 
 #search {
-    height: 48px;
-    margin-top: 25px;
+    height: 5%;
+    margin-top: 10px;
     text-align: center;
     vertical-align: middle;
 }
-
 #revealwrapper {
-    height: 200px;
+    height: 15%;
     clear: right;
     margin-top: 10px;
     text-align: center;
@@ -61,22 +60,20 @@ body {
 }
 
 #controlpanel {
-    height: 430px;
+    height: 70%;
     clear: right;
     margin-top: 10px;
 }
 
 #search, #revealwrapper, #controlpanel {
     color: #3F3E45;
-    width: 290px;
+    width: 23%;
     float: right;
     border-radius: 7px;
     border-left: 2px groove #D2CFE7;
 }
 
 #search, #revealwrapper {
-    width: 285px;
-    padding-left: 5px;
     border-bottom: 3px groove #D2CFE7;
 }
 
@@ -91,12 +88,11 @@ select, input, input[type="button"] {
     border: 1px solid #d4ccd4;
     border-radius: 4px;
     font: normal 13px"Helvetica Neue";
-    max-width: 80px !important;
     overflow: hidden;
 }
 
 #lostNode {
-    max-width:  170px !important;
+    max-width:  140px !important;
 }
 .rules {
     border-left: 6px solid #D2CFE7;
@@ -110,6 +106,11 @@ select, input, input[type="button"] {
 .filter {
     border-left: 6px solid #a9a3a9;
     border-bottom: 2px solid #a9a3a9;
+    padding-bottom: 4px;
+}
+
+input{
+    max-width: 43px;
 }
 
 input[type="button"] {
@@ -119,7 +120,8 @@ input[type="button"] {
     border-radius: 0px;
     float: right;
     margin-right: 5px;
-    min-width: 65px;
+    min-width: 60px;
+    max-width: 105px;
 }
 
 input.filter{
@@ -171,4 +173,12 @@ div.tooltip {
     padding-right: 2px;
     display:inline-block;
     float: right;
+}
+
+.viztext {
+    font: normal 14px"Helvetica Neue";
+}
+
+.legend {
+    font: normal 11px"Helvetica Neue";    
 }

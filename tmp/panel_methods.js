@@ -48,10 +48,12 @@ var asgScales = {};
 //get witdh of the "panel" div and the number of traits to figure out the number of hive plots and their size in the panel
 var width = document.getElementById("panel").offsetWidth
     height = width
-    padding = width/0.7*0.05;
+    padding = width*0.06;
+    legend_padding = padding/4
     panels = Math.max(columntraits.length, rowtraits.length)
-    size = (width-padding)/panels
+    size = (width-padding-legend_padding)/panels
     num_panels = columntraits.length*rowtraits.length
+    console.log(width, height, padding, size)
 
 //returns numerical thresholds to bin log scaled node assignment data into the number of axes required.
 function log_thresholds(min,max){
@@ -94,6 +96,7 @@ for (var i in columntraits) {
             .domain(keys)
             .range(d3.range(numAxes));
         console.log('Categorical trait', trait, 'has categories: ', keys)
+        columnTraitScales[trait]="categorical"
     } else {
         max = d3.max(nodes, function(d) {
             return Number(d[trait])});
@@ -138,6 +141,7 @@ for (var i in rowtraits) {
             .domain(keys)
             .rangeBands([0, 1], 1.0/keys.length/3);
         console.log('Categorical trait', trait, 'has categories: ', keys)
+        rowTraitScales[trait]=="categorical"
     } else {
         max = d3.max(nodes, function(d) {
             return Number(d[trait])});
@@ -202,11 +206,13 @@ var tooltipOpacity = 0.7
 var hoverTimer
 
 //delay for hover animations
-var hoverDelay = 500 //milliseconds
+var hoverDelay = 5 //milliseconds
 
 function clearHoverTimer() {
     clearTimeout(hoverTimer)
 }
+
+var highlightTime = 500 //milliseconds
 
 //create svg drawing without the "#oanel" 
 var svg = d3.select("body").select("#container").select("#panel").append("svg")
@@ -217,6 +223,24 @@ var svg = d3.select("body").select("#container").select("#panel").append("svg")
   .append("g")
     .attr("transform", "translate(" + (size/2 + padding) + "," + (size/2 + padding) + ")");//(0,0) coordinates correspond to the center of the first hive.
 
+//add labels for column and row rules
+svg.append("text")
+    .attr("x", (width - padding)/2 - (size/2))
+    .attr("y", -(size/2 + padding*3/4))
+    .attr("text-anchor", "middle")
+    .attr("class","legend")
+    .text('A X I S   A S S I G N M E N T') //add name of property used for node positionning, the rowtrait
+
+svg.append("text")
+    .attr("x", - (size))
+    .attr("y", -(size/2 + padding*3/4))
+    .attr("text-anchor", "middle")
+    .attr("class","legend")
+    .text('A X I S   P O S I T I O N') //add name of property used for node positionning, the rowtrait
+    .attr("transform", function(d) { 
+        return "rotate(-90)";
+        })
+
 //each cell contains a hive plot and is characterized by a node assignment rule (columnttrait) and a node positionning rule. 
 var cell = svg.selectAll(".cell")
   .data(cross(columntraits,rowtraits)) //data is the combination or column and row traits.
@@ -225,20 +249,36 @@ var cell = svg.selectAll(".cell")
   .attr("transform", function(d) { return "translate(" + (d.i) * size + "," + d.j * size + ")";})
   .each(plot);
   
+//format the labels for axes
+function formatAxisLegend(trait,axis){
+    values = asgScales[trait].domain()
+    type = columnTraitScales[trait]
+    //console.log(values, type)
+
+    if (type=="categorical"){
+        return values[axis]
+    } else {
+        range = asgScales[trait].invertExtent(axis)
+        if (isNaN(range[0])){return 'x < '+ range[1]}
+        else if (isNaN(range[1])){return 'x > '+ range[0]}
+        else {return range[0]+'< x <'+range[1]}
+        }
+}
+
 //build each hive plot
 function plot(p){
     var cell = d3.select(this);
 
     //calculate the slength and position of each axes depending on the size of the hive plot.
-    var innerRadius = size*0.05
-    var outerRadius = size*0.45
+    var innerRadius = size*0.03
+    var outerRadius = size*0.46
     var radius = d3.scale.linear().range([innerRadius, outerRadius]);
 
     //column labels (when one plotting first row, where p.i=0)
     if (p.i == 0){
     cell.append("text")
-        .attr("x", function(d) { return d.i;})
-        .attr("y", function(d) { return d.j-size/2 - padding/2})
+        .attr("x", function(d) { return d.i})
+        .attr("y", function(d) { return d.j-size/2 -padding/2})
         .attr("text-anchor", "middle")
         .attr("class","viztext")
         .text(capitalize(p.y)) //add name of property used for node positionning, the rowtrait
@@ -258,15 +298,37 @@ function plot(p){
 
     }
 
-    // Uncomment to see the cutoffs of the scale
-    //console.log(asgScales[p.x].invertExtent(0), asgScales[p.x].invertExtent(1), asgScales[p.x].invertExtent(2)) 
-    // cell.selectAll(".axis")
-    //     .data(angle)
-    //   .enter().append("text")
-    //     .attr("transform", function(d) { return "rotate(" + degrees(angles(d)) + ")translate("+radius.range()[1] + 40+","+0+")";})
-    //     //.attr("x", function(d) {return Math.sin(angles(d))*(radius.range()[1])} )
-    //     //.attr("y", function(d) {return - Math.cos(angles(d))*(radius.range()[1])} )
-    //     .text(function(d,i) {return asgScales[p.x](i)})
+    //creates axis labels
+    //some parameters
+    var outer_radius = radius.range()[1]*1.05
+        x_shift = 10
+        y_shift = 20
+
+    cell.selectAll(".axis")
+        .data(angle)
+      .enter().append("text")
+        .attr("transform", function(d,i) {
+            if (!doubleAxes){
+                a = angles(d)
+            } else if (i % 2 == 0) {
+                a = get_angles(numAxes, false)[i/2]
+            } else {a = 0}
+            theta = a-Math.PI
+            h = outer_radius
+            y = h*Math.cos(theta)
+            x = -h*Math.sin(theta)
+            //if (x>20){x = x-x_shift} else if (x<20) {x = x+x_shift}
+            if (y>0){y = y+y_shift} else {y = y-y_shift/4}
+            //console.log(asgScales[p.x].range()[i], theta, x, y)
+            return "translate("+x+","+y+")";
+        })
+        .attr("class","legend")
+        .attr("text-anchor", "middle")
+        .text(function(d,i) {
+            if (!doubleAxes){return formatAxisLegend(p.x,i)}
+            else if (i % 2 == 0){ console.log(i, formatAxisLegend(p.x,i/2)); return formatAxisLegend(p.x,i/2)}
+            else {return ''}
+        })
 
     //build axes
     cell.selectAll(".axis")
@@ -278,12 +340,6 @@ function plot(p){
         .attr("x2", radius.range()[1])
         .attr("stroke-width",0.7)
         .attr("stroke", "black");
-
-    //format all viz text the same
-    cell.selectAll("text")
-        .attr("font-family", "Helvetica Neue")
-        .attr("fill", "#4E3D54")
-        .attr("font-size", "17px")
 
     //seriesLinks reflects the fact that double axes are being plotted.
     var seriesLinks = cell.selectAll(".seriesLinks")
@@ -357,7 +413,7 @@ function plot(p){
                     return show
                 }
             })
-            .style("fill", linkfill) //linkfill is "none" so that just the arc of the path is seen.
+            .style("fill", linkfill) //linkfill is "none" so that only the arc of the path is seen.
             .style("stroke-opacity", oplink)
             .style("stroke", function(d) {
                 if (edgeColor){
@@ -387,15 +443,15 @@ function plot(p){
 
                 hoverTimer = setTimeout(function(){
                         link_tooltip(cx, cy, d, d.source.name, d.target.name);
-                        link.call(highlight_links)
+                        //link.call(highlight_links)  //not responsive because manipulating the DOM is expensive.
                     }, hoverDelay)
             })
             .on("mouseout", function(){
                 clearHoverTimer()
                 remove_tooltip()
-                if (!d3.select(this).classed("clicked")){
-                    d3.select(this).call(link_mouseout)
-                }
+                //if (!d3.select(this).classed("clicked")){
+                //    d3.select(this).call(link_mouseout)
+                //}
             });
 
         //removes any edges between nodes on same axis.
@@ -448,22 +504,23 @@ function plot(p){
                 }
             })
             .on("mouseover", function(d){
-                var node = d3.select(this)
+                clearHoverTimer()
+                //var node = d3.select(this)
                 var cx = d3.event.pageX
                 var cy = d3.event.pageY
 
                 hoverTimer = setTimeout(function(){
                         node_tooltip(cx, cy, d, p.x,p.y, d[p.x], d[p.y]);
-                        node.call(highlight_nodes)
+                        //node.call(highlight_nodes) //not responsive because manipulating the DOM is expensive.
                     }, hoverDelay)
             })
-            .on("mouseout", function(d){
-                clearHoverTimer()
+            .on("mouseout", function(d){                
                 remove_tooltip() 
-                if (!d3.select(this).classed("clicked")){
-                    d3.select(this)
-                        .call(node_mouseout)  
-                } 
+                clearHoverTimer()
+                //if (!d3.select(this).classed("clicked")){
+                //    d3.select(this)
+                //        .call(node_mouseout)  
+                //} 
             })
     };
 
@@ -491,22 +548,23 @@ var node_tooltip = function(cx, cy, d, px, py, x, y){
 }
 
 var node_full_reveal = function(node,d) {
-    revealNode(d, node.style("fill"));
+    revealQueue = queue(1)
+    revealQueue
+        .defer(revealNode, d, node.style("fill"))
+
+    tasks = []
     d3.selectAll(".node")
         .each(function(n){
             if (n.name == d.name){
-                d3.select(this)
-                    .call(highlight_nodes)
-                    .classed({"clicked":true})
+                node = d3.select(this)
+                node.classed({"clicked":true})
+                t = []
+                t.push(highlight_nodes)
+                t.push(node)
+                tasks.push(t)
             }
         })
-
-/*    d3.selectAll(".link")
-        .each(function(l){
-            if (l.source.name == d.name || l.target.name == d.name){
-                d3.select(this).call(highlight_links)
-            }
-        })*/
+    tasks.forEach(function(t) {console.log(t[1]); revealQueue.defer(t[0], t[1])})
 }
 
 var node_mouseout = function(node) {
@@ -541,9 +599,7 @@ var node_mouseout = function(node) {
 
 
 var remove_tooltip = function(){
-    tooltip.transition()        
-        .duration(500)      
-        .style("opacity", 0);
+    tooltip.style("opacity", 0);
 }
 
 d3.selection.prototype.moveToFront = function() {
@@ -554,6 +610,8 @@ d3.selection.prototype.moveToFront = function() {
 
 var highlight_nodes = function(selection) {
     selection
+        .transition()
+        .duration(highlightTime)
         .attr("r", nodesize*1.8)
         .attr("stroke-width", nodestroke*3)
         .attr("stroke", 'black')
@@ -604,8 +662,7 @@ var link_mouseout = function(link) {
 var highlight_links = function(selection) {
     selection            
         .transition()
-        .delay(0*hoverOverTime*0.1)
-        .duration(0*hoverOverTime*0.2)
+        .duration(highlightTime)
         .style("stroke-opacity", 1)
         .style("stroke-width", linkwidth*2)
     };
@@ -637,7 +694,7 @@ function make_link_reveal_text(link) {
     return text
 }
 
-var revealNode = function(d,color){
+var revealNode = function(d, color, callback){
     removeReveal()
     d3.select("body").select("#reveal").append("p")
         .html(make_node_full_reveal_text(d))
@@ -646,7 +703,7 @@ var revealNode = function(d,color){
         .transition()
         .duration(hoverOverTime*2)
         .style("background-color", calculate_brackground(color))
-
+    callback(null,true)
     };
 
 var revealLink = function(d,color){
@@ -919,8 +976,9 @@ function make_coloring(ruleNumber) {
     filterButton = document.getElementById("filter_type"+ruleNumber)
     equality = document.getElementById("equality"+ruleNumber).value
     success = false
-    color = '#B1AFC4'
+    color = ''
     filter = ''
+    count = 0
     if (ruleButton != null) {
         color = ruleButton.value
         console.log('Coloring ' + ' ' + mark + 's' + ' with a ' + property + equality + value + ' ' + color)
@@ -1124,10 +1182,10 @@ function remove_add_rule_button() {
 
 function place_add_rule() {
     d3.select("body").select("#controlpanel").append("div").html("<form action='' class='darktext leftrule'>"
-        +"<input value='Add coloring rule' id='addColorRule' onclick='add_rule(this);' "
+        +"<input value='+ coloring rule' id='addColorRule' onclick='add_rule(this);' "
         +"type='button' class='darktext addbutton' /> </form>")
     d3.select("body").select("#controlpanel").append("div").html("<form action='' class='darktext'>"
-        +"<input value='Add filtering rule' id='addFilterRule' onclick='add_rule(this);' "
+        +"<input value='+ filtering rule' id='addFilterRule' onclick='add_rule(this);' "
         +"type='button' class='darktext addbutton filter' /> </form>")
 }
 
@@ -1190,22 +1248,22 @@ function redo_rules(undoneRule) {
 function get_angles(numAxes,doubleAxes){
     if (doubleAxes){
         if (numAxes==3){
-            angles = [-0.35, 0.35, 1.75, 2.44, 3.84, 4.54]
+            a = [-0.35, 0.35, 1.75, 2.44, 3.84, 4.54]
         } else if (numAxes == 2){
-            angles = [-2.09, -1.05, 1.05, 2.09]
+            a = [-2.09, -1.05, 1.05, 2.09]
         } else if (numAxes == 4){
-            angles = [-0.26, 0.26, 1.31, 1.83, 2.88, 3.4, 4.45, 4.97]
+            a = [-0.26, 0.26, 1.31, 1.83, 2.88, 3.4, 4.45, 4.97]
         }
     } else {
         if (numAxes==3){
-            angles = [0.0001, 2.09, 4.19]
+            a = [0.0001, 2.09, 4.19]
         } else if (numAxes == 2){
-            angles = [-1.57, 1.57]
+            a = [-1.57, 1.57]
         } else if (numAxes == 4){
-            angles = [0.0001, 1.57, 3.14, 4.71]
+            a = [0.0001, 1.57, 3.14, 4.71]
         }
     }
-    return angles
+    return a
 }
 
 
