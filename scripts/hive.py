@@ -19,9 +19,9 @@ import string
 #hive parameter defaults when not using GUI
 AXIS_ASSIGN_RULE = 'degree'
 AXIS_POSIT_RULE = 'closeness'
-EDGE_PALETTE = 'purple'
+EDGE_PALETTE = 'grey'
 EDGE_STYLE_RULE = 'average connecting degree'
-NODE_COLOR = 'blue'
+NODE_COLOR = 'grey'
 PALETTE = ['blue', 'cornflowerblue', 'darkblue', 'deepskyblue', 'darkturquoise',
                'midnightblue', 'navy', 'dodgerblue', 'lightblue', 'lightskyblue', 'cadetblue', 'teal',
                'paleturquoise', 'aquamarine', 'azure', 'aqua', 'lightsteelblue', 'powderblue']
@@ -38,7 +38,8 @@ class Hive():
                  axisPositRule = AXIS_POSIT_RULE,
                  edgePalette = EDGE_PALETTE,
                  edgeStyleRule = EDGE_STYLE_RULE,
-                 nodeColor = NODE_COLOR
+                 nodeColor = NODE_COLOR,
+                 rawMeasures = False
                  ):
         '''Initializing defining parameters of the hive'''
         
@@ -51,6 +52,7 @@ class Hive():
         self.edgeStyleRule = edgeStyleRule
         self.nodeColor = nodeColor
         self.valuesEdges = None
+        self.rawMeasures = rawMeasures
         self.totalNodes = 0
         self.totalEdges = 0
         
@@ -67,11 +69,14 @@ class Hive():
         return None
  
     
-    def make_hive(self, nodeFile, edgeFile, cutoffValues = None, filter = False, makeAllEdges = False):
+    def make_hive(self, nodeFile, edgeFile, cutoffValues = None, filter = False, makeAllEdges = False, graphml = False):
         '''runs Hive methods to create an instance from user input'''  
-            
-        self.get_nodes(nodeFile)
-        self.get_edges(edgeFile)               
+        
+        if graphml:
+            self.get_graphml(nodeFile)
+        else:
+            self.get_nodes(nodeFile)
+            self.get_edges(edgeFile)               
         self.check_nodes(self.sources, self.targets, self.nodes, self.doubleAxes, self.debug)
         self.make_axes()
         self.node_assignment(cutoffValues = cutoffValues)
@@ -163,6 +168,12 @@ class Hive():
 
         return self.edgeProperties
 
+    def get_graphml(self, inputFile):
+        graph = nx.read_graphml(inputFile)
+        self.nodes = graph.nodes()
+        edges = graph.edges()
+        self.sources, self.targets = zip(*edges)
+        print self.nodes, self.sources
 
     def make_axes(self):
         '''creates axes and angles given the number of axes desired
@@ -211,61 +222,65 @@ class Hive():
             assignmentValues = self.get_assignment_values(self.axisAssignRule)
         
         values = assignmentValues.values()
-        #check if styling values are numerical, otherwise treat as categorical
-        # and recode into numerical variables
-        categories = find_categories(values)
-        if categories:
-            if len(categories) != self.numAxes:
-                print 'The number of node groups using the rule \'{0}\' is different than the number of axes ({1})!'.format(self.axisAssignRule, self.numAxes)
-            for n,v in assignmentValues.iteritems():
-                axisAssignment[n] = categories.index(v) + 1 #want the node group to start at 1, not 0
-            #save categories values to be displayed on plot
-            self.valuesAssignment = categories
+        if self.rawMeasures:
+            self.axisAssignment = assignmentValues
+            return None
         else:
-            if not cutoffValues:      
-                values.sort()
-                if len(set(values)) < self.numAxes:
-                    print "\nPlease choose a different rule for assigning nodes to axes. There aren't enough unique values for all {1} axes".format(self.edgeStyleRule, self.numAxes)
-                    sys.exit()
-                cutoffIndexes = [int(len(values)/self.numAxes)*i for i in range(1,self.numAxes)]
-                cutoffValues = [values[c] for c in cutoffIndexes] # to prevent nodes with the same value to be in different groups
-            if values[-1] not in cutoffValues:
-                cutoffValues.append(values[-1]) #add greatest value as a cutoff
-                
-            j = 0
-            for n in self.nodes:
-                i = 0
-                while i < len(cutoffValues):
-                    if n not in assignmentValues.keys():
-                        j+=1
-                        break
-                    elif assignmentValues[n] <= cutoffValues[i]:
-                        axisAssignment[n]=i+1 #want the node group to start at 1, not 0
-                        break
-                    else: i+=1
-                    
-            #save cutoff values to be displayed on plot
-            self.valuesAssignment = self.reformat(cutoffValues)
-        
-        if self.doubleAxes:
-            newAssignment = {}
-            #for the case of 3 doubled axis, the axis groups become 2,4, or 6 for nodes ending in '.2'
-            #and 1,3,or 5 for nodes ending in '.1'
-            for n,i in axisAssignment.iteritems():
-                if  n[-2:] == '.1':
-                    newAssignment[n] = i*2 - 1
-                else:
-                    newAssignment[n] = i*2
-            axisAssignment = newAssignment
-        
-        self.axisAssignment = axisAssignment
-
-        if self.debug:
+            #check if styling values are numerical, otherwise treat as categorical
+            # and recode into numerical variables
+            categories = find_categories(values)
             if categories:
-                print '    Node Categories:', categories
-            print '    For the rule "{0}", the cut off values for assigning nodes to axes are: {1}'.format(self.axisAssignRule, self.valuesAssignment)
+                if len(categories) != self.numAxes:
+                    print 'The number of node groups using the rule \'{0}\' is different than the number of axes ({1})!'.format(self.axisAssignRule, self.numAxes)
+                for n,v in assignmentValues.iteritems():
+                    axisAssignment[n] = categories.index(v) + 1 #want the node group to start at 1, not 0
+                #save categories values to be displayed on plot
+                self.valuesAssignment = categories
+            else:
+                if not cutoffValues:      
+                    values.sort()
+                    if len(set(values)) < self.numAxes:
+                        print "\nPlease choose a different rule for assigning nodes to axes. There aren't enough unique values for all {1} axes".format(self.edgeStyleRule, self.numAxes)
+                        sys.exit()
+                    cutoffIndexes = [int(len(values)/self.numAxes)*i for i in range(1,self.numAxes)]
+                    cutoffValues = [values[c] for c in cutoffIndexes] # to prevent nodes with the same value to be in different groups
+                if values[-1] not in cutoffValues:
+                    cutoffValues.append(values[-1]) #add greatest value as a cutoff
+                    
+                j = 0
+                for n in self.nodes:
+                    i = 0
+                    while i < len(cutoffValues):
+                        if n not in assignmentValues.keys():
+                            j+=1
+                            break
+                        elif assignmentValues[n] <= cutoffValues[i]:
+                            axisAssignment[n]=i #want the node group to start at 0
+                            break
+                        else: i+=1
+                        
+                #save cutoff values to be displayed on plot
+                self.valuesAssignment = self.reformat(cutoffValues)
             
-        return None
+            if self.doubleAxes:
+                newAssignment = {}
+                #for the case of 3 doubled axis, the axis groups become 2,4, or 6 for nodes ending in '.2'
+                #and 1,3,or 5 for nodes ending in '.1'
+                for n,i in axisAssignment.iteritems():
+                    if  n[-2:] == '.1':
+                        newAssignment[n] = i*2 - 1
+                    else:
+                        newAssignment[n] = i*2
+                axisAssignment = newAssignment
+        
+            self.axisAssignment = axisAssignment
+    
+            if self.debug:
+                if categories:
+                    print '    Node Categories:', categories
+                print '    For the rule "{0}", the cut off values for assigning nodes to axes are: {1}'.format(self.axisAssignRule, self.valuesAssignment)
+                
+            return None
 
 
     def node_position(self):
@@ -278,32 +293,36 @@ class Hive():
         nodePositions = {}
         assignmentValues = self.get_assignment_values(self.axisPositRule)
         
-        values = assignmentValues.values()
-        #check if styling values are numerical, otherwise treat as categorical
-        # and recode into numerical variables
-        categories = find_categories(values)
-        if categories:
-            categories.sort() # sorts strings alphabetically
-            maxValue = len(categories) #index of last element in categories + 1
-            for n,p in assignmentValues.iteritems():
-                nodePositions[n] = round(float(categories.index(p))/float(maxValue),3)
-            #save categories values to be displayed on plot
-            self.valuesPosition = categories
-        else:    
-            maxValue = max(values)
-            for n,p in assignmentValues.iteritems():
-                nodePositions[n] = round(float(p)/float(maxValue),3)
-            #save min,max values pf positions to be displayed on plot
-            self.valuesPosition = [str(min(values)),str(maxValue)]
-                
-        self.nodePositions = nodePositions
-        if self.debug:
+        if self.rawMeasures:
+            self.nodePositions = assignmentValues
+            return None
+        else:
+            values = assignmentValues.values()
+            #check if styling values are numerical, otherwise treat as categorical
+            # and recode into numerical variables
+            categories = find_categories(values)
             if categories:
-                print '    For the rule "{0}", the values for positioning nodes onto axes are categorical values: {1}'.format(self.axisPositRule, self.valuesPosition)
-            else:
-                print '    For the rule "{0}", the values for positioning nodes onto axes occur in this range: {1}'.format(self.axisPositRule, self.valuesPosition)
-        
-        return None
+                categories.sort() # sorts strings alphabetically
+                maxValue = len(categories) #index of last element in categories + 1
+                for n,p in assignmentValues.iteritems():
+                    nodePositions[n] = round(float(categories.index(p))/float(maxValue),3)
+                #save categories values to be displayed on plot
+                self.valuesPosition = categories
+            else:    
+                maxValue = max(values)
+                for n,p in assignmentValues.iteritems():
+                    nodePositions[n] = round(float(p)/float(maxValue),3)
+                #save min,max values pf positions to be displayed on plot
+                self.valuesPosition = [str(min(values)),str(maxValue)]
+                    
+            self.nodePositions = nodePositions
+            if self.debug:
+                if categories:
+                    print '    For the rule "{0}", the values for positioning nodes onto axes are categorical values: {1}'.format(self.axisPositRule, self.valuesPosition)
+                else:
+                    print '    For the rule "{0}", the values for positioning nodes onto axes occur in this range: {1}'.format(self.axisPositRule, self.valuesPosition)
+            
+            return None
 
 
     def get_assignment_values(self, rule):
@@ -611,4 +630,14 @@ class Hive():
                 print "\n\n***WARNING: {0} of the {1} nodes were not found in the edge file! You may filter them out using filter_data.py and rerun HivePlotter or continue.***".format(old-new,old)                        
             
         return None
+    
+if __name__ == "__main__":
+    hive = Hive()
+    for d in [True, False]:
+        for a in [2,3,4]:
+            print d, a
+            hive.numAxes = a
+            hive.doubleAxes = d
+            hive.make_axes()
+            print hive.angles
 

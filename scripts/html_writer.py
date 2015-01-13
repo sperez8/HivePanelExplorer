@@ -41,7 +41,7 @@ def write_nodes(file, hive):
         if n[-2:] == '.1' or n[-2:] == '.2':
             name = n[:-2]
         else: name = n
-        line  = '  {axis: ' + str(hive.axisAssignment[n]-1) + ', pos: ' + str(hive.nodePositions[n])
+        line  = '  {axis: ' + str(hive.axisAssignment[n]) + ', pos: ' + str(hive.nodePositions[n])
         line += ', name: \'' + str(name) +'\''
         for property,values in hive.nodeProperties.iteritems():
             if i < len(values):
@@ -53,7 +53,7 @@ def write_nodes(file, hive):
         f.write(line)
     f.write('];')
     
-def write_nodes_panel(file, hives, rules):
+def write_nodes_panel(file, hives, rules, rawMeasures = False):
     '''outputs node info to a text file
         in a javascript variable format'''
     
@@ -73,12 +73,18 @@ def write_nodes_panel(file, hives, rules):
         rulesAdded = []
         for (a,p) in rules:
             hive = hives[(a,p)]
-            if a not in rulesAdded:
-                line  += ', '+a+'_axis: ' + str(hive.axisAssignment[n]-1)
-                rulesAdded.append(a)
-            if p not in rulesAdded:
-                line  += ', '+p+'_pos: ' + str(hive.nodePositions[n])
-                rulesAdded.append(p)
+            if rawMeasures:
+                asgRule = a
+                posRule = p
+            else:
+                asgRule = a + '_axis' #to distinguish from position values of the same rule
+                posRule = p + '_pos' #to distinguish from assignment values of the same rule
+            if asgRule not in rulesAdded:
+                line  += ', '+asgRule+': ' + str(hive.axisAssignment[n])
+                rulesAdded.append(asgRule)
+            if posRule not in rulesAdded:
+                line  += ', '+posRule+': ' + str(hive.nodePositions[n])
+                rulesAdded.append(posRule)
         for property,values in hive.nodeProperties.iteritems():
             if i < len(values):
                 index = i
@@ -177,7 +183,7 @@ def make_html(title, hive, hive_size, folder = TEMP_FOLDER, rules = None):
     return outputfile
 
 
-def make_panel_html(title, hives, panelSize, rules, folder = TEMP_FOLDER):
+def make_panel_html(title, hives, panelSize, rules, folder = TEMP_FOLDER, only_input_files = False):
     '''takes a hive instance and write the
     following files:
         panel_nodes.js - contains nodes, position and coloring
@@ -196,9 +202,12 @@ def make_panel_html(title, hives, panelSize, rules, folder = TEMP_FOLDER):
     nodeFile = os.path.join(folder, nodeFileName)
     edgeFile = os.path.join(folder, edgeFileName)
     
-    write_nodes_panel(nodeFile, hives, rules)
+    write_nodes_panel(nodeFile, hives, rules, rawMeasures = only_input_files)
     write_edges(edgeFile, hive)
     
+    if only_input_files:
+        sys.exit()
+        
     #Preparing all variables to insert into htmlDoc
     colorNeutral = NEUTRAL_COLOR
     
@@ -223,14 +232,14 @@ def make_panel_html(title, hives, panelSize, rules, folder = TEMP_FOLDER):
     positionsRule = ''
     asg = []
     pos = []
-    for (a,p) in rules:
-        hive = hives[(a,p)]
-        if a not in asg:
-            assignmentRule += string.capitalize(a) + ': (' + ', '.join(hive.valuesAssignment) + '),     '
-            asg.append(a)
-        if p not in pos:
-            positionsRule += string.capitalize(p) + ': (' + ', '.join(hive.valuesPosition) + '),     '
-            pos.append(p)
+#     for (a,p) in rules:
+#         hive = hives[(a,p)]
+#         if a not in asg:
+#             assignmentRule += string.capitalize(a) + ': (' + ', '.join(hive.valuesAssignment) + '),     '
+#             asg.append(a)
+#         if p not in pos:
+#             positionsRule += string.capitalize(p) + ': (' + ', '.join(hive.valuesPosition) + '),     '
+#             pos.append(p)
     rowRules = '[\"'+'\",\"'.join(asg)+'\"]'
     columnRules = '[\"'+'\",\"'.join(pos)+'\"]'
     

@@ -18,9 +18,9 @@ _cur_dir = os.path.dirname(os.path.realpath(__file__))
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 
-SIZE = (2,2) #assignment by position rules
-ASSIGNMENT_RULES = ('degree', 'Gender')
-POSITION_RULES = ('clustering', 'Height')
+SIZE = (4,4) #assignment by position rules
+ASSIGNMENT_RULES = ['degree', 'betweeness', 'clustering', 'centrality', 'component']
+POSITION_RULES = ['degree', 'betweeness', 'clustering', 'centrality', 'component']
 
 class Panel():
     '''contains a set of hives'''
@@ -34,7 +34,8 @@ class Panel():
                  positionRules = POSITION_RULES,
                  edgePalette = EDGE_PALETTE,
                  edgeStyleRule = EDGE_STYLE_RULE,
-                 nodeColor = NODE_COLOR
+                 nodeColor = NODE_COLOR,
+                 rawMeasures = False
                  ):
         '''Initializing defining parameters of the hive'''
         
@@ -48,6 +49,7 @@ class Panel():
         self.edgeStyleRule = edgeStyleRule
         self.nodeColor = nodeColor
         self.valuesEdges = None
+        self.rawMeasures = rawMeasures
         self.totalNodes = 0
         self.totalEdges = 0
                 
@@ -68,18 +70,24 @@ class Panel():
                     axisPositRule = p,
                     edgePalette = self.edgePalette, 
                     edgeStyleRule = self.edgeStyleRule,
-                    nodeColor = self.nodeColor
+                    nodeColor = self.nodeColor,
+                    rawMeasures = self.rawMeasures
                     )
             
-            hive.make_hive(nodefile, edgefile, makeAllEdges = True) 
+            if nodefile.split('.')[-1] == 'graphml':
+                hive.make_hive(nodefile, None, makeAllEdges = True, graphml = True) 
+            else:
+                hive.make_hive(nodefile, edgefile, makeAllEdges = True) 
             Hives[(a,p)] = hive
             hive = None
         
         self.Hives = Hives
         return None
     
-    def open_panel(self, title, folder):
-        url = make_panel_html(title, self.Hives, self.size, rules = self.rulePairs)
+    def open_panel(self, title, folder, only_input_files = False):
+        url = make_panel_html(title, self.Hives, self.size, rules = self.rulePairs, only_input_files = only_input_files)
+        if only_input_files:
+            sys.exit()
         webbrowser.open("file://"+url, new=2)
         
     def size_rules_agree(self):
@@ -97,18 +105,6 @@ class Panel():
             for p in posRules:
                 rules.append((a,p))
         return rules
-
-if __name__ == "__main__":
-    '''testing purposes'''
-    P = Panel(assignmentRules = ['degree', 'Gender', 'Height'],
-                positionRules = ['clustering','Height','betweeness'], size = (3,3))
-    NODES = os.path.join(_root_dir, 'tests', 'test_nodes_friends.txt')
-    EDGES = os.path.join(_root_dir, 'tests', 'test_edges_friends.txt')
-    TITLE = 'friends_panel_test'
-    FOLDER = os.path.join(_root_dir, 'tests')
-    P.make_panel(NODES, EDGES)
-    P.open_panel(TITLE, FOLDER)
-
 
 
 
