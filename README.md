@@ -1,5 +1,10 @@
-HivePlotter
+HivePanelExplorer
 ===========
+
+--------------------------------------------------------------------------------
+**WARNING:** As you may have noticed, HivePlotter has changed to Hive Panel Explorer (or HyPE). This tool will soon be released online to help users create not just one hive plot but a a hive panel, and an interactive one at that. Stay tuned!
+------------------------------------------------------------
+
 
 A graphical user interface (GUI) written using Tkinter in Python that takes a network and writes the HTML and JavaScript files necessary to create hive plots in D3. Check out the [wiki page](https://github.com/sperez8/HivePlotter/wiki) for a step-by-step example of how to make a hive plot.
 
