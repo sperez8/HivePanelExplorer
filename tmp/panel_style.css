@@ -85,6 +85,7 @@ select, input, input[type="button"] {
     padding-left: 4px;
     background: transparent;
     height: 26px;
+    max-width:77px;
     border: 1px solid #d4ccd4;
     border-radius: 4px;
     font: normal 13px"Helvetica Neue";
@@ -99,8 +100,8 @@ select, input, input[type="button"] {
     border-bottom: 2px solid #D2CFE7;
     margin-top: 5px;
     margin-bottom: 15px;
-    padding-right: 2px;
-    padding-left: 4px;
+    padding-right: 1px;
+    padding-left: 1px;
 }
 
 .filter {
@@ -114,13 +115,12 @@ input{
 }
 
 input[type="button"] {
-    margin-left: 10px;
     border: 2px solid #B1AFC4;
     height: 32px;
     border-radius: 0px;
     float: right;
-    margin-right: 5px;
-    min-width: 60px;
+    margin-right: 0px;
+    min-width: 40px;
     max-width: 105px;
 }
 
