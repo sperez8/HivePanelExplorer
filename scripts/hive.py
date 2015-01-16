@@ -380,14 +380,13 @@ class Hive():
             self.edges = zipper(self.sources, self.targets)
             return None
 
-        misingNodesCount = 0
         for s,t,p in zipper(self.sources, self.targets, reorganizedProperties):
             if self.doubleAxes:
                 s1 = s + '.1'
                 s2 = s + '.2'
                 t1 = t + '.1'
                 t2 = t + '.2'
-                
+
                 #if nodes are from same group we add edge
                 #and it's symmetrical edge within the doubled Axes
                 if axis[s1] == axis[t1]:
@@ -442,9 +441,6 @@ class Hive():
                     newSources.append(s)
                     newTargets.append(t)   
                     newProperties.append(p)     
-        
-        if misingNodesCount > 0:
-            print "WARNING: There were {0} nodes encoded in the edges which weren't in the node file and were ignored".format(misingNodesCount)
         
         #save the new edges and their properties
         self.edges = zipper(newSources, newTargets)
