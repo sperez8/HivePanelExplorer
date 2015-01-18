@@ -34,11 +34,24 @@ np.random.seed(RANDSEED)
 MEASURES = [nx.betweenness_centrality, nx.degree_centrality, 
 		nx.closeness_centrality, nx.eigenvector_centrality, nx.load_centrality]
 
-def get_graph(nodeFile, edgeFile):
+NETWORKS = ['B_R_BAC_SBS_OM3','B_R_BAC_SBS_OM2']
+PATH = 'C:\\Users\\Sarah\\Dropbox\\1-Aria\\LTSP_networks\\'
+
+
+def make_graph(nodeFile, edgeFile):
+	'''imports the node and edge file and makes the graph'''
 	G = import_graph(nodeFile,edgeFile)
 	print "\nMade the networkx graph."
 	return G
 
+def get_multiple_graphs(networks, path):
+	'''makes multiple graphs from names of networks and a file path'''
+	graphs = {}
+	for netName in networks:
+		nodeFile = os.path.join(path,netName+'_nodes.txt')
+		edgeFile = os.path.join(path,netName+'_edges.txt')
+		graphs[netName] = make_graph(nodeFile,edgeFile)
+	return graphs
 
 def input_files(*argv):
 	'''handles user input and runs plsa'''
@@ -55,7 +68,7 @@ def input_files(*argv):
 	nodeFile = args.n
 	edgeFile = args.e
 
-	G = get_graph(nodeFile, edgeFile)
+	G = make_graph(nodeFile, edgeFile)
 	return G
 
 
@@ -97,44 +110,97 @@ def target_attack(G, measure):
 
 
 
-def plot_robustness(data):
+def plot_robustness(data,filename):
 	'''plots the simulations'''
 	colors ='rgbkmy'
 
 	# plotting locations in rows and centralities in columns
-	fig, axes = plt.subplots(2,6)
+	fig, axes = plt.subplots(1)
+	measures = data.keys()
+	measures.remove('random')
+	measures.insert(0,'random') #put at front
 
-	print axes
-	for i,ax in enumerate(axes):
-		name,values = data[i]
-		print name, values,i,ax
-		#plt.plot(range(len(values)),values,colors[i])
-		ppl.plot(ax, range(len(values)), values)
+	colors = {measure: ppl.colors.set2[i] for i,measure in enumerate(measures)}
 
-	ppl.legend(ax)
+	for measure in measures:
+		values = data[measure]
+		x = range(len(values))
+		ppl.plot(axes, x, 
+			values,
+			label=str(measure))
+			#color=[colors[measure] for measure in measures])
 
-	fig.savefig('plot_prettyplotlib_default.png')
+	ppl.legend(axes)  
+	fig.savefig(filename+'_simulation'+'.png')
+	return None
 
 
+def plot_individual(networks,path):
+	graphs = get_multiple_graphs(networks,path)
 
+	for netName,G in graphs.iteritems():
+		randSizes = random_attack(G)
+		data = {}
+		data['random']=randSizes
+		for m in MEASURES:
+			targSizes = target_attack(G, m)
+			data[m.__name__] = targSizes
+		plot_robustness(data, netName)
+	return None
 
-networks = ['B_R_BAC_SBS_OM3']
-path = 'C:\\Users\\Sarah\\Dropbox\\1-Aria\\LTSP_networks\\'
+def multi_plot_robustness(multidata,filename):
+	'''plots the simulations in a multiplot'''
+	colors ='rgbkmy'
+
+	# plotting locations in rows and centralities in columns
+	fig, axes = plt.subplots(len(multidata.keys()))
+	netNames = multidata.keys()
+	measures = multidata[netNames[0]].keys()
+	measures.remove('random')
+	measures.insert(0,'random') #put at front
+
+	colors = {measure: ppl.colors.set1[i] for i,measure in enumerate(measures)}
+
+	for ax, net in zip(axes,netNames):
+		for measure in multidata[net].keys():
+			values = multidata[net][measure]
+			x = range(len(values))
+			ppl.plot(ax,
+				x, 
+				values,
+				label=str(measure),
+				color=colors[measure])
+		ax.set_title(net)
+
+	ppl.legend(axes)
+	fig.tight_layout()
+	fig.savefig(filename+'_simulation'+'.png')
+	return None
+
+def plot_multiple(networks,path):
+	graphs = get_multiple_graphs(networks,path)
+	data = {}
+	for netName,G in graphs.iteritems():
+		randSizes = random_attack(G)
+		data[netName] = {'random':randSizes}
+		for m in MEASURES:
+			targSizes = target_attack(G, m)
+			data[netName][m.__name__] = targSizes
+	
+	multi_plot_robustness(data,'Allnetworks')
+	return None
+
 
 if __name__ == "__main__":
 	'''testing purposes'''
 	#G = input_files(*sys.argv[1:])
-	graphs = {}
-	for netName in networks:
-		nodeFile = os.path.join(path,netName+'_nodes.txt')
-		edgeFile = os.path.join(path,netName+'_edges.txt')
-		graphs[netName] = get_graph(nodeFile,edgeFile)
+	plot_multiple(NETWORKS,PATH)
+	#plot_individual(NETWORKS,PATH)
 
-	for netName,G in graphs.iteritems():
-		randSizes = random_attack(G)
-		data = []
-		data.append(('random',randSizes))
-		for m in MEASURES:
-			targSizes = target_attack(G, m)
-			data.append((m.__name__,targSizes))
-		plot_robustness(data)
+'''
+to do:
+Run sim on 10% of networks
+normalize yticks by original size giant component
+switch the oms and the measures
+do all networks
+'''
