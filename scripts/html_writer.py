@@ -102,7 +102,7 @@ def write_edges(file, hive):
     
     f = open(file, 'w')
     f.write('var links = [\n')
-    for i, (s, t) in enumerate(hive.edges):        
+    for i, (s, t) in enumerate(hive.edges):
         line = '  {source: nodes['+str(hive.nodes.index(s))+'], target: nodes['+str(hive.nodes.index(t))+'], type: ' + str(hive.edgeStyling[(s,t)])
         for j, value in enumerate(hive.edgeProperties[i]):
                 line  += ', '+str(properties[j]) + ': \'' + str(value) +'\''

@@ -12,8 +12,12 @@ import os
 import argparse
 import numpy as np
 import hive as hive
-import random
+import prettyplotlib as ppl
+
+# prettyplotlib imports 
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+from prettyplotlib import brewer2mpl
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))
 _root_dir = os.path.dirname(_cur_dir)
@@ -26,30 +30,34 @@ NODES = os.path.join(_root_dir, 'tests', 'test_nodes_friends.txt')
 EDGES = os.path.join(_root_dir, 'tests', 'test_edges_friends.txt')
 
 RANDSEED = 2
-random.seed(RANDSEED)
+np.random.seed(RANDSEED)
 MEASURES = [nx.betweenness_centrality, nx.degree_centrality, 
 		nx.closeness_centrality, nx.eigenvector_centrality, nx.load_centrality]
 
-def main(*argv):
-    '''handles user input and runs plsa'''
-    parser = argparse.ArgumentParser(description='This scripts runs an extinction simulation.')
-    parser.add_argument('-n', help='The node file', default = NODES)
-    parser.add_argument('-e', help='The edge file', default = EDGES)
-    args = parser.parse_args()
+def get_graph(nodeFile, edgeFile):
+	G = import_graph(nodeFile,edgeFile)
+	print "\nMade the networkx graph."
+	return G
 
-    if (args.n == '' and args.e != '') or (args.n != '' and args.e == ''):
-        print "\n***You must specify both a node and an edge file if specifying either.***\n"
-        parser.print_help()
-        sys.exit()
-        
-    nodeFile = args.n
-    edgeFile = args.e
 
-    G = import_graph(nodeFile,edgeFile)
+def input_files(*argv):
+	'''handles user input and runs plsa'''
+	parser = argparse.ArgumentParser(description='This scripts runs an extinction simulation.')
+	parser.add_argument('-n', help='The node file', default = NODES)
+	parser.add_argument('-e', help='The edge file', default = EDGES)
+	args = parser.parse_args()
 
-    print "\nMade the networkx graph."
+	if (args.n == '' and args.e != '') or (args.n != '' and args.e == ''):
+		print "\n***You must specify both a node and an edge file if specifying either.***\n"
+		parser.print_help()
+		sys.exit()
+		
+	nodeFile = args.n
+	edgeFile = args.e
 
-    return G
+	G = get_graph(nodeFile, edgeFile)
+	return G
+
 
 
 def random_attack(G):
@@ -60,12 +68,12 @@ def random_attack(G):
 	H = G.copy()
 
 	nodes= G.nodes()
-	random.shuffle(nodes)
+	np.random.shuffle(nodes)
 	for n in nodes[:-1]:
 		H.remove_node(n)
 		sizes.append(len(nx.connected_components(H)[0]))
-
 	return sizes
+
 
 def target_attack(G, measure):
 	'''Measure the size of the largest component of the graph
@@ -79,9 +87,7 @@ def target_attack(G, measure):
 
 	measures = [(n,v) for n,v in measure(G).iteritems()]
 
-	def getKey(item):
-		return item[1]
-	measures = sorted(measures, key = getKey, reverse = True)
+	measures = sorted(measures, key = lambda item: item[1], reverse = True)
 
 	for n,v in measures[:-1]:
 		H.remove_node(n)
@@ -89,22 +95,46 @@ def target_attack(G, measure):
 
 	return sizes
 
+
+
 def plot_robustness(data):
+	'''plots the simulations'''
 	colors ='rgbkmy'
-	for i,(name,values) in enumerate(data):
-		print colors[i],name,values
-		plt.plot(range(len(values)),values,colors[i])
-	plt.show()
-	return None
+
+	# plotting locations in rows and centralities in columns
+	fig, axes = plt.subplots(2,6)
+
+	print axes
+	for i,ax in enumerate(axes):
+		name,values = data[i]
+		print name, values,i,ax
+		#plt.plot(range(len(values)),values,colors[i])
+		ppl.plot(ax, range(len(values)), values)
+
+	ppl.legend(ax)
+
+	fig.savefig('plot_prettyplotlib_default.png')
+
+
+
+
+networks = ['B_R_BAC_SBS_OM3']
+path = 'C:\\Users\\Sarah\\Dropbox\\1-Aria\\LTSP_networks\\'
 
 if __name__ == "__main__":
-    '''testing purposes'''
-    G = main(*sys.argv[1:])
-    randSizes = random_attack(G)
-    data = []
-    data.append(('random',randSizes))
-    for m in MEASURES:
-    	targSizes = target_attack(G, m)
-    	data.append((m.__name__,targSizes))
-    print data
-    plot_robustness(data)
+	'''testing purposes'''
+	#G = input_files(*sys.argv[1:])
+	graphs = {}
+	for netName in networks:
+		nodeFile = os.path.join(path,netName+'_nodes.txt')
+		edgeFile = os.path.join(path,netName+'_edges.txt')
+		graphs[netName] = get_graph(nodeFile,edgeFile)
+
+	for netName,G in graphs.iteritems():
+		randSizes = random_attack(G)
+		data = []
+		data.append(('random',randSizes))
+		for m in MEASURES:
+			targSizes = target_attack(G, m)
+			data.append((m.__name__,targSizes))
+		plot_robustness(data)
