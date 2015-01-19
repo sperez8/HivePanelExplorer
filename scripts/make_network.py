@@ -28,7 +28,7 @@ def import_graphml(graphmlFile):
 
 def import_graph(nodeFile, edgeFile):
     '''make a networkx graph from a csv or tsv using methods from the hive class'''
-    hive = Hive.Hive()
+    hive = Hive.Hive(debug=False)
     hive.get_nodes(nodeFile)
     hive.get_edges(edgeFile)
     
