@@ -550,7 +550,22 @@ var node_tooltip = function(cx, cy, d, px, py, x, y){
             .style("top", (cy - 28) + "px");
 }
 
+
 var node_full_reveal = function(node,d) {
+    revealNode(d, node.style("fill"))
+
+    d3.selectAll(".node")
+        .each(function(n){
+            if (n.name == d.name){
+                node = d3.select(this)
+                node.classed({"clicked":true})
+                highlight_nodes(node)
+            }
+        })
+}
+
+/////with queue brocken@!!!!!
+/*var node_full_reveal = function(node,d) {
     revealQueue = queue(1)
     revealQueue
         .defer(revealNode, d, node.style("fill"))
@@ -568,7 +583,7 @@ var node_full_reveal = function(node,d) {
             }
         })
     tasks.forEach(function(t) {console.log(t[1]); revealQueue.defer(t[0], t[1])})
-}
+}*/
 
 var node_mouseout = function(node) {
     if (node){
@@ -706,7 +721,7 @@ var revealNode = function(d, color, callback){
         .transition()
         .duration(hoverOverTime*2)
         .style("background-color", calculate_brackground(color))
-    callback(null,true)
+    //callback(null,true)
     };
 
 var revealLink = function(d,color){
