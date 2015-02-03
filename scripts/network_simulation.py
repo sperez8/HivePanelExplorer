@@ -29,7 +29,7 @@ from make_network import import_graph
 #EDGES = os.path.join(_root_dir, 'tests', 'test_edges_friends.txt')
 RANDSEED = 2
 np.random.seed(RANDSEED)
-PROP_TO_REMOVE = 0.1 #only removing 10 percent of nodes
+PROP_TO_REMOVE = 1 #only removing 10 percent of nodes
 MEASURES = [nx.betweenness_centrality, 
 			nx.degree_centrality,
 			nx.closeness_centrality, 
@@ -39,10 +39,10 @@ NETWORKS = {'B_R_BAC_SBS':['OM3','OM2','OM1','OM0']}
 			#'R_BAC_IDF':['OM3','OM2','OM1','OM0']} #changed OL to OM0 temporarily
 # NETWORKS = {'trial1':['OM3'], ##trial networks to test faster
 # 			'trial2':['OM3']}
-PLOT_BY = 'bytreatment'
-#PLOT_BY = 'bymeasure'
+#PLOT_BY = 'bytreatment'
+PLOT_BY = 'bymeasure'
 
-PATH = 'C:\\Users\\Sarah\\Dropbox\\1-Aria\\LTSP_networks\\'
+PATH = '/Users/sperez/Dropbox/1-Aria/LTSP_networks'
 FIGURE_PATH = PATH
 #FIGURE_NAME = 'Allnetworks'
 FIGURE_NAME = 'SBS' +'_'+ PLOT_BY
@@ -102,7 +102,7 @@ def random_attack(G):
 	nodes= G.nodes()
 	np.random.shuffle(nodes)
 
-	removal=int(len(nodes)*PROP_TO_REMOVE)
+	removal=int(len(nodes)*PROP_TO_REMOVE)-1
 
 	for n in nodes[:removal]:
 		H.remove_node(n)
@@ -126,7 +126,7 @@ def target_attack(G, measure):
 	values = sorted(values, key = lambda item: item[1], reverse = True)
 
 
-	removal=int(len(values)*PROP_TO_REMOVE)
+	removal=int(len(values)*PROP_TO_REMOVE)-1
 
 	for n in zip(*values)[0][:removal]:
 		H.remove_node(n)
@@ -154,7 +154,7 @@ def plot_robustness(data,filename):
 			#color=[colors[measure] for measure in measures])
 
 	ppl.legend(axes)  
-	figureFile = FIGURE_PATH + filename+'_simulation'+'.png'
+	figureFile = os.join(FIGURE_PATH,filename+'_simulation'+'.png')
 	fig.savefig(figureFile)
 	print "Saving the figure file: ", figureFile
 	return None
@@ -194,7 +194,6 @@ def multi_plot_robustness_by_treatment(multidata,filename,rowLabels,colLabels):
 			else:
 				iterable.append((axes[j],r,c))
 
-	print iterable
 	netLabeldone = []
 	for ax,net,treatment in iterable:
 
@@ -215,7 +214,7 @@ def multi_plot_robustness_by_treatment(multidata,filename,rowLabels,colLabels):
 
 	lgd = ppl.legend(loc=5, bbox_to_anchor=(7, 1, 1, 1)) # bbox_to_anchor=(4.2,2.5))
 
-	figureFile = FIGURE_PATH + filename+'_simulation'+'.png'
+	figureFile = os.path.join(FIGURE_PATH,filename+'_simulation'+'.png')
 	#fig.tight_layout()
 	fig.set_size_inches(8*len(colLabels),5*len(rowLabels))
 	fig.savefig(figureFile,dpi=DPI,  bbox_extra_artists=(lgd,), bbox_inches='tight')
@@ -260,7 +259,6 @@ def multi_plot_robustness_by_measure(multidata,filename,rowLabels,treatments):
 			else:
 				iterable.append((axes[j],r,c))
 
-	print iterable
 	netLabeldone = []
 	for ax,net,measure in iterable:
 
@@ -280,7 +278,7 @@ def multi_plot_robustness_by_measure(multidata,filename,rowLabels,treatments):
 
 	lgd = ppl.legend(loc='right', bbox_to_anchor=(1, 1, 1, 1))
 
-	figureFile = FIGURE_PATH + filename+'_simulation'+'.png'
+	figureFile = os.path.join(FIGURE_PATH, filename+'_simulation'+'.png')
 	#fig.tight_layout()
 	fig.set_size_inches(7*len(treatments),3*len(rowLabels))
 	fig.savefig(figureFile,dpi=DPI, bbox_extra_artists=(lgd,), bbox_inches='tight')

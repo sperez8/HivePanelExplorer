@@ -71,16 +71,22 @@ function log_thresholds(min,max){
     return k
 }
 
+
+//ensures a numercial, and not an alphabetical sort
+function sortNumber(a,b) {
+    return a - b;
+}
+
 //returns numerical thresholds to bin node assignment data into about equally sized bins.
 function even_thresholds(data){
     total = data.length
-    data.sort()
+    data.sort(sortNumber)
     k = []
     for (var i = 1; i < numAxes; i++) {
         index = parseInt(total*i/numAxes)
         k.push(data[index])
     };
-    k = k.sort()
+    k = k.sort(sortNumber)
     return k
 }
 
@@ -260,11 +266,11 @@ function formatAxisLegend(trait,axis){
         return values[axis]
     } else {
         range = asgScales[trait].invertExtent(axis)
-        r0 = Math.round(range[0]*100)/100
-        r1 = Math.round(range[1]*100)/100
+        r0 = Math.round(range[0])//*100)/100
+        r1 = Math.round(range[1])//*100)/100
         if (isNaN(range[0])){return 'x < '+ r1}
         else if (isNaN(range[1])){return 'x > '+ r0}
-        else {return r0+'< x <'+r1}
+        else {return r0+' < x < '+r1}
         }
 }
 
@@ -320,7 +326,7 @@ function plot(p){
             h = outer_radius
             y = h*Math.cos(theta)
             x = -h*Math.sin(theta)
-            //if (x>20){x = x-x_shift} else if (x<20) {x = x+x_shift}
+            if (x>20){x = x-x_shift} else if (x<20) {x = x+x_shift}
             if (y>0){y = y+y_shift} else {y = y-y_shift/4}
             //console.log(asgScales[p.x].range()[i], theta, x, y)
             return "translate("+x+","+y+")";
@@ -804,9 +810,10 @@ function add_options(selector, data, property){
             newOptions.push(Number(options[i]))
         }
         options = newOptions
+        options.sort(sortNumber)
+    } else {
+        options.sort() //sort in ascending order
     }
-
-    options.sort() //sort in ascending order
 
     for (i in options) {
         option = document.createElement("option")
@@ -1092,7 +1099,7 @@ function color_marks(mark, styling, property, value, color, equality) {
                     d3.selectAll(".link")
                         .each(function(l){
                             if (l.source.name == d.name || l.target.name == d.name){
-                                d3.select(this).style(styling, color)
+                                //d3.select(this).style(styling, color)
                             }
                         });
                 }
