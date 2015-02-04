@@ -87,6 +87,7 @@ function even_thresholds(data){
         k.push(data[index])
     };
     k = k.sort(sortNumber)
+    if (k[0]==data[0]) {k[0] = k[0] + 0.000000000000001} //this avoids having the nodes with the smallest values cut off because they are equal to the first cut off.
     return k
 }
 
@@ -239,7 +240,7 @@ svg.append("text")
     .text('A X I S   A S S I G N M E N T') //add name of property used for node positionning, the rowtrait
 
 svg.append("text")
-    .attr("x", - (size))
+    .attr("x", - (size/2))
     .attr("y", -(size/2 + padding*3/4))
     .attr("text-anchor", "middle")
     .attr("class","legend")
@@ -266,10 +267,10 @@ function formatAxisLegend(trait,axis){
         return values[axis]
     } else {
         range = asgScales[trait].invertExtent(axis)
-        r0 = Math.round(range[0])//*100)/100
-        r1 = Math.round(range[1])//*100)/100
-        if (isNaN(range[0])){return 'x < '+ r1}
-        else if (isNaN(range[1])){return 'x > '+ r0}
+        r0 = Math.round(range[0]*100)/100
+        r1 = Math.round(range[1]*100)/100
+        if (isNaN(range[0])){return 'x ≤ '+ r1}
+        else if (isNaN(range[1])){return 'x ≥ '+ r0}
         else {return r0+' < x < '+r1}
         }
 }
@@ -310,7 +311,7 @@ function plot(p){
     //creates axis labels
     //some parameters
     var outer_radius = radius.range()[1]*1.05
-        x_shift = 10
+        x_shift = 8
         y_shift = 20
 
     cell.selectAll(".axis")
@@ -326,9 +327,9 @@ function plot(p){
             h = outer_radius
             y = h*Math.cos(theta)
             x = -h*Math.sin(theta)
-            if (x>20){x = x-x_shift} else if (x<20) {x = x+x_shift}
+            if (x>20){x = x+x_shift} else if (x<-20) {x = x-x_shift}
             if (y>0){y = y+y_shift} else {y = y-y_shift/4}
-            //console.log(asgScales[p.x].range()[i], theta, x, y)
+            console.log(asgScales[p.x].range()[i], theta, x, y)
             return "translate("+x+","+y+")";
         })
         .attr("class","legend")

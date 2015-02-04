@@ -19,7 +19,7 @@ var nodeColor = 'darkgrey'
     opnode = 1
     opnode_more = 1
 
-var nodesize = 11
+var nodesize = 5
     nodestroke = 0.4
     nodestrokecolor = "grey"
 
@@ -29,8 +29,8 @@ var linkfill = "none"
 var hoverOverTime = 900
 
 
-var columntraits = ["Gender"]//,'Height', 'degree'];
-    rowtraits = ["degree"] //"Height","betweeness", "degree"];
+var columntraits = ["Gender",'clustering'];
+    rowtraits = ["Height","degree"];// "degree"];
 
-var columnTraitScales = {"Gender":"linear", "degree":"even", "Height":"even"}
-var rowTraitScales = {"Height": "linear", "betweeness": "linear"}
+var columnTraitScales = {"Gender":"linear", "clustering":"even", "Height":"even"}
+var rowTraitScales = {"Height": "linear", "betweenness": "linear"}
