@@ -58,30 +58,63 @@ for n in set(H_degrees):
 
 
 
-fig, (axG,axH) = plt.subplots(2, sharex = True)
+fig, ax = plt.subplots(1)
 
 # Axis needs to be set before plotting the bars
-axG.set_yscale('log')
-axG.set_xscale('log')
-axH.set_yscale('log')
-axH.set_xscale('log')
+# ax.set_yscale('log')
+# ax.set_xscale('log')
 
-ppl.bar(axG, G_k, G_p_k, color = ppl.colors.set2[0], label = "Power-law distribution network", annotate=False, grid='y')
-ppl.bar(axH,  H_k, H_p_k, color = ppl.colors.set2[1], label = "Binomial degree distribtuion network", annotate=False, grid='y')
+ppl.plot(ax, G_k, G_p_k, 'o-', color = ppl.colors.set2[0], label = "Network with power-law distribution")
+ppl.plot(ax,  H_k, H_p_k, 'o-', color = ppl.colors.set2[1], label = "Network with binomial degree distribution")
 
-axG.set_title("Degree distribution of two networks with "+str(N)+" nodes and "+str(M)+" edges.\n")
-axG.xaxis.set_label_text("degree (k)")
-axG.yaxis.set_label_text("Degree frequency P(k)")
-axH.xaxis.set_label_text("degree (k)")
-axH.yaxis.set_label_text("Degree frequency P(k)")
+ax.set_title("Degree distribution of networks with "+str(N)+" nodes and "+str(M)+" edges.\n")
+ax.xaxis.set_label_text("degree (k)")
+ax.yaxis.set_label_text("Degree frequency P(k)")
 
-ppl.legend(axG, loc='upper right', ncol=1)
+ppl.legend(ax, loc='upper right', ncol=1)
 
+ax.set_xlim([0,20])
 
 fig.savefig('test_distribution.png')
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# subplots
+# fig, (axG,axH) = plt.subplots(2, sharex = True)
+
+# # Axis needs to be set before plotting the bars
+# # axG.set_yscale('log')
+# # axG.set_xscale('log')
+# # axH.set_yscale('log')
+# # axH.set_xscale('log')
+
+# ppl.plot(axG, G_k, G_p_k, color = ppl.colors.set2[0], label = "Power-law distribution network")
+# ppl.plot(axH,  H_k, H_p_k, color = ppl.colors.set2[1], label = "Binomial degree distribtuion network")
+
+# axG.set_title("Degree distribution of two networks with "+str(N)+" nodes and "+str(M)+" edges.\n")
+# axG.xaxis.set_label_text("degree (k)")
+# axG.yaxis.set_label_text("Degree frequency P(k)")
+# axH.xaxis.set_label_text("degree (k)")
+# axH.yaxis.set_label_text("Degree frequency P(k)")
+
+# ppl.legend(axG, loc='upper right', ncol=1)
+
+# axG.set_xlim([0,100])
 
 # # draw graph in inset
 # plt.axes([0.45,0.45,0.45,0.45])
