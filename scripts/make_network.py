@@ -53,23 +53,27 @@ def measure_all(G):
 
 def convert_graphml(graphmlFile):
     G = make_graphml(graphmlFile)
-    sources, targets, edgeProperties = zip(*G.edges(data=True))
     fileName = graphmlFile.split('.graphml')[0]
+    convert_graph(G,fileName)
+
+def convert_graph(G,fileName):
+    sources, targets, edgeProperties = zip(*G.edges(data=True))
     nodeFile = fileName+'_nodes.csv'
     edgeFile = fileName+'_edges.csv'
     nf = open(nodeFile,'w')
     keys = []
     for node, nodeProperties in G.nodes(data=True):
-        print nodeProperties.keys()
         new_keys = nodeProperties.keys()
         if new_keys != keys:
             keys.extend(new_keys)
     
     keys = set(keys)
-    print keys
     
     #write header
-    nf.write('Node'+','+','.join(keys))
+    if keys:
+        nf.write('Node'+','+','.join(keys))
+    else:
+        nf.write('Node')        
     
     for node, nodeProperties in G.nodes(data=True):
         row = []
@@ -79,23 +83,24 @@ def convert_graphml(graphmlFile):
                 row.append(str(nodeProperties[k]).replace(',', ';'))
             else:
                 row.append('None')
-        print row
-        nf.write('\n' + ','.join(row))
+        nf.write('\n' + ','.join([str(r) for r in row]))
     
     nf.close()
     
     ef = open(edgeFile,'w')
     keys = []
     for source,target, edgeProperties in G.edges(data=True):
-        print edgeProperties.keys()
         new_keys = edgeProperties.keys()
         if new_keys != keys:
             keys.extend(new_keys)
     
     keys = set(keys)
-    print keys
     
-    ef.write('source' + ',' + 'target' + ',' +','.join(keys))
+    if keys:
+        ef.write('source' + ',' + 'target' + ',' +','.join(keys))
+    else: 
+        ef.write('source' + ',' + 'target')
+
     for source, target, edgeProperties in G.edges(data=True):
         row = []
         row.append(source)
@@ -105,8 +110,7 @@ def convert_graphml(graphmlFile):
                 row.append(str(edgeProperties[k]))
             else:
                 row.append('None')
-        print row
-        ef.write('\n' + ','.join(row))
+        ef.write('\n' + ','.join([str(r) for r in row]))
     
     print "writing nodefile", nodeFile
     print "writing edgefile", edgeFile

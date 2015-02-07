@@ -29,15 +29,9 @@ var linkfill = "none"
 var hoverOverTime = 900
 
 
-var columntraits = ["Gender",'clustering'];
-    rowtraits = ["Height","degree"];// "degree"];
+var columntraits = ["degree", "degree"];
+    rowtraits = ["degree","degree"];
 
-var columnTraitScales = {"Gender":"linear", "clustering":"even", "Height":"even"}
-var rowTraitScales = {"Height": "linear", "betweenness": "linear"}
-
-
-//the colors!!!
-//
-//
-//
+var columnTraitScales = ["linear","log"]
+var rowTraitScales = ["linear","log"]
 

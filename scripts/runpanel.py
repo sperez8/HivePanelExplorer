@@ -72,7 +72,6 @@ def main(*argv):
     P.open_panel(title, folder, only_input_files = True)
 
     
-    
 if __name__ == "__main__":
     '''testing purposes'''
     main(*sys.argv[1:])
