@@ -269,8 +269,8 @@ function formatAxisLegend(trait,axis){
         r0 = Math.round(range[0]*100)/100
         r1 = Math.round(range[1]*100)/100
         if (isNaN(range[0])){return 'x ≤ '+ r1}
-        else if (isNaN(range[1])){return 'x ≥ '+ r0}
-        else {return r0+' < x < '+r1}
+        else if (isNaN(range[1])){return 'x > '+ r0}
+        else {return r0+' < x ≤ '+r1}
         }
 }
 
