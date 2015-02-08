@@ -84,10 +84,9 @@ function even_thresholds(data){
     k = []
     for (var i = 1; i < numAxes; i++) {
         index = parseInt(total*i/numAxes)
-        k.push(data[index])
+        k.push(data[index]+ 0.000000000000001) //add arbitrarily small value to ensure that, when binning integer values, all axes are populated.
     };
     k = k.sort(sortNumber)
-    if (k[0]==data[0]) {k[0] = k[0] + 0.000000000000001} //this avoids having the nodes with the smallest values cut off because they are equal to the first cut off.
     return k
 }
 
