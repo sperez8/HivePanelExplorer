@@ -322,7 +322,7 @@ function plot(p){
     var outerRadius = size*0.46
     var radius = d3.scale.linear().range([innerRadius, outerRadius]);
 
-    //column labels (when one plotting first row, where p.i=0)
+    //row labels (when one plotting first column, where p.i=0)
     if (p.i == 0){
     cell.append("text")
         .attr("x", function (d) { return d.i})
@@ -335,7 +335,7 @@ function plot(p){
             })
     }
 
-    //column labels (when one plotting first column, where p.j=0)
+    //column labels (when one plotting first row, where p.j=0)
     if (p.j==0){
     cell.append("text")
         .attr("x", function (d) { return d.i;})

@@ -324,27 +324,27 @@ function plot(p){
     var outerRadius = size*0.46
     var radius = d3.scale.linear().range([innerRadius, outerRadius]);
 
-    //column labels (when one plotting first row, where p.i=0)
+    //row labels (when one plotting first column, where p.i=0)
     if (p.i == 0){
     cell.append("text")
         .attr("x", function(d) { return d.i})
         .attr("y", function(d) { return d.j-size/2 -padding/2})
         .attr("text-anchor", "middle")
         .attr("class","viztext")
-        .text(capitalize(p.y)) //add name of property used for node positionning, the rowtrait
+        .text(capitalize(p.y + ' (' + rowTraitScales[p.j] + ')')) //add name of property used for node positionning, the rowtrait
         .attr("transform", function(d) { 
             return "rotate(-90)";
             })
     }
 
-    //column labels (when one plotting first column, where p.j=0)
+    //column labels (when one plotting first row, where p.j=0)
     if (p.j==0){
     cell.append("text")
         .attr("x", function(d) { return d.i;})
         .attr("y", function(d) { return d.j-size/2 - padding/2;})
         .attr("text-anchor", "middle")
         .attr("class","viztext")
-        .text(capitalize(p.x)) //add name of property used for node assignment, the columntrait
+        .text(capitalize(p.x + ' (' + columnTraitScales[p.i] + ')')) //add name of property used for node assignment, the columntrait
 
     }
 

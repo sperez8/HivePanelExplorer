@@ -19,8 +19,8 @@ var nodeColor = 'darkgrey'
     opnode = 1
     opnode_more = 1
 
-var nodesize = 5
-    nodestroke = 0.4
+var nodesize = 6
+    nodestroke = 0.1
     nodestrokecolor = "grey"
 
 var linkfill = "none"
