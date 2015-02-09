@@ -273,14 +273,14 @@ var svg = d3.select("body").select("#container").select("#panel").append("svg")
 
 //add labels for column and row rules
 svg.append("text")
-    .attr("x", (width - padding)/2 - (size/2))
+    .attr("x", (width - padding - size)/2)
     .attr("y", -(size/2 + padding*3/4))
     .attr("text-anchor", "middle")
     .attr("class","legend")
     .text('A X I S   A S S I G N M E N T') //add name of property used for node positionning, the rowtrait
 
 svg.append("text")
-    .attr("x", - (size/2))
+    .attr("x", -(width - padding - size)/2)
     .attr("y", -(size/2 + padding*3/4))
     .attr("text-anchor", "middle")
     .attr("class","legend")
@@ -309,9 +309,9 @@ function formatAxisLegend(trait,j,axis){
         range = asgScales[trait+String(j)].invertExtent(axis)
         r0 = Math.round(range[0]*100)/100
         r1 = Math.round(range[1]*100)/100
-        if (isNaN(range[0])){return 'x ≤ '+ r1}
-        else if (isNaN(range[1])){return 'x > '+ r0}
-        else {return r0+' < x ≤ '+r1}
+        if (isNaN(range[0])){return 'x≤'+ r1}
+        else if (isNaN(range[1])){return 'x>'+ r0}
+        else {return r0+'<x≤'+r1}
         }
 }
 
@@ -351,8 +351,9 @@ function plot(p){
     //creates axis labels
     //some parameters
     var outer_radius = radius.range()[1]*1.05
-        x_shift = 8
-        y_shift = 20
+        x_shift = 50
+        y_shift = 45
+        stagger = 0
 
     cell.selectAll(".axis")
         .data(angle)
@@ -367,13 +368,36 @@ function plot(p){
             h = outer_radius
             y = h*Math.cos(theta)
             x = -h*Math.sin(theta)
-            if (x>20){x = x+x_shift} else if (x<-20) {x = x-x_shift}
-            if (y>0){y = y+y_shift} else {y = y-y_shift/4}
-            //console.log(asgScales[p.x+String(p.i)].range()[i], theta, x, y)
+            if (x>20){x = x-x_shift} else if (x<-20) {x = x+x_shift}
+            if (y>30){
+                console.log(theta, x, y, stagger)
+                y = y+y_shift+stagger
+
+                stagger = -stagger
+            }
+            //console.log(theta, x, y, stagger)
             return "translate("+x+","+y+")";
         })
         .attr("class","legend")
-        .attr("text-anchor", "middle")
+        .attr("text-anchor", function(d,i) {
+            if (!doubleAxes){
+                a = angles(d)
+            } else if (i % 2 == 0) {
+                a = get_angles(numAxes, false)[i/2]
+            } else {a = 0}
+            theta = a-Math.PI
+            h = outer_radius
+            y = h*Math.cos(theta)
+            x = -h*Math.sin(theta)
+
+            if (x>60){
+                return "start"
+            } else if (x<-60) {
+                return "end"
+            } else {
+                return "middle"
+            }
+        })
         .text(function(d,k) {
             if (!doubleAxes){return formatAxisLegend(p.x,String(p.i),k)}
             else if (k % 2 == 0){return formatAxisLegend(p.x,String(p.i),k/2)}
