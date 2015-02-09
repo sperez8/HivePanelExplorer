@@ -10,7 +10,7 @@
 var SVGTitle = 'Friends Forever' + ' Hive Panel'
 
 var numAxes = 3
-    doubleAxes = true
+    doubleAxes = false
 
 var nodeColor = 'darkgrey'
     edgeColor = ['darkgrey']
@@ -29,9 +29,9 @@ var linkfill = "none"
 var hoverOverTime = 900
 
 
-var columntraits = ["degree", "degree"];
-    rowtraits = ["degree","degree"];
+var columntraits = ["degree", "degree", "degree"];
+    rowtraits = ["degree","degree", "degree"];
 
-var columnTraitScales = ["linear","log"]
-var rowTraitScales = ["linear","log"]
+var columnTraitScales = ["linear","log","even"]
+var rowTraitScales = ["linear","log","log"]
 
