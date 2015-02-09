@@ -33,5 +33,5 @@ var columntraits = ["degree", "degree", "degree"];
     rowtraits = ["degree","degree", "degree"];
 
 var columnTraitScales = ["linear","log","even"]
-var rowTraitScales = ["linear","log","log"]
+var rowTraitScales = ["linear","log","rank"]
 

@@ -109,8 +109,6 @@ function make_rank_scale(trait){
     indices = Array.apply(null, Array(total)).map(function (_, i) {return i;});
     both = zip([data,indices])
 
-    console.log(data,indices, both)
-
     both.sort(function (a, b) {
         a = a[0];
         b = b[0];
@@ -124,11 +122,9 @@ function make_rank_scale(trait){
 
         rankScale[ind] = i/parseFloat(both.length-1)
     }
-    console.log(both, rankScale)
     return rankScale
 }
 
-make_rank_scale("degree")
 
 // get the columntraits used for node assignment onto axes and build the desired linear, log 
 //or evenly distributed scales to use later when plotting nodes and links
@@ -174,7 +170,7 @@ for (var i in columntraits) {
     }
 }
 
-// get the columntraits used for node positionning on axes and build the desired linear orlog 
+// get the rowtraits used for node positionning on axes and build the desired linear orlog 
 //scales to use later when plotting nodes and links
 console.log('\nScaled values for positioning of nodes onto axes:')
 for (var i in rowtraits) {
@@ -195,6 +191,7 @@ for (var i in rowtraits) {
         type = 'linear'
 
         if (rowTraitScales[trait]=="rank"){
+            type = 'rank'            
             rankScale = make_rank_scale(trait)
             posScales[trait] = rankScale
         } else if (rowTraitScales[trait]=="log"){
@@ -423,7 +420,6 @@ function plot(p){
                 })
                 .radius(function (l) {
                     if (rowTraitScales[p.y]=="rank"){
-                        console.log(l.name,l[p.y],nodes.indexOf(l),rankScale[nodes.indexOf(l)])
                         return radius(rankScale[nodes.indexOf(l)])
                     } else {
                         return radius(posScales[p.y](l[p.y])) //pos
@@ -537,11 +533,10 @@ function plot(p){
                }
             })
 
-            .attr("cx", function (d,i) {
+            .attr("cx", function (d) {
                 //console.log(d.name, p.y, d[p.y], posScales[p.y](d[p.y]))
                 if (rowTraitScales[p.y]=="rank"){
-                        console.log(d.name,d[p.y],nodes.indexOf(d),rankScale[nodes.indexOf(d)])
-                        return radius(rankScale[nodes.indexOf(d)])
+                    return radius(rankScale[nodes.indexOf(d)])
                 } else {
                     return radius(posScales[p.y](d[p.y])) //pos
                 }

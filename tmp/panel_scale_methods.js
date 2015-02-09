@@ -77,8 +77,13 @@ function sortNumber(a,b) {
     return a - b;
 }
 
+function get_trait_values(trait){
+    return nodes.map(function (d) {return Number(d[trait])})
+}
+
 //returns numerical thresholds to bin node assignment data into about equally sized bins.
-function even_thresholds(data){
+function even_thresholds(trait){
+    data = get_trait_values(trait)
     total = data.length
     data.sort(sortNumber)
     k = []
@@ -88,6 +93,36 @@ function even_thresholds(data){
     };
     k = k.sort(sortNumber)
     return k
+}
+
+function zip(arrays) {
+    return Array.apply(null,Array(arrays[0].length)).map(function (_,i){
+        return arrays.map(function (array){return array[i]})
+    });
+}
+
+function make_rank_scale(trait){
+    rankScale = [];
+    data = get_trait_values(trait)
+    total = data.length
+    
+    indices = Array.apply(null, Array(total)).map(function (_, i) {return i;});
+    both = zip([data,indices])
+
+    both.sort(function (a, b) {
+        a = a[0];
+        b = b[0];
+
+        return a < b ? -1 : (a > b ? 1 : 0);
+    });
+
+    for (var i = 0; i < both.length; i++) {
+        var datum = both[i][0];
+        var ind = both[i][1];
+
+        rankScale[ind] = i/parseFloat(both.length-1)
+    }
+    return rankScale
 }
 
 
@@ -111,7 +146,7 @@ for (var i in columntraits) {
             return Number(d[trait])});
         type = 'linear'
         if (columnTraitScales[i]=="even"){
-            t = even_thresholds(nodes.map(function(d) {return Number(d[trait])}))
+            t = even_thresholds(trait)
             asgScales[trait+String(i)] = d3.scale.threshold()
                     .domain(t)
                     .range(d3.range(numAxes))
@@ -136,7 +171,7 @@ for (var i in columntraits) {
 }
 
 
-// get the columntraits used for node positionning on axes and build the desired linear orlog 
+// get the rowtraits used for node positionning on axes and build the desired linear orlog 
 //scales to use later when plotting nodes and links
 console.log('\nScaled values for positioning of nodes onto axes:')
 for (var i in rowtraits) {
@@ -154,8 +189,14 @@ for (var i in rowtraits) {
             return Number(d[trait])});
         min = d3.min(nodes, function(d) {
             return Number(d[trait])});
-        type = 'linear'
-        if (rowTraitScales[i]=="log"){
+        type = 'linear' 
+
+        if (rowTraitScales[i]=="rank"){
+            type = 'rank'            
+            rankScale = make_rank_scale(trait)
+            posScales[trait] = rankScale
+
+        } else if (rowTraitScales[i]=="log"){
             if ((max > 0 && min > 0)||(max < 0 && min < 0)){
                 type = 'log'
                 posScales[trait+String(i)] = d3.scale.log()
@@ -379,13 +420,18 @@ function plot(p){
                     }
                     return a
                 })
-                .radius(function(d) {
-                    return radius(posScales[p.y+String(p.j)](d[p.y]));})
-            )
-            .attr("show", function (d) { //the 'show' attribute is false when links are between nodes on the same axes
+                .radius(function (l) {
+                    if (rowTraitScales[p.j]=="rank"){
+                        return radius(rankScale[nodes.indexOf(l)])
+                    } else {
+                        return radius(posScales[p.y+String(p.j)](l[p.y])) //pos
+                    }
+                })
+            )            
+            .attr("show", function (l) { //the 'show' attribute is false when links are between nodes on the same axes
                 //or when the link connects nodes that are not on neighboring axes and cross over a third axes.
-                s = asgScales[p.x+String(p.i)](d.source[p.x])
-                t = asgScales[p.x+String(p.i)](d.target[p.x])
+                s = asgScales[p.x+String(p.i)](l.source[p.x])
+                t = asgScales[p.x+String(p.i)](l.target[p.x])
                 if (!doubleAxes){
                     if (t == s) {
                         return false
@@ -424,7 +470,7 @@ function plot(p){
             })
             .style("fill", linkfill) //linkfill is "none" so that only the arc of the path is seen.
             .style("stroke-opacity", oplink)
-            .style("stroke", function(d) {
+            .style("stroke", function(l) {
                 if (edgeColor){
                 return edgeColor} else {
                     return "grey"
@@ -432,7 +478,7 @@ function plot(p){
             })
             .style("stroke-width", linkwidth)
             .classed({"clicked":false})
-            .on("click", function(d){
+            .on("click", function(){
                 if (d3.select(this).classed("clicked")){
                     d3.select(this)
                         .classed({"clicked":false})
@@ -445,13 +491,13 @@ function plot(p){
                         .call(link_full_reveal,d,d.source.name, d.target.name)
                 }
             })
-            .on("mouseover", function(d){
+            .on("mouseover", function(l){
                 var link = d3.select(this)
                 var cx = d3.event.pageX
                 var cy = d3.event.pageY
 
                 hoverTimer = setTimeout(function(){
-                        link_tooltip(cx, cy, d, d.source.name, d.target.name);
+                        link_tooltip(cx, cy, l, l.source.name, l.target.name);
                         //link.call(highlight_links)  //not responsive because manipulating the DOM is expensive.
                     }, hoverDelay)
             })
@@ -489,9 +535,14 @@ function plot(p){
                }
             })
 
-            .attr("cx", function(d) {
-                //console.log(d.name, p.y+String(p.j), d[p.y], posScales[p.y+String(p.j)](d[p.y]))
-                return radius(posScales[p.y+String(p.j)](d[p.y]));}) //pos
+            .attr("cx", function (d) {
+                //console.log(d.name, p.y, d[p.y], posScales[p.y+String(p.j)](d[p.y]))
+                if (rowTraitScales[p.j]=="rank"){
+                    return radius(rankScale[nodes.indexOf(d)])
+                } else {
+                    return radius(posScales[p.y+String(p.j)](d[p.y])) //pos
+                }
+            })
             .attr("r", nodesize)
             .attr("stroke-width", nodestroke)
             .attr("stroke", nodestrokecolor)
