@@ -6,6 +6,13 @@ by sperez
 Contains functions used by hive class to measure things like network properties
 '''
 
+#need a specific version of networkx for read_gexf to work
+#import pkg_resources
+#pkg_resources.require("networkx==1.7")
+import networkx
+
+print networkx.__version__
+
 #library imports
 import sys
 import os
@@ -14,12 +21,10 @@ from math import pi
 import hive as Hive
 from hive_utilities import *
 
-_cur_dir = os.path.dirname(os.path.realpath(__file__))
-_root_dir = os.path.dirname(_cur_dir)
-sys.path.insert(0, _root_dir)
-
-import networkx as nx
-
+def import_gexf(gexfFile):
+    #parse graphml file
+    G = nx.read_gexf(gexfFile)
+    return G
 
 def import_graphml(graphmlFile):
     #parse graphml file
@@ -51,8 +56,13 @@ def measure_all(G):
     
     return measures
 
+def convert_gexf(gexfFile):
+    G = import_gexf(gexfFile)
+    fileName = gexfFile.split('.gexf')[0]
+    convert_graph(G,fileName)
+
 def convert_graphml(graphmlFile):
-    G = make_graphml(graphmlFile)
+    G = import_graphml(graphmlFile)
     fileName = graphmlFile.split('.graphml')[0]
     convert_graph(G,fileName)
 
@@ -119,9 +129,10 @@ def convert_graph(G,fileName):
 
 
 
-
-#file = "C:\Users\Sarah\Dropbox\\0-HalLab\Hive panel examples\C.elegans\c.elegans.herm_pharynx_1.graphml"
-#convert_graphml(file)
+file = "C:\\Users\\Sarah\\Dropbox\\1-Hive panels\\Diseasome\\diseasome.gexf"
+f = open(file,'r')
+print f.readlines()
+convert_gexf(file)
 
 
 

@@ -274,14 +274,16 @@ svg.append("text")
     .attr("x", (width - padding - size)/2)
     .attr("y", -(size/2 + padding*3/4))
     .attr("text-anchor", "middle")
-    .attr("class","legend")
+    .attr("font-family", "Helvetica Neue")
+    .attr("font-size", "14px")
     .text('A X I S   A S S I G N M E N T') //add name of property used for node positionning, the rowtrait
 
 svg.append("text")
     .attr("x", -(width - padding - size)/2)
     .attr("y", -(size/2 + padding*3/4))
     .attr("text-anchor", "middle")
-    .attr("class","legend")
+    .attr("font-family", "Helvetica Neue")
+    .attr("font-size", "14px")
     .text('A X I S   P O S I T I O N') //add name of property used for node positionning, the rowtrait
     .attr("transform", function (d) { 
         return "rotate(-90)";
@@ -328,9 +330,9 @@ function plot(p){
         .attr("x", function (d) { return d.i})
         .attr("y", function (d) { return d.j-size/2 -padding/2})
         .attr("text-anchor", "middle")
-        .attr("class","viztext")
-        .text(capitalize(p.y)) //add name of property used for node positionning, the rowtrait
-        .attr("transform", function (d) { 
+        .attr("font-family", "Helvetica Neue")
+        .attr("font-size", "14px")
+        .text(capitalize(p.y+' ('+rowTraitScales[p.y]+')').replace('_',' ')) //add name of property used for node positionning, the rowtrait        .attr("transform", function (d) { 
             return "rotate(-90)";
             })
     }
@@ -341,9 +343,9 @@ function plot(p){
         .attr("x", function (d) { return d.i;})
         .attr("y", function (d) { return d.j-size/2 - padding/2;})
         .attr("text-anchor", "middle")
-        .attr("class","viztext")
-        .text(capitalize(p.x)) //add name of property used for node assignment, the columntrait
-
+        .attr("font-family", "Helvetica Neue")
+        .attr("font-size", "14px")
+        .text(capitalize(p.x+' ('+columnTraitScales[p.x]+')').replace('_',' ')) //add name of property used for node assignment, the columntrait
     }
 
     //creates axis labels
@@ -368,7 +370,7 @@ function plot(p){
             x = -h*Math.sin(theta)
             if (x>20){x = x-x_shift} else if (x<-20) {x = x+x_shift}
             if (y>30){
-                console.log(theta, x, y, stagger)
+                //console.log(theta, x, y, stagger)
                 y = y+y_shift+stagger
 
                 stagger = -stagger
@@ -376,7 +378,8 @@ function plot(p){
             //console.log(theta, x, y, stagger)
             return "translate("+x+","+y+")";
         })
-        .attr("class","legend")
+        .attr("font-family", "Helvetica Neue")
+        .attr("font-size", "11px")
         .attr("text-anchor", function(d,i) {
             if (!doubleAxes){
                 a = angles(d)
