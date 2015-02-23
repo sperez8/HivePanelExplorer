@@ -6,6 +6,9 @@
 
 // ****************************************** //
 
+
+a = performance.now()
+
 //display title of panel and number of nodes and links
 d3.select("body").select("#title").select("#thetitle")
     .html(SVGTitle)
@@ -332,7 +335,8 @@ function plot(p){
         .attr("text-anchor", "middle")
         .attr("font-family", "Helvetica Neue")
         .attr("font-size", "14px")
-        .text(capitalize(p.y+' ('+rowTraitScales[p.y]+')').replace('_',' ')) //add name of property used for node positionning, the rowtrait        .attr("transform", function (d) { 
+        .text(capitalize(p.y+' ('+rowTraitScales[p.y]+')').replace('_',' ')) //add name of property used for node positionning, the rowtrait
+        .attr("transform", function (d) { 
             return "rotate(-90)";
             })
     }
@@ -346,6 +350,7 @@ function plot(p){
         .attr("font-family", "Helvetica Neue")
         .attr("font-size", "14px")
         .text(capitalize(p.x+' ('+columnTraitScales[p.x]+')').replace('_',' ')) //add name of property used for node assignment, the columntrait
+
     }
 
     //creates axis labels
@@ -432,6 +437,7 @@ function plot(p){
             .data(links)
           .enter().append("path")
             .attr("class", "link")
+            .attr("shape-rendering", "optimize-speed")
             .attr("d", d3.hive.link() //use Mbostocks hive plot library
                 .angle(function (l) {
                     if (!doubleAxes){
@@ -554,18 +560,18 @@ function plot(p){
             .attr("class", "node")
             .attr("transform", function (d) { 
                 if (doubleAxes){ //plot nodes of even axes when h=0 then on odd axes when h=1
-                    return "rotate(" + degrees(angles(asgScales[p.x](d[p.x])*2 + h)) + ")"  
+                    return "rotate(" + ~~degrees(angles(asgScales[p.x](d[p.x])*2 + h)) + ")"  //Use  ~~ to round values
                 } else {
-                    return "rotate(" + degrees(angles(asgScales[p.x](d[p.x]))) + ")"
+                    return "rotate(" + ~~degrees(angles(asgScales[p.x](d[p.x]))) + ")"
                }
             })
 
             .attr("cx", function (d) {
                 //console.log(d.name, p.y, d[p.y], posScales[p.y](d[p.y]))
                 if (rowTraitScales[p.y]=="rank"){
-                    return radius(rankScale[nodes.indexOf(d)])
+                    return ~~radius(rankScale[nodes.indexOf(d)])
                 } else {
-                    return radius(posScales[p.y](d[p.y])) //pos
+                    return ~~radius(posScales[p.y](d[p.y])) //pos
                 }
             })
             .attr("r", nodesize)
@@ -1051,7 +1057,7 @@ function color_filter_or_undo(sel) {
         d3.selectAll(".link")
             .style("stroke", edgeColor)
             .style("visibility", "visible")
-            .style("fill-opacity", oplink)
+            .style("stroke-opacity", oplink)
 
         d3.selectAll(".node")
             .style("fill", nodeColor)
@@ -1146,7 +1152,7 @@ function color_marks(mark, styling, property, value, color, equality) {
                             d3.select(this).moveToFront()}
                     })
                     .style(styling, color)
-                    .style("fill-opacity", opnode_more)
+                    .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
                     .classed({"important":true})
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
@@ -1169,7 +1175,7 @@ function color_marks(mark, styling, property, value, color, equality) {
                             d3.select(this).moveToFront()}
                     })
                     .style(styling, color)
-                    .style("fill-opacity", opnode_more)
+                    .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
                     .classed({"important":true})
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
@@ -1192,7 +1198,7 @@ function color_marks(mark, styling, property, value, color, equality) {
                             d3.select(this).moveToFront()}
                     })
                     .style(styling, color)
-                    .style("fill-opacity", opnode_more)
+                    .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
                     .classed({"important":true})
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
@@ -1214,7 +1220,7 @@ function color_marks(mark, styling, property, value, color, equality) {
                             d3.select(this).moveToFront()}
                     })
                     .style(styling, color)
-                    .style("fill-opacity", opnode_more)
+                    .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
                     .classed({"important":true})
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
@@ -1554,7 +1560,11 @@ function place_remove_icon(ruleNumber) {
     }
 
     var icon = document.createElement("d")
-    icon.innerHTML = "<img src='remove_icon.svg' class='icon' id = 'removeIcon"+ruleNumber+"' onclick='remove_rule(this)'>"
+    icon.innerHTML = "<img src='../remove_icon.svg' class='icon' id = 'removeIcon"+ruleNumber+"' onclick='remove_rule(this)'>"
     var div = document.getElementById("equality"+ruleNumber);
     insertAfter(div, icon);
 }
+
+b = performance.now()
+
+alert(b-a)
