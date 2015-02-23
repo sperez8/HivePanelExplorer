@@ -7,7 +7,7 @@
 // ****************************************** //
 
 
-a = performance.now()
+a1 = performance.now()
 
 //display title of panel and number of nodes and links
 d3.select("body").select("#title").select("#thetitle")
@@ -31,12 +31,8 @@ var angle = get_angles(numAxes,doubleAxes)
 
 //if doubled axes are requested, then we need to bind twice the amount of DOM elements from the nodes{} and links{} datasets
 if (doubleAxes){
-    var seriesLinksNames = [0,1]
-    var seriesNodesNames = [0,1]
     var angleRange = d3.range(numAxes*2)
 } else {
-    var seriesLinksNames = [0]
-    var seriesNodesNames = [0]
     var angleRange = d3.range(numAxes)
 };
 
@@ -56,7 +52,7 @@ var width = document.getElementById("panel").offsetWidth
     panels = Math.max(columntraits.length, rowtraits.length)
     size = (width-padding-legend_padding)/panels
     num_panels = columntraits.length*rowtraits.length
-    console.log(width, height, padding, size)
+    //console.log(width, height, padding, size)
 
 //returns numerical thresholds to bin log scaled node assignment data into the number of axes required.
 function log_thresholds(min,max){
@@ -421,23 +417,25 @@ function plot(p){
         .attr("stroke-width",0.7)
         .attr("stroke", "black");
 
-    //seriesLinks reflects the fact that double axes are being plotted.
-    var seriesLinks = cell.selectAll(".seriesLinks")
-                        .data(seriesLinksNames)
-                      .enter().append("g")
-                        .attr("class", "seriesLinks")
-                        .each(hiveLinks);
+    if (doubleAxes){
+        hiveLinks(0)
+        hiveLinks(1)
+        hiveNodes(0)
+        hiveNodes(1)
+    } else {
+        hiveLinks(0)
+        hiveNodes(0)
+        }
+
 
     //plot links as paths between nodes
     function hiveLinks(h){
-        var axesType = d3.select(this);
         var isSource = true
 
-        axesType.selectAll(".link")
+        cell.selectAll(".link")
             .data(links)
           .enter().append("path")
             .attr("class", "link")
-            .attr("shape-rendering", "optimize-speed")
             .attr("d", d3.hive.link() //use Mbostocks hive plot library
                 .angle(function (l) {
                     if (!doubleAxes){
@@ -540,21 +538,13 @@ function plot(p){
                 //}
             });
 
-        //removes any edges between nodes on same axis.
-        axesType.selectAll("path[show="+false+"]").remove()
-
         };
 
-    var seriesNodes = cell.selectAll(".seriesNodes")
-                    .data(seriesLinksNames)
-                  .enter().append("g")
-                    .attr("class", "seriesNodes")
-                    .each(hiveNodes);
 
     //plot nodes second so they appear on top of links
     function hiveNodes(h){
-        var axesType = d3.select(this);
-        axesType.selectAll(".node")
+
+        cell.append("g").selectAll(".node")
             .data(nodes)
           .enter().append("circle")
             .attr("class", "node")
@@ -613,6 +603,9 @@ function plot(p){
                 //        .call(node_mouseout)  
                 //} 
             })
+
+        //removes any edges between nodes on same axis.
+        cell.selectAll("path[show="+false+"]").remove()
     };
 
     };
@@ -1091,7 +1084,10 @@ function make_coloring(ruleNumber) {
         console.log('Coloring ' + ' ' + mark + 's' + ' with a ' + property + equality + value + ' ' + color)
         if (color != ''){
             if (mark == "node"){
+                b1 = performance.now()
                 count = color_marks("circle", "fill", property, value, color, equality)
+                b2 = performance.now()
+                alert(b2-b1)
             } else if (mark == "link"){
                 count = color_marks("path", "stroke", property, value, color, equality)
             }
@@ -1565,6 +1561,6 @@ function place_remove_icon(ruleNumber) {
     insertAfter(div, icon);
 }
 
-b = performance.now()
+a2 = performance.now()
 
-alert(b-a)
+alert(a2-a1)
