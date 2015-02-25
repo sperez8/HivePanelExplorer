@@ -1143,10 +1143,6 @@ function color_marks(mark, styling, property, value, color, equality) {
             if (Number(d[property]) > Number(value)) {
                 count ++
                 d3.select(this)
-                    .each(function (){
-                        if (mark == 'cirle'){
-                            d3.select(this).moveToFront()}
-                    })
                     .style(styling, color)
                     .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
                     .classed({"important":true})
@@ -1166,10 +1162,6 @@ function color_marks(mark, styling, property, value, color, equality) {
             if (Number(d[property]) < Number(value)) {
                 count ++
                 d3.select(this)
-                    .each(function (){
-                        if (mark == 'cirle'){
-                            d3.select(this).moveToFront()}
-                    })
                     .style(styling, color)
                     .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
                     .classed({"important":true})
@@ -1189,10 +1181,6 @@ function color_marks(mark, styling, property, value, color, equality) {
             if (d[property] == value) {
                 count ++
                 d3.select(this)
-                    .each(function (){
-                        if (mark == 'cirle'){
-                            d3.select(this).moveToFront()}
-                    })
                     .style(styling, color)
                     .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
                     .classed({"important":true})
@@ -1211,10 +1199,6 @@ function color_marks(mark, styling, property, value, color, equality) {
             if (d[property] != value) {
                 count ++
                 d3.select(this)
-                    .each(function (){
-                        if (mark == 'cirle'){
-                            d3.select(this).moveToFront()}
-                    })
                     .style(styling, color)
                     .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
                     .classed({"important":true})
