@@ -274,14 +274,16 @@ svg.append("text")
     .attr("x", (width - padding - size)/2)
     .attr("y", -(size/2 + padding*3/4))
     .attr("text-anchor", "middle")
-    .attr("class","legend")
+    .attr("font-family", "Helvetica Neue")
+    .attr("font-size", "14px")
     .text('A X I S   A S S I G N M E N T') //add name of property used for node positionning, the rowtrait
 
 svg.append("text")
     .attr("x", -(width - padding - size)/2)
     .attr("y", -(size/2 + padding*3/4))
     .attr("text-anchor", "middle")
-    .attr("class","legend")
+    .attr("font-family", "Helvetica Neue")
+    .attr("font-size", "14px")
     .text('A X I S   P O S I T I O N') //add name of property used for node positionning, the rowtrait
     .attr("transform", function (d) { 
         return "rotate(-90)";
@@ -328,7 +330,8 @@ function plot(p){
         .attr("x", function (d) { return d.i})
         .attr("y", function (d) { return d.j-size/2 -padding/2})
         .attr("text-anchor", "middle")
-        .attr("class","viztext")
+        .attr("font-family", "Helvetica Neue")
+        .attr("font-size", "14px")
         .text(capitalize(p.y)) //add name of property used for node positionning, the rowtrait
         .attr("transform", function (d) { 
             return "rotate(-90)";
@@ -341,7 +344,8 @@ function plot(p){
         .attr("x", function (d) { return d.i;})
         .attr("y", function (d) { return d.j-size/2 - padding/2;})
         .attr("text-anchor", "middle")
-        .attr("class","viztext")
+        .attr("font-family", "Helvetica Neue")
+        .attr("font-size", "14px")
         .text(capitalize(p.x)) //add name of property used for node assignment, the columntrait
 
     }
@@ -376,7 +380,8 @@ function plot(p){
             //console.log(theta, x, y, stagger)
             return "translate("+x+","+y+")";
         })
-        .attr("class","legend")
+        .attr("font-family", "Helvetica Neue")
+        .attr("font-size", "11px")
         .attr("text-anchor", function(d,i) {
             if (!doubleAxes){
                 a = angles(d)

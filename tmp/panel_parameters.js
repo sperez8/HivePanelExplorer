@@ -29,7 +29,7 @@ var linkfill = "none"
 var hoverOverTime = 900
 
 
-var columntraits = ["Gender",'Height'];
+var columntraits = ["Gender",'clustering'];
     rowtraits = ["Height","degree"];// "degree"];
 
 var columnTraitScales = {"Gender":"linear", "clustering":"even", "Height":"even"}
