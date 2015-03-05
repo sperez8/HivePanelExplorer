@@ -6,6 +6,9 @@
 
 // ****************************************** //
 
+
+a1 = performance.now()
+
 //display title of panel and number of nodes and links
 d3.select("body").select("#title").select("#thetitle")
     .html(SVGTitle)
@@ -28,12 +31,8 @@ var angle = get_angles(numAxes,doubleAxes)
 
 //if doubled axes are requested, then we need to bind twice the amount of DOM elements from the nodes{} and links{} datasets
 if (doubleAxes){
-    var seriesLinksNames = [0,1]
-    var seriesNodesNames = [0,1]
     var angleRange = d3.range(numAxes*2)
 } else {
-    var seriesLinksNames = [0]
-    var seriesNodesNames = [0]
     var angleRange = d3.range(numAxes)
 };
 
@@ -53,7 +52,7 @@ var width = document.getElementById("panel").offsetWidth
     panels = Math.max(columntraits.length, rowtraits.length)
     size = (width-padding-legend_padding)/panels
     num_panels = columntraits.length*rowtraits.length
-    console.log(width, height, padding, size)
+    //console.log(width, height, padding, size)
 
 //returns numerical thresholds to bin log scaled node assignment data into the number of axes required.
 function log_thresholds(min,max){
@@ -332,7 +331,7 @@ function plot(p){
         .attr("text-anchor", "middle")
         .attr("font-family", "Helvetica Neue")
         .attr("font-size", "14px")
-        .text(capitalize(p.y)) //add name of property used for node positionning, the rowtrait
+        .text(capitalize(p.y+' ('+rowTraitScales[p.y]+')').replace('_',' ')) //add name of property used for node positionning, the rowtrait
         .attr("transform", function (d) { 
             return "rotate(-90)";
             })
@@ -345,9 +344,7 @@ function plot(p){
         .attr("y", function (d) { return d.j-size/2 - padding/2;})
         .attr("text-anchor", "middle")
         .attr("font-family", "Helvetica Neue")
-        .attr("font-size", "14px")
-        .text(capitalize(p.x)) //add name of property used for node assignment, the columntrait
-
+        .text(capitalize(p.x+' ('+columnTraitScales[p.x]+')').replace('_',' ')) //add name of property used for node assignment, the columntrait
     }
 
     //creates axis labels
@@ -372,7 +369,7 @@ function plot(p){
             x = -h*Math.sin(theta)
             if (x>20){x = x-x_shift} else if (x<-20) {x = x+x_shift}
             if (y>30){
-                console.log(theta, x, y, stagger)
+                //console.log(theta, x, y, stagger)
                 y = y+y_shift+stagger
 
                 stagger = -stagger
@@ -418,19 +415,22 @@ function plot(p){
         .attr("stroke-width",0.7)
         .attr("stroke", "black");
 
-    //seriesLinks reflects the fact that double axes are being plotted.
-    var seriesLinks = cell.selectAll(".seriesLinks")
-                        .data(seriesLinksNames)
-                      .enter().append("g")
-                        .attr("class", "seriesLinks")
-                        .each(hiveLinks);
+    if (doubleAxes){
+        hiveLinks(0)
+        hiveLinks(1)
+        hiveNodes(0)
+        hiveNodes(1)
+    } else {
+        hiveLinks(0)
+        hiveNodes(0)
+        }
+
 
     //plot links as paths between nodes
     function hiveLinks(h){
-        var axesType = d3.select(this);
         var isSource = true
 
-        axesType.selectAll(".link")
+        cell.selectAll(".link")
             .data(links)
           .enter().append("path")
             .attr("class", "link")
@@ -536,38 +536,30 @@ function plot(p){
                 //}
             });
 
-        //removes any edges between nodes on same axis.
-        axesType.selectAll("path[show="+false+"]").remove()
-
         };
 
-    var seriesNodes = cell.selectAll(".seriesNodes")
-                    .data(seriesLinksNames)
-                  .enter().append("g")
-                    .attr("class", "seriesNodes")
-                    .each(hiveNodes);
 
     //plot nodes second so they appear on top of links
     function hiveNodes(h){
-        var axesType = d3.select(this);
-        axesType.selectAll(".node")
+
+        cell.append("g").selectAll(".node")
             .data(nodes)
           .enter().append("circle")
             .attr("class", "node")
             .attr("transform", function (d) { 
                 if (doubleAxes){ //plot nodes of even axes when h=0 then on odd axes when h=1
-                    return "rotate(" + degrees(angles(asgScales[p.x](d[p.x])*2 + h)) + ")"  
+                    return "rotate(" + ~~degrees(angles(asgScales[p.x](d[p.x])*2 + h)) + ")"  //Use  ~~ to round values
                 } else {
-                    return "rotate(" + degrees(angles(asgScales[p.x](d[p.x]))) + ")"
+                    return "rotate(" + ~~degrees(angles(asgScales[p.x](d[p.x]))) + ")"
                }
             })
 
             .attr("cx", function (d) {
                 //console.log(d.name, p.y, d[p.y], posScales[p.y](d[p.y]))
                 if (rowTraitScales[p.y]=="rank"){
-                    return radius(rankScale[nodes.indexOf(d)])
+                    return ~~radius(rankScale[nodes.indexOf(d)])
                 } else {
-                    return radius(posScales[p.y](d[p.y])) //pos
+                    return ~~radius(posScales[p.y](d[p.y])) //pos
                 }
             })
             .attr("r", nodesize)
@@ -609,6 +601,9 @@ function plot(p){
                 //        .call(node_mouseout)  
                 //} 
             })
+
+        //removes any edges between nodes on same axis.
+        cell.selectAll("path[show="+false+"]").remove()
     };
 
     };
@@ -1053,7 +1048,7 @@ function color_filter_or_undo(sel) {
         d3.selectAll(".link")
             .style("stroke", edgeColor)
             .style("visibility", "visible")
-            .style("fill-opacity", oplink)
+            .style("stroke-opacity", oplink)
 
         d3.selectAll(".node")
             .style("fill", nodeColor)
@@ -1087,7 +1082,10 @@ function make_coloring(ruleNumber) {
         console.log('Coloring ' + ' ' + mark + 's' + ' with a ' + property + equality + value + ' ' + color)
         if (color != ''){
             if (mark == "node"){
+                b1 = performance.now()
                 count = color_marks("circle", "fill", property, value, color, equality)
+                b2 = performance.now()
+                alert(b2-b1)
             } else if (mark == "link"){
                 count = color_marks("path", "stroke", property, value, color, equality)
             }
@@ -1143,12 +1141,8 @@ function color_marks(mark, styling, property, value, color, equality) {
             if (Number(d[property]) > Number(value)) {
                 count ++
                 d3.select(this)
-                    .each(function (){
-                        if (mark == 'cirle'){
-                            d3.select(this).moveToFront()}
-                    })
                     .style(styling, color)
-                    .style("fill-opacity", opnode_more)
+                    .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
                     .classed({"important":true})
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
@@ -1166,12 +1160,8 @@ function color_marks(mark, styling, property, value, color, equality) {
             if (Number(d[property]) < Number(value)) {
                 count ++
                 d3.select(this)
-                    .each(function (){
-                        if (mark == 'cirle'){
-                            d3.select(this).moveToFront()}
-                    })
                     .style(styling, color)
-                    .style("fill-opacity", opnode_more)
+                    .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
                     .classed({"important":true})
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
@@ -1189,12 +1179,8 @@ function color_marks(mark, styling, property, value, color, equality) {
             if (d[property] == value) {
                 count ++
                 d3.select(this)
-                    .each(function (){
-                        if (mark == 'cirle'){
-                            d3.select(this).moveToFront()}
-                    })
                     .style(styling, color)
-                    .style("fill-opacity", opnode_more)
+                    .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
                     .classed({"important":true})
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
@@ -1211,12 +1197,8 @@ function color_marks(mark, styling, property, value, color, equality) {
             if (d[property] != value) {
                 count ++
                 d3.select(this)
-                    .each(function (){
-                        if (mark == 'cirle'){
-                            d3.select(this).moveToFront()}
-                    })
                     .style(styling, color)
-                    .style("fill-opacity", opnode_more)
+                    .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
                     .classed({"important":true})
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
@@ -1556,7 +1538,11 @@ function place_remove_icon(ruleNumber) {
     }
 
     var icon = document.createElement("d")
-    icon.innerHTML = "<img src='remove_icon.svg' class='icon' id = 'removeIcon"+ruleNumber+"' onclick='remove_rule(this)'>"
+    icon.innerHTML = "<img src='../remove_icon.svg' class='icon' id = 'removeIcon"+ruleNumber+"' onclick='remove_rule(this)'>"
     var div = document.getElementById("equality"+ruleNumber);
     insertAfter(div, icon);
 }
+
+a2 = performance.now()
+
+alert(a2-a1)
