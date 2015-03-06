@@ -34,10 +34,3 @@ var columntraits = ["Gender",'Height'];
 
 var columnTraitScales = {"Gender":"linear", "clustering":"even", "Height":"even"}
 var rowTraitScales = {"Height": "linear", "degree":"rank"}
-
-
-//the colors!!!
-//
-//
-//
-
