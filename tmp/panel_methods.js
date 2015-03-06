@@ -345,6 +345,7 @@ function plot(p){
         .attr("text-anchor", "middle")
         .attr("font-family", "Helvetica Neue")
         .text(capitalize(p.x+' ('+columnTraitScales[p.x]+')').replace('_',' ')) //add name of property used for node assignment, the columntrait
+
     }
 
     //creates axis labels
@@ -546,6 +547,7 @@ function plot(p){
             .data(nodes)
           .enter().append("circle")
             .attr("class", "node")
+            //.attr("id",function(d,i){return d.name}) //can be used to cirles for same nodes and color them at the same time.
             .attr("transform", function (d) { 
                 if (doubleAxes){ //plot nodes of even axes when h=0 then on odd axes when h=1
                     return "rotate(" + ~~degrees(angles(asgScales[p.x](d[p.x])*2 + h)) + ")"  //Use  ~~ to round values
@@ -1066,6 +1068,34 @@ function color_filter_or_undo(sel) {
     }
 }
 
+function count_marks_colored(mark,property,value,equality) {
+    count = 0
+    if (mark == "node"){
+        data = nodes
+    }
+    else if (mark == "link"){
+        data = links
+    }
+
+    if (equality == '>'){
+        for (var i = data.length - 1; i >= 0; i--) {
+             if (data[i][property] > value) {count ++}};
+    }
+    else if (equality == '<') {
+        for (var i = data.length - 1; i >= 0; i--) {
+             if (data[i][property] < value) {count ++}};
+    }
+    else if (equality == '=') {
+        for (var i = data.length - 1; i >= 0; i--) {
+             if (data[i][property] == value) {count ++}};
+    }
+    else if (equality == '!=') {
+        for (var i = data.length - 1; i >= 0; i--) {
+             if (data[i][property] != value) {count ++}};
+    }
+    return count
+}
+
 function make_coloring(ruleNumber) {
     mark = document.getElementById("node_or_link"+ruleNumber).value
     property = document.getElementById("property"+ruleNumber).value
@@ -1077,55 +1107,62 @@ function make_coloring(ruleNumber) {
     color = ''
     filter = ''
     count = 0
-    if (ruleButton != null) {
-        color = ruleButton.value
-        console.log('Coloring ' + ' ' + mark + 's' + ' with a ' + property + equality + value + ' ' + color)
-        if (color != ''){
-            if (mark == "node"){
-                b1 = performance.now()
-                count = color_marks("circle", "fill", property, value, color, equality)
-                b2 = performance.now()
-                alert(b2-b1)
-            } else if (mark == "link"){
-                count = color_marks("path", "stroke", property, value, color, equality)
-            }
-        }
-    } else if (filterButton != null) {
-        filter = filterButton.value
-        console.log('Filtering (' + filter + ') ' + mark + 's' + ' with a ' + property + equality + value)
-        if (filter == 'keep') {
-            if (equality == '='){
-                equality = '!='
-            } else if (equality == '<'){
-                equality = '>'
-            } else if (equality == '>'){
-                equality = '<'
-            }
-        }
-        if (mark == "node"){
-            count = color_marks("circle", "visibility", property, value, "hidden", equality)
-        } else if (mark == "link"){
-            count = color_marks("path", "visibility", property, value, "hidden", equality)
-        }
-    }
+
+    count = count_marks_colored(mark,property,value,equality)
+
     if (count > 0){
         success = true
-        reveal_count(mark, filter, color, count)
+
+        if (ruleButton != null) {
+            color = ruleButton.value
+            console.log('Coloring' + ' ' + mark + 's' + ' with a ' + property + equality + value + ' ' + color)
+            if (color != ''){
+                if (mark == "node"){
+                    b1 = performance.now()
+                    color_marks("circle", "fill", property, value, color, equality)
+                    b2 = performance.now()
+                    alert(b2-b1)
+                } else if (mark == "link"){
+                    color_marks("path", "stroke", property, value, color, equality)
+                }
+            }
+        } else if (filterButton != null) {
+            filter = filterButton.value
+            console.log('Filtering (' + filter + ') ' + mark + 's' + ' with a ' + property + equality + value)
+            if (filter == 'keep') {
+                if (equality == '='){
+                    equality = '!='
+                } else if (equality == '<'){
+                    equality = '>'
+                } else if (equality == '>'){
+                    equality = '<'
+                }
+            }
+            if (mark == "node"){
+                color_marks("circle", "visibility", property, value, "hidden", equality)
+            } else if (mark == "link"){
+                color_marks("path", "visibility", property, value, "hidden", equality)
+            }
+        }
     }
+    reveal_count(mark, filter, color, count)
     return success
 }
 
 function reveal_count(mark, filter, color, count){
-    if (filter == 'hide' || filter == 'keep'){action = 'filtered out'
+    console.log(count)
+    if (filter == 'hide'){action = 'filtered out'
+    } else if (filter == 'keep'){action = 'not filtered'
     } else {action = 'colored'}
 
-    if (mark == 'link'){beginning = 'On average, per hive, '
-    } else {beginning = ''}
+    if (count > 1 || count == 0){mark = mark + 's were'
+    } else if (count == 1) {mark = mark + ' was'}
 
-    if (count > 1){mark = mark + 's were'
-    } else {mark = mark + ' was'}
+    if (count == 0) {
+        number = 'No'
+    } else {number = Math.ceil(count)}
 
-    text = beginning + Math.ceil(count) + ' ' + mark + ' ' + action + '.'
+    text = number + ' ' + mark + ' ' + action + '.'
 
 
     removeReveal()
@@ -1135,11 +1172,9 @@ function reveal_count(mark, filter, color, count){
 };
 
 function color_marks(mark, styling, property, value, color, equality) {
-    count = 0
     if (equality == '>'){
         d3.selectAll(mark).each(function (d){
             if (Number(d[property]) > Number(value)) {
-                count ++
                 d3.select(this)
                     .style(styling, color)
                     .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
@@ -1158,7 +1193,6 @@ function color_marks(mark, styling, property, value, color, equality) {
     else if (equality == '<'){
         d3.selectAll(mark).each(function (d){
             if (Number(d[property]) < Number(value)) {
-                count ++
                 d3.select(this)
                     .style(styling, color)
                     .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
@@ -1177,7 +1211,6 @@ function color_marks(mark, styling, property, value, color, equality) {
     else if (equality == '='){
         d3.selectAll(mark).each(function (d){
             if (d[property] == value) {
-                count ++
                 d3.select(this)
                     .style(styling, color)
                     .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
@@ -1195,7 +1228,6 @@ function color_marks(mark, styling, property, value, color, equality) {
     } else if (equality == '!='){
         d3.selectAll(mark).each(function (d){
             if (d[property] != value) {
-                count ++
                 d3.select(this)
                     .style(styling, color)
                     .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
@@ -1211,8 +1243,8 @@ function color_marks(mark, styling, property, value, color, equality) {
            }
         })
     }
-    if (!doubleAxes){return count/num_panels}
-    else {return count/num_panels/2}
+    //if (!doubleAxes){return count/num_panels}
+    //else {return count/num_panels/2}
 };
 
 
