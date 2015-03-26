@@ -431,7 +431,7 @@ function plot(p){
     function hiveLinks(h){
         var isSource = true
 
-        cell.selectAll(".link")
+        cell.append("g").selectAll(".link")
             .data(links)
           .enter().append("path")
             .attr("class", "link")
@@ -1577,4 +1577,4 @@ function place_remove_icon(ruleNumber) {
 
 a2 = performance.now()
 
-alert(a2-a1)
+//alert(a2-a1)

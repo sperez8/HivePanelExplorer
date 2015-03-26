@@ -60,17 +60,17 @@ def plot_distributions(G,H):
 	# ax.set_yscale('log')
 	# ax.set_xscale('log')
 
-	ppl.plot(ax, G_k, G_p_k, 'o-', color = ppl.colors.set2[0], label = "Network with power-law distribution")
-	ppl.plot(ax,  H_k, H_p_k, 'o-', color = ppl.colors.set2[1], label = "Network with binomial degree distribution")
+	ppl.plot(ax, G_k, G_p_k, 'o-', color = "#9e9ac8", label = "Network with power-law distribution")
+	ppl.plot(ax,  H_k, H_p_k, 'o-', color = "#6baed6", label = "Network with binomial degree distribution")
 
-	ax.set_title("Degree distribution of networks with "+str(N)+" nodes and "+str(M)+" edges.\n")
+	//ax.set_title("Degree distribution of networks with "+str(N)+" nodes and "+str(M)+" edges.\n")
 	ax.xaxis.set_label_text("degree (k)")
 	ax.yaxis.set_label_text("Degree frequency P(k)")
 
 	ppl.legend(ax, loc='upper right', ncol=1)
 	ax.set_xlim([0,20]) #Otherwise we can'st see the curves they are so close ot 0
 
-	fig.savefig('test_distribution.png')
+	fig.savefig('test_distribution.pdf')
 
 
 def add_properties(G,H):
