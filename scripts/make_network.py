@@ -129,10 +129,10 @@ def convert_graph(G,fileName):
 
 
 
-file = "C:\\Users\\Sarah\\Dropbox\\1-Hive panels\\Diseasome\\diseasome.gexf"
-f = open(file,'r')
-print f.readlines()
-convert_gexf(file)
+# file = "C:\\Users\\Sarah\\Dropbox\\1-Hive panels\\Diseasome\\diseasome.gexf"
+# f = open(file,'r')
+# print f.readlines()
+# convert_gexf(file)
 
 
 

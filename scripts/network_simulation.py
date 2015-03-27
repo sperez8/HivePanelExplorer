@@ -29,7 +29,8 @@ from make_network import import_graph
 #EDGES = os.path.join(_root_dir, 'tests', 'test_edges_friends.txt')
 RANDSEED = 2
 np.random.seed(RANDSEED)
-PROP_TO_REMOVE = 1 #only removing 10 percent of nodes
+PROP_TO_REMOVE = 1 #only removing this percent of nodes
+FRACTION_OF_NODES = False
 MEASURES = [nx.betweenness_centrality, 
 			nx.degree_centrality,
 			nx.closeness_centrality, 
@@ -141,7 +142,8 @@ def plot_robustness(data,filename):
 
 	# plotting locations in rows and centralities in columns
 	fig, axes = plt.subplots(1)
-	measures = ['random'].extend([m.__name__ for m in MEASURES])
+	measures = ['random']
+	measures.extend([m.__name__ for m in MEASURES])
 
 	colors = {measure: ppl.colors.set2[i] for i,measure in enumerate(measures)}
 
@@ -154,7 +156,7 @@ def plot_robustness(data,filename):
 			#color=[colors[measure] for measure in measures])
 
 	ppl.legend(axes)  
-	figureFile = os.join(FIGURE_PATH,filename+'_simulation'+'.png')
+	figureFile = os.path.join(FIGURE_PATH,filename+'_simulation'+'.png')
 	fig.savefig(figureFile)
 	print "Saving the figure file: ", figureFile
 	return None
@@ -199,7 +201,10 @@ def multi_plot_robustness_by_treatment(multidata,filename,rowLabels,colLabels):
 
 		for measure in measures:
 			values = multidata[net+'_'+treatment][measure]
-			x = range(len(values))
+			if FRACTION_OF_NODES:
+				x = [float(r)/len(values) for r in range(len(values))]
+			else:
+				x = range(len(values))
 			ppl.plot(ax,
 				x, 
 				values,
@@ -264,7 +269,10 @@ def multi_plot_robustness_by_measure(multidata,filename,rowLabels,treatments):
 
 		for t in treatments:
 			values = multidata[net+'_'+t][measure]
-			x = range(len(values))
+			if FRACTION_OF_NODES:
+				x = [float(r)/len(values) for r in range(len(values))]
+			else:
+				x = range(len(values))
 			ppl.plot(ax,
 				x, 
 				values,
