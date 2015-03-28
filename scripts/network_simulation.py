@@ -25,29 +25,10 @@ sys.path.insert(0, _root_dir)
 import networkx as nx
 from make_network import import_graph
 
-#NODES = os.path.join(_root_dir, 'tests', 'test_nodes_friends.txt')
-#EDGES = os.path.join(_root_dir, 'tests', 'test_edges_friends.txt')
 RANDSEED = 2
 np.random.seed(RANDSEED)
-PROP_TO_REMOVE = 1 #only removing this percent of nodes
-FRACTION_OF_NODES = False
-MEASURES = [nx.betweenness_centrality, 
-			nx.degree_centrality,
-			nx.closeness_centrality, 
-			nx.eigenvector_centrality]
-NETWORKS = {'B_R_BAC_SBS':['OM3','OM2','OM1','OM0']}
-			#'B_R_BAC_SBS2':['OM3','OM2','OM1','OM0']}
-			#'R_BAC_IDF':['OM3','OM2','OM1','OM0']} #changed OL to OM0 temporarily
-# NETWORKS = {'trial1':['OM3'], ##trial networks to test faster
-# 			'trial2':['OM3']}
-#PLOT_BY = 'bytreatment'
-PLOT_BY = 'bymeasure'
-
-PATH = '/Users/sperez/Dropbox/1-Aria/LTSP_networks'
-FIGURE_PATH = PATH
-#FIGURE_NAME = 'Allnetworks'
-FIGURE_NAME = 'SBS' +'_'+ PLOT_BY
-DPI = 300
+FRACTION_OF_NODES = True
+DPI = 200 #resolution of plot
 
 
 def make_graph(nodeFile, edgeFile):
@@ -92,59 +73,69 @@ def input_files(*argv):
 
 
 
-def random_attack(G):
+def random_attack(G,fraction):
 	'''Measure the size of the largest component of the graph
 	as nodes are removed randomly'''
-	sizes = []
+	lc_sizes = [] #relative size of big component
+	sc_sizes = [] #avg size of smaller components
 	startSize = len(nx.connected_components(G)[0])
-	sizes.append(1)
+	lc_sizes.append(1)
+	sc_sizes.append(1)
 	H = G.copy()
 
 	nodes= G.nodes()
 	np.random.shuffle(nodes)
 
-	removal=int(len(nodes)*PROP_TO_REMOVE)-1
+	removal=int(len(nodes)*fraction)-1 #can't remove last node, otherwise there is nothing to measure!
 
 	for n in nodes[:removal]:
 		H.remove_node(n)
-		sizes.append(len(nx.connected_components(H)[0])/float(startSize)) #measure the relative size change
-	return sizes
+		components = nx.connected_components(H)
+		lc_sizes.append(len(components[0])/float(startSize)) #measure the relative size change
+		if len(components)>1:
+			sc_sizes.append(np.mean([len(c) for c in components[1:]]))
+		else:
+			sc_sizes.append(1.0)
+	return lc_sizes,sc_sizes
 
 
-def target_attack(G, measure):
+def target_attack(G, measure,fraction):
 	'''Measure the size of the largest component of the graph
 	as nodes are removed given the measure (degree or centrality 
 	measure). The order of the nodes to be removed IS NOT updated
 	after each removal.
 	'''
-	sizes = []
+	lc_sizes = [] #relative size of big component
+	sc_sizes = [] #avg size of smaller components
 	startSize = len(nx.connected_components(G)[0])
-	sizes.append(1)
+	lc_sizes.append(1)
+	sc_sizes.append(1)
 	H = G.copy()
 
 	values = [(n,v) for n,v in measure(G).iteritems()]
 
 	values = sorted(values, key = lambda item: item[1], reverse = True)
 
-
-	removal=int(len(values)*PROP_TO_REMOVE)-1
+	removal=int(len(values)*fraction)-1 #can't remove last node, otherwise there is nothing to measure!
 
 	for n in zip(*values)[0][:removal]:
 		H.remove_node(n)
-		sizes.append(len(nx.connected_components(H)[0])/float(startSize))  #measure the relative size change
-	return sizes
+		components = nx.connected_components(H)
+		lc_sizes.append(len(components[0])/float(startSize))  #measure the relative size change
+		if len(components)>1:
+			sc_sizes.append(np.mean([len(c) for c in components[1:]]))
+		else:
+			sc_sizes.append(1.0)
+	return lc_sizes,sc_sizes
 
 
 
 def plot_robustness(data,filename):
 	'''plots the simulations'''
-	colors ='rgbkmy'
 
 	# plotting locations in rows and centralities in columns
 	fig, axes = plt.subplots(1)
-	measures = ['random']
-	measures.extend([m.__name__ for m in MEASURES])
-
+	measures = ['random'] + [m.__name__ for m in measures]
 	colors = {measure: ppl.colors.set2[i] for i,measure in enumerate(measures)}
 
 	for measure in measures:
@@ -156,34 +147,52 @@ def plot_robustness(data,filename):
 			#color=[colors[measure] for measure in measures])
 
 	ppl.legend(axes)  
-	figureFile = os.path.join(FIGURE_PATH,filename+'_simulation'+'.png')
+	figureFile = os.path.join(net_path,filename)
 	fig.savefig(figureFile)
 	print "Saving the figure file: ", figureFile
 	return None
 
 
-def plot_individual(networkNames,path):
+def plot_individual(path,networkNames,fraction):
 	networks,treatments = get_network_fullnames(networkNames)
 	graphs = get_multiple_graphs(networks,path)
 
 	for netName,G in graphs.iteritems():
-		randSizes = random_attack(G)
+		rand_lc_sizes, rand_sc_sizes = random_attack(G, fraction)
 		data = {}
-		data['random']=randSizes
-		for m in MEASURES:
-			targSizes = target_attack(G, m)
-			data[m.__name__] = targSizes
+		data['random']= (rand_lc_sizes, rand_sc_sizes)
+		for m in measures:
+			targ_lc_sizes, targ_sc_sizes = target_attack(G, m, fraction)
+			data[m.__name__] = (targ_lc_sizes, targ_sc_sizes)
 		plot_robustness(data, netName)
 	return None
 
-def multi_plot_robustness_by_treatment(multidata,filename,rowLabels,colLabels):
+
+def plot_multiple(net_path, networkNames, measures, plotby, fraction, figure_name):
+	networks,treatments = get_network_fullnames(networkNames)
+	graphs = get_multiple_graphs(networks,net_path)
+	data = {}
+	for netName,G in graphs.iteritems():
+		rand_lc_sizes, rand_sc_sizes = random_attack(G, fraction)
+		data[netName] = {'random':(rand_lc_sizes, rand_sc_sizes)}
+		for m in measures:
+			targ_lc_sizes, targ_sc_sizes = target_attack(G, m, fraction)
+			data[netName][m.__name__] = (targ_lc_sizes, targ_sc_sizes)
+	if plotby == 'by treatment':
+		multi_plot_robustness_by_treatment(data, figure_name, networkNames.keys(), treatments, measures, fraction, net_path)
+	elif plotby == 'by measure':
+		multi_plot_robustness_by_measure(data, figure_name, networkNames.keys(), treatments, measures, fraction, net_path)
+	return None
+
+
+def multi_plot_robustness_by_treatment(multidata,filename,rowLabels,colLabels, measures, fraction, net_path):
 	'''plots the simulations in a multiplot: each row is a location and each column is a treatment'''
-	colors ='rgbkmy'
 
 	# plotting locations in rows and treatments in columns
 	fig, axes = plt.subplots(len(rowLabels),len(colLabels))
 	netNames = rowLabels
-	measures = ['random'] + [m.__name__ for m in MEASURES]
+
+	measures = ['random'] + [m.__name__ for m in measures]
 
 	colors = {measure: ppl.colors.set1[i] for i,measure in enumerate(measures)}
 	#print netNames, measures, len(rowLabels),len(colLabels), len(axes), colLabels*len(rowLabels)
@@ -200,14 +209,20 @@ def multi_plot_robustness_by_treatment(multidata,filename,rowLabels,colLabels):
 	for ax,net,treatment in iterable:
 
 		for measure in measures:
-			values = multidata[net+'_'+treatment][measure]
+			lc_values = multidata[net+'_'+treatment][measure][0]
+			sc_values = multidata[net+'_'+treatment][measure][1]
 			if FRACTION_OF_NODES:
-				x = [float(r)/len(values) for r in range(len(values))]
+				x = [float(r)/len(lc_values) for r in range(len(lc_values))]
 			else:
-				x = range(len(values))
+				x = range(len(lc_values))
 			ppl.plot(ax,
 				x, 
-				values,
+				lc_values,
+				label=str(measure),
+				color=colors[measure])
+			ppl.plot(ax,
+				x, 
+				sc_values,
 				label=str(measure),
 				color=colors[measure])
 
@@ -215,41 +230,22 @@ def multi_plot_robustness_by_treatment(multidata,filename,rowLabels,colLabels):
 		if net not in netLabeldone:
 			ax.set_ylabel(net)
 			netLabeldone.append(net)
-		# ax.set_xticklabels([str(tick)+'%' for tick in range(0,int(PROP_TO_REMOVE*100)+1,int(PROP_TO_REMOVE*100/5))])
+		# ax.set_xticklabels([str(tick)+'%' for tick in range(0,int(fraction*100)+1,int(fraction*100/5))])
 
 	lgd = ppl.legend(loc=5, bbox_to_anchor=(7, 1, 1, 1)) # bbox_to_anchor=(4.2,2.5))
 
-	figureFile = os.path.join(FIGURE_PATH,filename+'_simulation'+'.png')
+	figureFile = os.path.join(net_path,filename)
 	#fig.tight_layout()
 	fig.set_size_inches(8*len(colLabels),5*len(rowLabels))
 	fig.savefig(figureFile,dpi=DPI,  bbox_extra_artists=(lgd,), bbox_inches='tight')
 	print "Saving the figure file: ", figureFile
 	return None
 
-
-def plot_multiple(networkNames,path,columns):
-	networks,treatments = get_network_fullnames(networkNames)
-	graphs = get_multiple_graphs(networks,path)
-	data = {}
-	for netName,G in graphs.iteritems():
-		randSizes = random_attack(G)
-		data[netName] = {'random':randSizes}
-		for m in MEASURES:
-			targSizes = target_attack(G, m)
-			data[netName][m.__name__] = targSizes
-	if columns == 'bytreatment':
-		multi_plot_robustness_by_treatment(data,FIGURE_NAME, networkNames.keys(), treatments)
-	elif columns == 'bymeasure':
-		multi_plot_robustness_by_measure(data,FIGURE_NAME, networkNames.keys(), treatments)
-	return None
-
-
-def multi_plot_robustness_by_measure(multidata,filename,rowLabels,treatments):
+def multi_plot_robustness_by_measure(multidata,filename,rowLabels,treatments,measures,fraction, net_path):
 	'''plots the simulations in a multiplot: each row is a location and each column is a centrality measure'''
-	colors ='rgbkmy'
 
 	# plotting locations in rows and centralities in columns
-	measures = ['random'] + [m.__name__ for m in MEASURES]
+	measures = ['random'] + [m.__name__ for m in measures]
 	fig, axes = plt.subplots(len(rowLabels),len(measures))
 	netNames = rowLabels
 
@@ -268,16 +264,17 @@ def multi_plot_robustness_by_measure(multidata,filename,rowLabels,treatments):
 	for ax,net,measure in iterable:
 
 		for t in treatments:
-			values = multidata[net+'_'+t][measure]
+			lc_values = multidata[net+'_'+t][measure]
 			if FRACTION_OF_NODES:
-				x = [float(r)/len(values) for r in range(len(values))]
+				x = [float(r)/len(lc_values) for r in range(len(lc_values))]
 			else:
-				x = range(len(values))
+				x = range(len(lc_values))
 			ppl.plot(ax,
 				x, 
-				values,
+				lc_values,
 				label=str(t),
 				color=colors[t])
+
 
 		ax.set_title(measure)
 		if net not in netLabeldone:
@@ -286,7 +283,7 @@ def multi_plot_robustness_by_measure(multidata,filename,rowLabels,treatments):
 
 	lgd = ppl.legend(loc='right', bbox_to_anchor=(1, 1, 1, 1))
 
-	figureFile = os.path.join(FIGURE_PATH, filename+'_simulation'+'.png')
+	figureFile = os.path.join(net_path, filename)
 	#fig.tight_layout()
 	fig.set_size_inches(7*len(treatments),3*len(rowLabels))
 	fig.savefig(figureFile,dpi=DPI, bbox_extra_artists=(lgd,), bbox_inches='tight')
@@ -296,15 +293,8 @@ def multi_plot_robustness_by_measure(multidata,filename,rowLabels,treatments):
 
 
 
-if __name__ == "__main__":
-	'''testing purposes'''
-	#G = input_files(*sys.argv[1:])
-	plot_multiple(NETWORKS,PATH,PLOT_BY)
-	#plot_individual(NETWORKS,PATH)
-
 '''
 to do:
-normalize yticks by original size giant component
 switch the oms and the measures to make a diff graph
 run on all networks
 '''

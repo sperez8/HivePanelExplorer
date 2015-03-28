@@ -11,8 +11,6 @@ Contains functions used by hive class to measure things like network properties
 #pkg_resources.require("networkx==1.7")
 import networkx
 
-print networkx.__version__
-
 #library imports
 import sys
 import os
