@@ -232,7 +232,9 @@ def multi_plot_robustness_by_treatment(multidata,filename,rowLabels,colLabels, m
 			netLabeldone.append(net)
 		# ax.set_xticklabels([str(tick)+'%' for tick in range(0,int(fraction*100)+1,int(fraction*100/5))])
 
-	lgd = ppl.legend(loc=5, bbox_to_anchor=(7, 1, 1, 1)) # bbox_to_anchor=(4.2,2.5))
+	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+
+#legend(loc=5, bbox_to_anchor=(7, 1, 1, 1)) # bbox_to_anchor=(4.2,2.5))
 
 	figureFile = os.path.join(net_path,filename)
 	#fig.tight_layout()

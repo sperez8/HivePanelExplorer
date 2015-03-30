@@ -18,7 +18,11 @@ MEASURES = [nx.betweenness_centrality,
 			nx.degree_centrality,
 			nx.closeness_centrality, 
 			nx.eigenvector_centrality]
-NETWORKS = ['B_R_BAC_SBS']#,'R_BAC_IDF']
+NETWORKS = ['SBS']#,'IDF']
+
+## to change names of network files from R_B_***_BAC_SBS* to BAC_SBS*
+#run the following command in network folder:
+# ls *_BAC*|sed 's/.*BAC\(.*\)/mv & BAC\1/' | sh
 
 #for testing and spead
 #NETWORKS = ['trial1'] ##trial networks to test faster
@@ -47,7 +51,7 @@ def main(*argv):
 		plot_by = 'by treatment'
 	elif args.measure:
 		plot_by = 'by measure'
-	networks = {n:TREATMENTS for n in args.networks}
+	networks = {('BAC_'+n if 'BAC_' not in n else n):TREATMENTS for n in args.networks}
 	fraction = float(args.fraction)
 	figure_name = 'plot_'+'_'.join(networks)+'_' + plot_by +'.png'
 	measures = MEASURES
