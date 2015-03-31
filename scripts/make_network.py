@@ -11,8 +11,6 @@ Contains functions used by hive class to measure things like network properties
 #pkg_resources.require("networkx==1.7")
 import networkx
 
-print networkx.__version__
-
 #library imports
 import sys
 import os
@@ -129,10 +127,10 @@ def convert_graph(G,fileName):
 
 
 
-file = "C:\\Users\\Sarah\\Dropbox\\1-Hive panels\\Diseasome\\diseasome.gexf"
-f = open(file,'r')
-print f.readlines()
-convert_gexf(file)
+# file = "C:\\Users\\Sarah\\Dropbox\\1-Hive panels\\Diseasome\\diseasome.gexf"
+# f = open(file,'r')
+# print f.readlines()
+# convert_gexf(file)
 
 
 

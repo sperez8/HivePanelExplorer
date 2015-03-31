@@ -95,6 +95,7 @@ class Hive():
         '''gets nodes and their properties from csv file'''
         
         delimiter = get_delimiter(inputFile)
+
         data = np.genfromtxt(inputFile, delimiter=delimiter, dtype='str', filling_values = 'None')
         
         #get properties and format as strings
