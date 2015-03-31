@@ -77,12 +77,14 @@ class Hive():
         else:
             self.get_nodes(nodeFile)
             self.get_edges(edgeFile)               
-        self.check_nodes(self.sources, self.targets, self.nodes, self.doubleAxes, self.debug)
+        #XXX
+        #self.check_nodes(self.sources, self.targets, self.nodes, self.doubleAxes, self.debug)
         self.make_axes()
         self.node_assignment(cutoffValues = cutoffValues)
         self.node_position()
         self.node_style()
         self.make_edges(makeAllEdges = makeAllEdges)
+
 
         self.edge_style()
         self.fix_color_palette()

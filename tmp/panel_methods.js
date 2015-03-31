@@ -431,10 +431,11 @@ function plot(p){
     function hiveLinks(h){
         var isSource = true
 
-        cell.selectAll(".link")
+        cell//.append("g")
+        	.selectAll(".link")
             .data(links)
           .enter().append("path")
-            .attr("class", "link")
+            //.attr("class", "link")
             .attr("d", d3.hive.link() //use Mbostocks hive plot library
                 .angle(function (l) {
                     if (!doubleAxes){
@@ -543,11 +544,11 @@ function plot(p){
     //plot nodes second so they appear on top of links
     function hiveNodes(h){
 
-        cell.append("g").selectAll(".node")
+        cell//.append("g")
+        	.selectAll(".node")
             .data(nodes)
           .enter().append("circle")
-            .attr("class", "node")
-            //.attr("id",function(d,i){return d.name}) //can be used to cirles for same nodes and color them at the same time.
+            //.attr("class", function (d,i) {return "n"+String(i)})
             .attr("transform", function (d) { 
                 if (doubleAxes){ //plot nodes of even axes when h=0 then on odd axes when h=1
                     return "rotate(" + ~~degrees(angles(asgScales[p.x](d[p.x])*2 + h)) + ")"  //Use  ~~ to round values
@@ -700,12 +701,12 @@ var node_mouseout = function (node) {
 var remove_tooltip = function (){
     tooltip.style("opacity", 0);
 }
-
-d3.selection.prototype.moveToFront = function () {
-  return this.each(function (){
-    this.parentNode.appendChild(this);
-  });
-};
+//***BROCKEN****
+// d3.selection.prototype.moveToFront = function () {
+//   return this.each(function (){
+//     this.parentNode.parentNode.appendChild(this.parentNode);
+//   });
+// };
 
 var highlight_nodes = function (selection) {
     selection
@@ -1150,9 +1151,10 @@ function make_coloring(ruleNumber) {
 }
 
 function reveal_count(mark, filter, color, count){
-    console.log(count)
     if (filter == 'hide'){action = 'filtered out'
-    } else if (filter == 'keep'){action = 'not filtered'
+    } else if (filter == 'keep'){
+    	action = 'filtered out'
+    	count = N-count
     } else {action = 'colored'}
 
     if (count > 1 || count == 0){mark = mark + 's were'
@@ -1209,6 +1211,21 @@ function color_marks(mark, styling, property, value, color, equality) {
         })
     }
     else if (equality == '='){
+
+    	// data = nodes
+    	// ids = []
+    	// for (var i = data.length - 1; i >= 0; i--) {
+     //         if (data[i][property] == value) {ids.push("n"+String(i))}
+     //     }
+     //    for (var i = ids.length - 1; i >= 0; i--) {
+     //    	console.log(ids[i])
+     //    	d3.selectAll("."+ids[i]).each(function (d) {
+     //    		d3.select(this)
+	    //     		.style(styling, color)
+	    //             .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
+	    //             .classed({"important":true})
+     //    		})
+     //   	};
         d3.selectAll(mark).each(function (d){
             if (d[property] == value) {
                 d3.select(this)

@@ -63,6 +63,7 @@ class Panel():
         self.rulePairs = self.cross_rules(self.assignmentRules, self.positionRules)
         Hives = {}
         for a,p in self.rulePairs:
+            print a,p
             hive = Hive(debug = self.debug,
                     numAxes = self.numAxes,
                     doubleAxes = self.doubleAxes, 
@@ -77,6 +78,7 @@ class Panel():
             if nodefile.split('.')[-1] == 'graphml':
                 hive.make_hive(nodefile, None, makeAllEdges = True, graphml = True) 
             else:
+                print 'Found 2 files: a node and an edge file.'
                 hive.make_hive(nodefile, edgefile, makeAllEdges = True) 
             Hives[(a,p)] = hive
             hive = None

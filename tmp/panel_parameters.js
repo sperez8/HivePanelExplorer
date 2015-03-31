@@ -16,7 +16,7 @@ var nodeColor = 'darkgrey'
     edgeColor = ['darkgrey']
     linkwidth = 1.3
     oplink = 0.8
-    opnode = 1
+    opnode = 0.3
     opnode_more = 1
 
 var nodesize = 5
