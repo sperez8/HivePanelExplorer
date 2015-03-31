@@ -28,7 +28,10 @@ from make_network import import_graph
 RANDSEED = 2
 np.random.seed(RANDSEED)
 FRACTION_OF_NODES = True
-DPI = 200 #resolution of plot
+DPI = 400 #resolution of plot #low for testing
+ADD_RANDOM,ADD_SCALE = True,True
+RAND_NAME = 'random_network_size_of_'
+SCALE_NAME = 'scalefree_network_size_of_'
 
 
 def make_graph(nodeFile, edgeFile):
@@ -42,8 +45,21 @@ def get_multiple_graphs(networks, path):
 	for netName in networks:
 		nodeFile = os.path.join(path,netName+'_nodes.txt')
 		edgeFile = os.path.join(path,netName+'_edges.txt')
-		graphs[netName] = make_graph(nodeFile,edgeFile)
+		G = make_graph(nodeFile,edgeFile)
+		graphs[netName] = G
 		print "Made the networkx graph: "+netName
+		##adding random graph for comparaison
+		if ADD_RANDOM:
+			M = nx.number_of_edges(G)
+			N = nx.number_of_nodes(G)
+			H = nx.gnm_random_graph(N,M,seed=RANDSEED)
+			graphs[RAND_NAME+netName] = H
+		if ADD_SCALE:
+			N = nx.number_of_nodes(G)
+			H = nx.scale_free_graph(N,seed=RANDSEED)
+			UH = H.to_undirected()
+			UH = nx.Graph(UH)
+			graphs[SCALE_NAME+netName] = UH
 	return graphs
 
 def get_network_fullnames(networkNames):
@@ -52,25 +68,6 @@ def get_network_fullnames(networkNames):
 		for t in treatments:
 			networks.append(location+'_'+t)
 	return networks,treatments
-
-def input_files(*argv):
-	'''handles user input and runs plsa'''
-	parser = argparse.ArgumentParser(description='This scripts runs an extinction simulation.')
-	parser.add_argument('-n', help='The node file', default = NODES)
-	parser.add_argument('-e', help='The edge file', default = EDGES)
-	args = parser.parse_args()
-
-	if (args.n == '' and args.e != '') or (args.n != '' and args.e == ''):
-		print "\n***You must specify both a node and an edge file if specifying either.***\n"
-		parser.print_help()
-		sys.exit()
-		
-	nodeFile = args.n
-	edgeFile = args.e
-
-	G = make_graph(nodeFile, edgeFile)
-	return G
-
 
 
 def random_attack(G,fraction):
@@ -173,15 +170,21 @@ def plot_multiple(net_path, networkNames, measures, plotby, fraction, figure_nam
 	graphs = get_multiple_graphs(networks,net_path)
 	data = {}
 	for netName,G in graphs.iteritems():
+		print 'Running simulation on ', netName, ' with ', G.number_of_nodes(), ' nodes.'
 		rand_lc_sizes, rand_sc_sizes = random_attack(G, fraction)
 		data[netName] = {'random':(rand_lc_sizes, rand_sc_sizes)}
 		for m in measures:
 			targ_lc_sizes, targ_sc_sizes = target_attack(G, m, fraction)
 			data[netName][m.__name__] = (targ_lc_sizes, targ_sc_sizes)
-	if plotby == 'by treatment':
-		multi_plot_robustness_by_treatment(data, figure_name, networkNames.keys(), treatments, measures, fraction, net_path)
-	elif plotby == 'by measure':
-		multi_plot_robustness_by_measure(data, figure_name, networkNames.keys(), treatments, measures, fraction, net_path)
+	networkNamesPlot = networkNames.keys()
+	if ADD_RANDOM:
+		networkNamesPlot.extend([RAND_NAME+n for n in networkNames.keys()])
+	if ADD_RANDOM:
+		networkNamesPlot.extend([SCALE_NAME+n for n in networkNames.keys()])
+	if plotby == 'by_treatment':
+		multi_plot_robustness_by_treatment(data, figure_name, networkNamesPlot, treatments, measures, fraction, net_path)
+	elif plotby == 'by_measure':
+		multi_plot_robustness_by_measure(data, figure_name, networkNamesPlot, treatments, measures, fraction, net_path)
 	return None
 
 
@@ -199,6 +202,7 @@ def multi_plot_robustness_by_treatment(multidata,filename,rowLabels,colLabels, m
 
 	iterable = []
 	for i,r in enumerate(rowLabels):
+
 		for j,c in enumerate(colLabels):
 			if len(rowLabels)>1:
 				iterable.append((axes[i][j],r,c))
@@ -223,23 +227,20 @@ def multi_plot_robustness_by_treatment(multidata,filename,rowLabels,colLabels, m
 			ppl.plot(ax,
 				x, 
 				sc_values,
-				label=str(measure),
-				color=colors[measure])
+				color=colors[measure],
+				linestyle='--')
 
 		ax.set_title(treatment)
 		if net not in netLabeldone:
 			ax.set_ylabel(net)
 			netLabeldone.append(net)
-		# ax.set_xticklabels([str(tick)+'%' for tick in range(0,int(fraction*100)+1,int(fraction*100/5))])
-
-	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-
-#legend(loc=5, bbox_to_anchor=(7, 1, 1, 1)) # bbox_to_anchor=(4.2,2.5))
+		
+	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
 
 	figureFile = os.path.join(net_path,filename)
 	#fig.tight_layout()
 	fig.set_size_inches(8*len(colLabels),5*len(rowLabels))
-	fig.savefig(figureFile,dpi=DPI,  bbox_extra_artists=(lgd,), bbox_inches='tight')
+	fig.savefig(figureFile, dpi=DPI,  bbox_extra_artists=(lgd,), bbox_inches='tight')
 	print "Saving the figure file: ", figureFile
 	return None
 
@@ -266,7 +267,8 @@ def multi_plot_robustness_by_measure(multidata,filename,rowLabels,treatments,mea
 	for ax,net,measure in iterable:
 
 		for t in treatments:
-			lc_values = multidata[net+'_'+t][measure]
+			lc_values = multidata[net+'_'+t][measure][0]
+			sc_values = multidata[net+'_'+t][measure][1]
 			if FRACTION_OF_NODES:
 				x = [float(r)/len(lc_values) for r in range(len(lc_values))]
 			else:
@@ -276,19 +278,23 @@ def multi_plot_robustness_by_measure(multidata,filename,rowLabels,treatments,mea
 				lc_values,
 				label=str(t),
 				color=colors[t])
-
+			ppl.plot(ax,
+				x, 
+				sc_values,
+				color=colors[t],
+				linestyle='--')
 
 		ax.set_title(measure)
 		if net not in netLabeldone:
 			ax.set_ylabel(net)
 			netLabeldone.append(net)
 
-	lgd = ppl.legend(loc='right', bbox_to_anchor=(1, 1, 1, 1))
+	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
 
 	figureFile = os.path.join(net_path, filename)
 	#fig.tight_layout()
 	fig.set_size_inches(7*len(treatments),3*len(rowLabels))
-	fig.savefig(figureFile,dpi=DPI, bbox_extra_artists=(lgd,), bbox_inches='tight')
+	fig.savefig(figureFile, dpi=DPI, bbox_extra_artists=(lgd,), bbox_inches='tight')
 	print "Saving the figure file: ", figureFile
 	return None
 

@@ -19,15 +19,6 @@ MEASURES = [nx.betweenness_centrality,
 			nx.closeness_centrality, 
 			nx.eigenvector_centrality]
 NETWORKS = ['SBS']#,'IDF']
-
-## to change names of network files from R_B_***_BAC_SBS* to BAC_SBS*
-#run the following command in network folder:
-# ls *_BAC*|sed 's/.*BAC\(.*\)/mv & BAC\1/' | sh
-
-#for testing and spead
-#NETWORKS = ['trial1'] ##trial networks to test faster
-#TREATMENTS = ['OM3']
-
 PROP_TO_REMOVE = 1 #only removing this percent of nodes
 
 
@@ -48,12 +39,12 @@ def main(*argv):
 		
 	net_path = args.path
 	if args.treatment:
-		plot_by = 'by treatment'
+		plot_by = 'by_treatment'
 	elif args.measure:
-		plot_by = 'by measure'
+		plot_by = 'by_measure'
 	networks = {('BAC_'+n if 'BAC_' not in n else n):TREATMENTS for n in args.networks}
 	fraction = float(args.fraction)
-	figure_name = 'plot_'+'_'.join(networks)+'_' + plot_by +'.png'
+	figure_name = 'plot_'+'_'.join(args.networks)+'_' + plot_by +'.png'
 	measures = MEASURES
 
 	print "\nSimulating and plotting the robustness of networks:"

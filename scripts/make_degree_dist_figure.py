@@ -27,7 +27,7 @@ import networkx as nx
 N = 1000 #number of nodes
 seed = 2 #random seed
 
-def create_graphs():
+def create_graphs(N):
 	G = nx.scale_free_graph(N,seed=seed)
 	M = nx.number_of_edges(G)
 	H = nx.gnm_random_graph(N,M,seed=seed)
@@ -88,7 +88,7 @@ def add_properties(G,H):
 	return G,H
 
 
-G,H = create_graphs()
+G,H = create_graphs(N)
 #G,H = add_properties(G,H)
 plot_distributions(G,H)
 
