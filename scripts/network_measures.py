@@ -14,13 +14,59 @@ import numpy as np
 from math import pi
 import hive as hive
 
-
 _cur_dir = os.path.dirname(os.path.realpath(__file__))
 _root_dir = os.path.dirname(_cur_dir)
 sys.path.insert(0, _root_dir)
 
 import networkx as nx
 from make_network import *
+
+
+def number_of_nodes(G):
+	return G.number_of_nodes()
+
+def number_of_edges(G):
+	return G.number_of_edges()
+
+def average_degree(G):
+    return np.mean(G.degree().values())
+
+def connectance(G):
+    return nx.density(G)
+
+def global_clustering_coefficient(G):
+    return nx.average_clustering(G)
+
+def fraction_of_possible_triangles(G):
+    return nx.transitivity(G)
+
+def size_of_largest_clique(G):
+    return nx.graph_clique_number(G)
+
+def degree_assortativity(G):
+    return nx.degree_assortativity_coefficient(G)
+
+def diameter_of_largest_connected_component(G):
+    H = nx.connected_component_subgraphs(G)[0]
+    return nx.diameter(H)
+
+def average_path_on_largest_connected_component(G):
+    H = nx.connected_component_subgraphs(G)[0]
+    return nx.average_shortest_path_length(H)
+
+
+
+
+# def assortativity_of_degree_and_betweenness_centrality(G):
+#     bc = nx.betweenness_centrality(G)
+#     H = nx.Graph()
+#     for n in G.nodes(): 
+#         H.add_nodes_from(n, att = bc[n])
+#         print n,bc[n]
+#     H.add_edges_from(G.edges())
+#     return nx.numeric_assortativity_coefficient(H,'att')
+
+
 
 NODES = os.path.join(_root_dir, 'tests', 'test_nodes_friends.txt')
 EDGES = os.path.join(_root_dir, 'tests', 'test_edges_friends.txt')
@@ -71,10 +117,7 @@ def measure_component(G):
         measuresC[i]['bc'] =  list(nx.betweenness_centrality(c).values())
         measuresC[i]['cc'] =  list(nx.closeness_centrality(c).values())
         measuresC[i]['clustering'] =  list(nx.clustering(c).values())
-    
-
     return measuresC
-
 
 if __name__ == "__main__":
     '''testing purposes'''

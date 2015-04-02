@@ -24,15 +24,26 @@ sys.path.insert(0, _root_dir)
 
 import networkx as nx
 from make_network import import_graph
+import network_measures as nm
 
 RANDSEED = 2
 np.random.seed(RANDSEED)
-FRACTION_OF_NODES = True
 DPI = 400 #resolution of plot #low for testing
-ADD_RANDOM,ADD_SCALE = True,True
+ADD_RANDOM,ADD_SCALE = True, False #True,True
 RAND_NAME = 'random_network_size_of_'
 SCALE_NAME = 'scalefree_network_size_of_'
 
+STRUCTURE_METRICS = [nm.number_of_nodes, 
+					nm.number_of_edges,
+					nm.average_degree, 
+					nm.connectance, 
+					nm.global_clustering_coefficient,
+					nm.fraction_of_possible_triangles,
+					nm.size_of_largest_clique,
+					nm.degree_assortativity,
+					#nm.assortativity_of_degree_and_betweenness_centrality
+					nm.diameter_of_largest_connected_component,
+					nm.average_path_on_largest_connected_component]
 
 def make_graph(nodeFile, edgeFile):
 	'''imports the node and edge file and makes the graph'''
@@ -47,7 +58,8 @@ def get_multiple_graphs(networks, path):
 		edgeFile = os.path.join(path,netName+'_edges.txt')
 		G = make_graph(nodeFile,edgeFile)
 		graphs[netName] = G
-		print "Made the networkx graph: "+netName
+		print 'Made the networkx graph {0} with N = {1}, E = {2}.'.format(netName,G.number_of_nodes(),G.number_of_edges())
+		
 		##adding random graph for comparaison
 		if ADD_RANDOM:
 			M = nx.number_of_edges(G)
@@ -68,6 +80,93 @@ def get_network_fullnames(networkNames):
 		for t in treatments:
 			networks.append(location+'_'+t)
 	return networks,treatments
+
+
+##########################################
+
+##########################################
+
+def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, plot_sequence):
+	networks,treatments = get_network_fullnames(networkNames)
+	graphs = get_multiple_graphs(networks,net_path)
+	data = {}
+	network = networkNames.keys()[0].split('_')
+	network = network[1]
+
+	# plotting locations in rows and treatments in columns
+	fig, ax = plt.subplots(1)
+
+	colors = {treatment: ppl.colors.set1[i] for i,treatment in enumerate(treatments)}
+
+	for t,net in zip(treatments,networks):
+		G = graphs[net]
+		if plot_sequence:
+			ax.set_title('Degree histogram of '+network+' network')
+			ax.set_xlabel('nodes ranked by degree')
+			ax.set_ylabel('degree')
+			
+			#to plot histogram
+			degree_sequence = sorted(nx.degree(G).values(),reverse=True)
+			
+			ppl.plot(degree_sequence,
+				marker='.',
+				linestyle='-',
+				label=str(t),
+				color=colors[t])
+		else:
+			ax.set_title('Degree distribution of '+network+' network')
+			ax.set_xlabel('degree')
+			ax.set_ylabel('frequency of degree')
+			N = G.number_of_nodes()
+			ds = [] #each degree
+			fds = [] #each degree's frequency
+			degrees = sorted(nx.degree(G).values(),reverse=True)
+			for d in set(degrees):
+				ds.append(d)
+				fds.append(float(degrees.count(d))/N)
+
+			ppl.plot(ds,
+				fds,
+				marker='.',
+				linestyle='-',
+				label=str(t),
+				color=colors[t])
+
+	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
+
+	fig.set_size_inches(9,6)
+	fig.savefig(figurePath, dpi=DPI, bbox_extra_artists=(lgd,), bbox_inches='tight')
+	print "Saving the figure file: ", figurePath
+	return None
+
+
+
+##########################################
+
+##########################################
+
+def network_structure(net_path,networkNames, filename):
+	networks,treatments = get_network_fullnames(networkNames)
+	graphs = get_multiple_graphs(networks,net_path)
+	table = np.zeros(shape=(len(STRUCTURE_METRICS)+2, len(networkNames)*len(treatments)+1), dtype='S100')
+	i,j = 0,1 # i is row, j is column
+	column = ['Zones','Treatments']
+	column.extend([sm.__name__.replace('_',' ').capitalize() for sm in STRUCTURE_METRICS])
+	table[:,0]=column
+	for location,treatments in networkNames.iteritems():
+		table[i,j]=location
+		for t in treatments:
+			i+=1
+			table[i,j]=t
+			for sm in STRUCTURE_METRICS:
+				i+=1
+				G = graphs[location+'_'+t]
+				table[i,j]=sm(G)
+			j+=1
+			i=0
+
+	np.savetxt(os.path.join(net_path,filename), table, delimiter=",", fmt='%s')
+	return None
 
 
 def random_attack(G,fraction):
@@ -165,12 +264,12 @@ def plot_individual(path,networkNames,fraction):
 	return None
 
 
-def plot_multiple(net_path, networkNames, measures, plotby, fraction, figure_name):
+def plot_multiple(net_path, networkNames, measures, plotby, fraction, figurePath):
 	networks,treatments = get_network_fullnames(networkNames)
 	graphs = get_multiple_graphs(networks,net_path)
 	data = {}
 	for netName,G in graphs.iteritems():
-		print 'Running simulation on ', netName, ' with ', G.number_of_nodes(), ' nodes.'
+		print 'Running simulation on {0}.'.format(netName)
 		rand_lc_sizes, rand_sc_sizes = random_attack(G, fraction)
 		data[netName] = {'random':(rand_lc_sizes, rand_sc_sizes)}
 		for m in measures:
@@ -179,16 +278,16 @@ def plot_multiple(net_path, networkNames, measures, plotby, fraction, figure_nam
 	networkNamesPlot = networkNames.keys()
 	if ADD_RANDOM:
 		networkNamesPlot.extend([RAND_NAME+n for n in networkNames.keys()])
-	if ADD_RANDOM:
+	if ADD_SCALE:
 		networkNamesPlot.extend([SCALE_NAME+n for n in networkNames.keys()])
 	if plotby == 'by_treatment':
-		multi_plot_robustness_by_treatment(data, figure_name, networkNamesPlot, treatments, measures, fraction, net_path)
+		multi_plot_robustness_by_treatment(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path)
 	elif plotby == 'by_measure':
-		multi_plot_robustness_by_measure(data, figure_name, networkNamesPlot, treatments, measures, fraction, net_path)
+		multi_plot_robustness_by_measure(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path)
 	return None
 
 
-def multi_plot_robustness_by_treatment(multidata,filename,rowLabels,colLabels, measures, fraction, net_path):
+def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels, measures, fraction, net_path):
 	'''plots the simulations in a multiplot: each row is a location and each column is a treatment'''
 
 	# plotting locations in rows and treatments in columns
@@ -209,42 +308,56 @@ def multi_plot_robustness_by_treatment(multidata,filename,rowLabels,colLabels, m
 			else:
 				iterable.append((axes[j],r,c))
 
-	netLabeldone = []
+	net_label_done = []
+	treatment_label_done = []
+	x_axis_label_done = False
+
+	#to add to legend
+	ppl.plot([], [], color='black', linestyle='-', label='relative size of LCC')
+	ppl.plot([], [], color='black', linestyle='--', label='avg size of other CC')
+
+
 	for ax,net,treatment in iterable:
 
 		for measure in measures:
 			lc_values = multidata[net+'_'+treatment][measure][0]
 			sc_values = multidata[net+'_'+treatment][measure][1]
-			if FRACTION_OF_NODES:
-				x = [float(r)/len(lc_values) for r in range(len(lc_values))]
-			else:
-				x = range(len(lc_values))
+			x = [float(r)/len(lc_values)*fraction for r in range(len(lc_values))]
 			ppl.plot(ax,
 				x, 
 				lc_values,
-				label=str(measure),
+				marker='.',
+				linestyle='-',
+				label=str(measure.replace('_',' ')),
 				color=colors[measure])
 			ppl.plot(ax,
 				x, 
 				sc_values,
 				color=colors[measure],
 				linestyle='--')
-
+			
+		if treatment not in treatment_label_done:
+			ax.set_title(treatment)
+			treatment_label_done.append(treatment)
 		ax.set_title(treatment)
-		if net not in netLabeldone:
+		if net not in net_label_done:
 			ax.set_ylabel(net)
-			netLabeldone.append(net)
+			net_label_done.append(net)
+
+		if not x_axis_label_done:
+			x_axis_label_done = True
+			ax.set_xlabel('fraction of removed nodes')
 		
 	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
 
-	figureFile = os.path.join(net_path,filename)
+	figureFile = os.path.join(net_path,figurePath)
 	#fig.tight_layout()
-	fig.set_size_inches(8*len(colLabels),5*len(rowLabels))
+	fig.set_size_inches(9*len(colLabels),7*len(rowLabels))
 	fig.savefig(figureFile, dpi=DPI,  bbox_extra_artists=(lgd,), bbox_inches='tight')
 	print "Saving the figure file: ", figureFile
 	return None
 
-def multi_plot_robustness_by_measure(multidata,filename,rowLabels,treatments,measures,fraction, net_path):
+def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,measures,fraction, net_path):
 	'''plots the simulations in a multiplot: each row is a location and each column is a centrality measure'''
 
 	# plotting locations in rows and centralities in columns
@@ -263,19 +376,25 @@ def multi_plot_robustness_by_measure(multidata,filename,rowLabels,treatments,mea
 			else:
 				iterable.append((axes[j],r,c))
 
-	netLabeldone = []
+	net_label_done = []
+	measure_label_done = []
+	x_axis_label_done = False
+
+	#to add to legend
+	ppl.plot([], [], color='black', marker= '.', linestyle='-', label='relative size of LCC')
+	ppl.plot([], [], color='black', linestyle='--', label='avg size of other CC')
+
 	for ax,net,measure in iterable:
 
 		for t in treatments:
 			lc_values = multidata[net+'_'+t][measure][0]
 			sc_values = multidata[net+'_'+t][measure][1]
-			if FRACTION_OF_NODES:
-				x = [float(r)/len(lc_values) for r in range(len(lc_values))]
-			else:
-				x = range(len(lc_values))
+			x = [float(r)/len(lc_values)*fraction for r in range(len(lc_values))]
 			ppl.plot(ax,
 				x, 
 				lc_values,
+				marker='.',
+				linestyle='-',
 				label=str(t),
 				color=colors[t])
 			ppl.plot(ax,
@@ -284,16 +403,22 @@ def multi_plot_robustness_by_measure(multidata,filename,rowLabels,treatments,mea
 				color=colors[t],
 				linestyle='--')
 
-		ax.set_title(measure)
-		if net not in netLabeldone:
+		if measure not in measure_label_done:
+			ax.set_title(measure)
+			measure_label_done.append(measure)
+		if net not in net_label_done:
 			ax.set_ylabel(net)
-			netLabeldone.append(net)
+			net_label_done.append(net)
+
+		if not x_axis_label_done:
+			x_axis_label_done = True
+			ax.set_xlabel('fraction of removed nodes')
 
 	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
 
-	figureFile = os.path.join(net_path, filename)
+	figureFile = os.path.join(net_path, figurePath)
 	#fig.tight_layout()
-	fig.set_size_inches(7*len(treatments),3*len(rowLabels))
+	fig.set_size_inches(9*len(treatments),9*len(rowLabels))
 	fig.savefig(figureFile, dpi=DPI, bbox_extra_artists=(lgd,), bbox_inches='tight')
 	print "Saving the figure file: ", figureFile
 	return None
