@@ -67,7 +67,7 @@ def main(*argv):
 		networks = {('BAC_'+n if 'BAC_' not in n else n):TREATMENTS for n in args.networks}
 
 	if args.calculate:
-		print "\nCalculating structural properties on "+edgetype" type of edges of networks:"
+		print "\nCalculating structural properties on "+edgetype+" type of edges of networks:"
 		print ", ".join(networks), '\n'
 		fileName = 'table_of_measures_'+'_'.join(args.networks)+'_'+edgetype+'.csv'
 		network_structure(net_path,networks,fileName,edgetype)
@@ -79,7 +79,7 @@ def main(*argv):
 			else:
 				figureName = 'plot_distribution_'+net+'_'+edgetype+'.png'
 			figurePath = os.path.join(FIGURE_PATH,figureName)
-			print "\nPlotting the degree distribution of network ", net
+			print "\nPlotting the degree distribution on "+edgetype+" type of edges of network ", net
 			plot_degree_distribution_per_treatment(net_path, {net: networks[net]}, figurePath, DEGREE_SEQUENCE, edgetype)
 
 	elif args.simulate:
@@ -100,14 +100,12 @@ def main(*argv):
 		else:
 			add_random = False
 
-
-
 		fraction = float(args.fraction)
 		figureName = 'plot_'+'_'.join(args.networks)+'_'+edgetype+'_'+ plot_by +'_prop='+str(fraction)+'.png'
 		figurePath = os.path.join(FIGURE_PATH,figureName)
 		measures = MEASURES
 
-		print "\nSimulating and plotting the robustness of networks:"
+		print "\nSimulating and plotting the robustness on "+edgetype+" type of edges of networks:"
 		print ", ".join(networks)
 		print "and plotting "+str(fraction)+" fraction of nodes "+plot_by+" and with following measures:"
 		print ", ".join([m.__name__ for m in measures])

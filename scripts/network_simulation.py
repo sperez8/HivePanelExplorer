@@ -314,12 +314,15 @@ def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels,
 	ppl.plot([], [], color='black', linestyle='-', label='relative size of LCC')
 	ppl.plot([], [], color='black', linestyle='--', label='avg size of other CC')
 
-
+	min_yvalue = 1
+	max_yvalue = 1
 	for ax,net,treatment in iterable:
 
 		for measure in measures:
 			lc_values = multidata[net+'_'+treatment][measure][0]
 			sc_values = multidata[net+'_'+treatment][measure][1]
+			min_yvalue = min(min_yvalue ,min(lc_values))
+			max_yvalue = max(max_yvalue ,max(sc_values))
 			x = [float(r)/len(lc_values)*fraction for r in range(len(lc_values))]
 			ppl.plot(ax,
 				x, 
@@ -337,7 +340,9 @@ def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels,
 		if treatment not in treatment_label_done:
 			ax.set_title(treatment)
 			treatment_label_done.append(treatment)
+		
 		ax.set_title(treatment)
+
 		if net not in net_label_done:
 			ax.set_ylabel(net)
 			net_label_done.append(net)
@@ -345,7 +350,10 @@ def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels,
 		if not x_axis_label_done:
 			x_axis_label_done = True
 			ax.set_xlabel('fraction of removed nodes')
-		
+
+		ax.set_autoscaley_on(False)
+		ax.set_ylim([min_yvalue,max_yvalue])
+
 	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
 
 	figureFile = os.path.join(net_path,figurePath)
@@ -382,11 +390,15 @@ def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,m
 	ppl.plot([], [], color='black', marker= '.', linestyle='-', label='relative size of LCC')
 	ppl.plot([], [], color='black', linestyle='--', label='avg size of other CC')
 
+	min_yvalue = 1
+	max_yvalue = 1
 	for ax,net,measure in iterable:
 
 		for t in treatments:
 			lc_values = multidata[net+'_'+t][measure][0]
 			sc_values = multidata[net+'_'+t][measure][1]
+			min_yvalue = min(min_yvalue ,min(lc_values))
+			max_yvalue = max(max_yvalue ,max(sc_values))
 			x = [float(r)/len(lc_values)*fraction for r in range(len(lc_values))]
 			ppl.plot(ax,
 				x, 
@@ -411,6 +423,10 @@ def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,m
 		if not x_axis_label_done:
 			x_axis_label_done = True
 			ax.set_xlabel('fraction of removed nodes')
+
+
+		ax.set_autoscaley_on(False)
+		ax.set_ylim([min_yvalue,max_yvalue])
 
 	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
 

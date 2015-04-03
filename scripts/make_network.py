@@ -50,9 +50,6 @@ def import_graph(nodeFile, edgeFile, edgetype):
             for p,v in edgeProperties.iteritems():
                 G[e[0]][e[1]][p] = v[i]
 
-    print G.number_of_edges()
-    sys.exit()
-
     return G
 
 def measure_all(G):
