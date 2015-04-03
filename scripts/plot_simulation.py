@@ -10,7 +10,8 @@ import numpy as np
 from network_simulation import *
 
 #What to plot
-PATH = '/Users/sperez/Dropbox/3-LTSP_networks'
+PATH = '/Users/sperez/Desktop/LTSPnetworks'
+FOLDER = 'by_treatment'
 FIGURE_PATH = os.path.join(PATH,'plots')
 
 TREATMENTS = ['OM3','OM2','OM1','OM0']
@@ -19,13 +20,14 @@ MEASURES = [nx.betweenness_centrality,
 			nx.closeness_centrality, 
 			nx.eigenvector_centrality]
 
-PROP_TO_REMOVE = 0.1 #only removing this percent of nodes
-DEGREE_SEQUENCE = True
+PROP_TO_REMOVE = 1 #only removing this percent of nodes
+DEGREE_SEQUENCE = False
 
 def main(*argv):
 	'''handles user input and runs plsa'''
 	parser = argparse.ArgumentParser(description='This scripts produces robustness plots for networks')
 	parser.add_argument('-path', help='Path where the networks are', default = PATH)
+	parser.add_argument('-folder', help='Path where the networks are', default = FOLDER)
 	parser.add_argument('-treatment', help='Makes a plot for each treatment', action = 'store_true')
 	parser.add_argument('-measure', help='Makes a plot for each centrality measure', action = 'store_true')
 	parser.add_argument('-networks', nargs='*', help='Which network to use: SBS, IDF, etc.')
@@ -47,8 +49,11 @@ def main(*argv):
 		parser.print_help()
 		sys.exit()
 
-	net_path = args.path
-	networks = {('BAC_'+n if 'BAC_' not in n else n):TREATMENTS for n in args.networks}
+	net_path = os.path.join(args.path,args.folder)
+	if args.folder == 'by_zone':
+		networks = {('BAC_'+n if 'BAC_' not in n else n):[] for n in args.networks}
+	else:
+		networks = {('BAC_'+n if 'BAC_' not in n else n):TREATMENTS for n in args.networks}
 
 	if args.calculate:
 		print "\nCalculating structural properties of networks:"

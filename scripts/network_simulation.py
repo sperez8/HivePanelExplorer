@@ -29,7 +29,7 @@ import network_measures as nm
 RANDSEED = 2
 np.random.seed(RANDSEED)
 DPI = 400 #resolution of plot #low for testing
-ADD_RANDOM,ADD_SCALE = True, False #True,True
+ADD_RANDOM,ADD_SCALE = True, True #True,True
 RAND_NAME = 'random_network_size_of_'
 SCALE_NAME = 'scalefree_network_size_of_'
 
@@ -39,11 +39,12 @@ STRUCTURE_METRICS = [nm.number_of_nodes,
 					nm.connectance, 
 					nm.global_clustering_coefficient,
 					nm.fraction_of_possible_triangles,
-					nm.size_of_largest_clique,
+					#nm.size_of_largest_clique,
 					nm.degree_assortativity,
 					#nm.assortativity_of_degree_and_betweenness_centrality
 					nm.diameter_of_largest_connected_component,
-					nm.average_path_on_largest_connected_component]
+					#nm.average_path_on_largest_connected_component
+					]
 
 def make_graph(nodeFile, edgeFile):
 	'''imports the node and edge file and makes the graph'''
@@ -76,7 +77,12 @@ def get_multiple_graphs(networks, path):
 
 def get_network_fullnames(networkNames):
 	networks = []
+	key = networkNames.keys()[0]
+	if networkNames[key] == []:
+		print 'here'
+		return networkNames.keys(),None
 	for location,treatments in networkNames.iteritems():
+		location, treatments
 		for t in treatments:
 			networks.append(location+'_'+t)
 	return networks,treatments
@@ -125,10 +131,10 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 				ds.append(d)
 				fds.append(float(degrees.count(d))/N)
 
-			ppl.plot(ds,
+			ppl.scatter(ds,
 				fds,
 				marker='.',
-				linestyle='-',
+				#linestyle='-',
 				label=str(t),
 				color=colors[t])
 
@@ -148,22 +154,26 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 def network_structure(net_path,networkNames, filename):
 	networks,treatments = get_network_fullnames(networkNames)
 	graphs = get_multiple_graphs(networks,net_path)
-	table = np.zeros(shape=(len(STRUCTURE_METRICS)+2, len(networkNames)*len(treatments)+1), dtype='S100')
-	i,j = 0,1 # i is row, j is column
-	column = ['Zones','Treatments']
-	column.extend([sm.__name__.replace('_',' ').capitalize() for sm in STRUCTURE_METRICS])
-	table[:,0]=column
-	for location,treatments in networkNames.iteritems():
-		table[i,j]=location
-		for t in treatments:
-			i+=1
-			table[i,j]=t
-			for sm in STRUCTURE_METRICS:
+	if treatments != []:
+		table = np.zeros(shape=(len(STRUCTURE_METRICS)+2, len(networkNames)*len(treatments)+1), dtype='S100')
+		i,j = 0,1 # i is row, j is column
+		column = ['Zones','Treatments']
+		column.extend([sm.__name__.replace('_',' ').capitalize() for sm in STRUCTURE_METRICS])
+		table[:,0]=column
+		for location,treatments in networkNames.iteritems():
+			table[i,j]=location
+			for t in treatments:
 				i+=1
-				G = graphs[location+'_'+t]
-				table[i,j]=sm(G)
-			j+=1
-			i=0
+				table[i,j]=t
+				for sm in STRUCTURE_METRICS:
+					print "For network for zone {0} treatment {1} calculating metric {2}".format(location,t,sm.__name__)
+					i+=1
+					G = graphs[location+'_'+t]
+					table[i,j]=sm(G)
+				j+=1
+				i=0
+	else:
+		print 'rere'
 
 	np.savetxt(os.path.join(net_path,filename), table, delimiter=",", fmt='%s')
 	return None
