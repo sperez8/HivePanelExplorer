@@ -67,7 +67,7 @@ def main(*argv):
 		networks = {('BAC_'+n if 'BAC_' not in n else n):TREATMENTS for n in args.networks}
 
 	if args.calculate:
-		print "\nCalculating structural properties of networks:"
+		print "\nCalculating structural properties on "+edgetype" type of edges of networks:"
 		print ", ".join(networks), '\n'
 		fileName = 'table_of_measures_'+'_'.join(args.networks)+'_'+edgetype+'.csv'
 		network_structure(net_path,networks,fileName,edgetype)
@@ -112,7 +112,7 @@ def main(*argv):
 		print "and plotting "+str(fraction)+" fraction of nodes "+plot_by+" and with following measures:"
 		print ", ".join([m.__name__ for m in measures])
 		print "\n"
-		plot_multiple(net_path, networks, measures, plot_by, fraction, figurePath, add_random, add_scalefree)
+		plot_multiple(net_path, networks, measures, plot_by, fraction, figurePath, edgetype, add_random, add_scalefree)
 	
 if __name__ == "__main__":
 	main(*sys.argv[1:])

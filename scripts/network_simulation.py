@@ -45,18 +45,18 @@ STRUCTURE_METRICS = [nm.number_of_nodes,
 					#nm.average_path_on_largest_connected_component
 					]
 
-def make_graph(nodeFile, edgeFile):
+def make_graph(nodeFile, edgeFile,edgetype):
 	'''imports the node and edge file and makes the graph'''
-	G = import_graph(nodeFile,edgeFile)
+	G = import_graph(nodeFile,edgeFile,edgetype)
 	return G
 
-def get_multiple_graphs(networks, path, add_random, add_scalefree):
+def get_multiple_graphs(networks, path, edgetype, add_random, add_scalefree):
 	'''makes multiple graphs from names of networks and a file path'''
 	graphs = {}
 	for netName in networks:
 		nodeFile = os.path.join(path,netName+'_nodes.txt')
 		edgeFile = os.path.join(path,netName+'_edges.txt')
-		G = make_graph(nodeFile,edgeFile)
+		G = make_graph(nodeFile,edgeFile,edgetype)
 		graphs[netName] = G
 		print 'Made the networkx graph {0} with N = {1}, E = {2}.'.format(netName,G.number_of_nodes(),G.number_of_edges())
 		
@@ -87,13 +87,9 @@ def get_network_fullnames(networkNames):
 	return networks,treatments
 
 
-##########################################
-
-##########################################
-
-def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, plot_sequence):
+def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, plot_sequence, edgetype):
 	networks,treatments = get_network_fullnames(networkNames)
-	graphs = get_multiple_graphs(networks,net_path)
+	graphs = get_multiple_graphs(networks, net_path, edgetype, False, False)
 	data = {}
 	network = networkNames.keys()[0].split('_')
 	network = network[1]
@@ -145,14 +141,9 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 	return None
 
 
-
-##########################################
-
-##########################################
-
-def network_structure(net_path,networkNames, filename):
+def network_structure(net_path,networkNames, filename, edgetype):
 	networks,treatments = get_network_fullnames(networkNames)
-	graphs = get_multiple_graphs(networks,net_path)
+	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
 	if treatments != []:
 		table = np.zeros(shape=(len(STRUCTURE_METRICS)+2, len(networkNames)*len(treatments)+1), dtype='S100')
 		i,j = 0,1 # i is row, j is column
@@ -175,6 +166,28 @@ def network_structure(net_path,networkNames, filename):
 		print 'rere'
 
 	np.savetxt(os.path.join(net_path,filename), table, delimiter=",", fmt='%s')
+	return None
+
+def plot_multiple(net_path, networkNames, measures, plotby, fraction, figurePath, edgetype, add_random, add_scalefree):
+	networks,treatments = get_network_fullnames(networkNames)
+	graphs = get_multiple_graphs(networks,net_path,edgetype, add_random, add_scalefree)
+	data = {}
+	for netName,G in graphs.iteritems():
+		print 'Running simulation on {0}.'.format(netName)
+		rand_lc_sizes, rand_sc_sizes = random_attack(G, fraction)
+		data[netName] = {'random':(rand_lc_sizes, rand_sc_sizes)}
+		for m in measures:
+			targ_lc_sizes, targ_sc_sizes = target_attack(G, m, fraction)
+			data[netName][m.__name__] = (targ_lc_sizes, targ_sc_sizes)
+	networkNamesPlot = networkNames.keys()
+	if add_random:
+		networkNamesPlot.extend([RAND_NAME+n for n in networkNames.keys()])
+	if add_scalefree:
+		networkNamesPlot.extend([SCALE_NAME+n for n in networkNames.keys()])
+	if plotby == 'by_treatment':
+		multi_plot_robustness_by_treatment(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path)
+	elif plotby == 'by_measure':
+		multi_plot_robustness_by_measure(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path)
 	return None
 
 
@@ -271,30 +284,6 @@ def plot_individual(path,networkNames,fraction):
 			data[m.__name__] = (targ_lc_sizes, targ_sc_sizes)
 		plot_robustness(data, netName)
 	return None
-
-
-def plot_multiple(net_path, networkNames, measures, plotby, fraction, figurePath, add_random, add_scalefree):
-	networks,treatments = get_network_fullnames(networkNames)
-	graphs = get_multiple_graphs(networks,net_path, add_random, add_scalefree)
-	data = {}
-	for netName,G in graphs.iteritems():
-		print 'Running simulation on {0}.'.format(netName)
-		rand_lc_sizes, rand_sc_sizes = random_attack(G, fraction)
-		data[netName] = {'random':(rand_lc_sizes, rand_sc_sizes)}
-		for m in measures:
-			targ_lc_sizes, targ_sc_sizes = target_attack(G, m, fraction)
-			data[netName][m.__name__] = (targ_lc_sizes, targ_sc_sizes)
-	networkNamesPlot = networkNames.keys()
-	if add_random:
-		networkNamesPlot.extend([RAND_NAME+n for n in networkNames.keys()])
-	if add_scalefree:
-		networkNamesPlot.extend([SCALE_NAME+n for n in networkNames.keys()])
-	if plotby == 'by_treatment':
-		multi_plot_robustness_by_treatment(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path)
-	elif plotby == 'by_measure':
-		multi_plot_robustness_by_measure(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path)
-	return None
-
 
 def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels, measures, fraction, net_path):
 	'''plots the simulations in a multiplot: each row is a location and each column is a treatment'''

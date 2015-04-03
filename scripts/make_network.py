@@ -29,7 +29,7 @@ def import_graphml(graphmlFile):
     G = nx.read_graphml(graphmlFile)
     return G
 
-def import_graph(nodeFile, edgeFile):
+def import_graph(nodeFile, edgeFile, edgetype):
     '''make a networkx graph from a csv or tsv using methods from the hive class'''
     hive = Hive.Hive(debug=False)
     hive.get_nodes(nodeFile)
@@ -42,9 +42,16 @@ def import_graph(nodeFile, edgeFile):
             G.node[n][p] = v[i]
 
     for i,e in enumerate(zip(sources, targets)):
-        for p,v in edgeProperties.iteritems():
-            G[e[0]][e[1]][p] = v[i]
+        if edgetype == 'pos' and 'mutualExclusion' in edgeProperties['interactionType'][i]:
+                G.remove_edge(e[0],e[1])
+        elif edgetype == 'neg' and 'copresence' in edgeProperties['interactionType'][i]:
+            G.remove_edge(e[0],e[1])
+        else:
+            for p,v in edgeProperties.iteritems():
+                G[e[0]][e[1]][p] = v[i]
 
+    print G.number_of_edges()
+    sys.exit()
 
     return G
 
