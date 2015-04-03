@@ -29,7 +29,6 @@ import network_measures as nm
 RANDSEED = 2
 np.random.seed(RANDSEED)
 DPI = 400 #resolution of plot #low for testing
-ADD_RANDOM,ADD_SCALE = True, True #True,True
 RAND_NAME = 'random_network_size_of_'
 SCALE_NAME = 'scalefree_network_size_of_'
 
@@ -51,7 +50,7 @@ def make_graph(nodeFile, edgeFile):
 	G = import_graph(nodeFile,edgeFile)
 	return G
 
-def get_multiple_graphs(networks, path):
+def get_multiple_graphs(networks, path, add_random, add_scalefree):
 	'''makes multiple graphs from names of networks and a file path'''
 	graphs = {}
 	for netName in networks:
@@ -62,12 +61,12 @@ def get_multiple_graphs(networks, path):
 		print 'Made the networkx graph {0} with N = {1}, E = {2}.'.format(netName,G.number_of_nodes(),G.number_of_edges())
 		
 		##adding random graph for comparaison
-		if ADD_RANDOM:
+		if add_random:
 			M = nx.number_of_edges(G)
 			N = nx.number_of_nodes(G)
 			H = nx.gnm_random_graph(N,M,seed=RANDSEED)
 			graphs[RAND_NAME+netName] = H
-		if ADD_SCALE:
+		if add_scalefree:
 			N = nx.number_of_nodes(G)
 			H = nx.scale_free_graph(N,seed=RANDSEED)
 			UH = H.to_undirected()
@@ -274,9 +273,9 @@ def plot_individual(path,networkNames,fraction):
 	return None
 
 
-def plot_multiple(net_path, networkNames, measures, plotby, fraction, figurePath):
+def plot_multiple(net_path, networkNames, measures, plotby, fraction, figurePath, add_random, add_scalefree):
 	networks,treatments = get_network_fullnames(networkNames)
-	graphs = get_multiple_graphs(networks,net_path)
+	graphs = get_multiple_graphs(networks,net_path, add_random, add_scalefree)
 	data = {}
 	for netName,G in graphs.iteritems():
 		print 'Running simulation on {0}.'.format(netName)
@@ -286,9 +285,9 @@ def plot_multiple(net_path, networkNames, measures, plotby, fraction, figurePath
 			targ_lc_sizes, targ_sc_sizes = target_attack(G, m, fraction)
 			data[netName][m.__name__] = (targ_lc_sizes, targ_sc_sizes)
 	networkNamesPlot = networkNames.keys()
-	if ADD_RANDOM:
+	if add_random:
 		networkNamesPlot.extend([RAND_NAME+n for n in networkNames.keys()])
-	if ADD_SCALE:
+	if add_scalefree:
 		networkNamesPlot.extend([SCALE_NAME+n for n in networkNames.keys()])
 	if plotby == 'by_treatment':
 		multi_plot_robustness_by_treatment(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path)
