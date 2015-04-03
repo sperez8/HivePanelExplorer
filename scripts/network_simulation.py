@@ -141,7 +141,7 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 	return None
 
 
-def network_structure(net_path,networkNames, filename, edgetype):
+def network_structure(net_path,networkNames, filePath, edgetype):
 	networks,treatments = get_network_fullnames(networkNames)
 	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
 	if treatments != []:
@@ -165,7 +165,7 @@ def network_structure(net_path,networkNames, filename, edgetype):
 	else:
 		print 'rere'
 
-	np.savetxt(os.path.join(net_path,filename), table, delimiter=",", fmt='%s')
+	np.savetxt(filePath, table, delimiter=",", fmt='%s')
 	return None
 
 def plot_multiple(net_path, networkNames, measures, plotby, fraction, figurePath, edgetype, add_random, add_scalefree):

@@ -69,8 +69,8 @@ def main(*argv):
 	if args.calculate:
 		print "\nCalculating structural properties on "+edgetype+" type of edges of networks:"
 		print ", ".join(networks), '\n'
-		fileName = 'table_of_measures_'+'_'.join(args.networks)+'_'+edgetype+'.csv'
-		network_structure(net_path,networks,fileName,edgetype)
+		filePath = os.path.join(FIGURE_PATH,'table_of_measures_'+'_'.join(args.networks)+'_'+edgetype+'.csv')
+		network_structure(net_path,networks,filePath,edgetype)
 
 	elif args.distribution:
 		for net in networks.keys():
