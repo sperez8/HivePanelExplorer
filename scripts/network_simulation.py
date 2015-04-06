@@ -45,6 +45,10 @@ STRUCTURE_METRICS = [nm.number_of_nodes,
 					#nm.average_path_on_largest_connected_component
 					]
 
+INPUT_METRICS = [nm.richness,
+				nm.shannon_diversity,
+				]
+
 def make_graph(nodeFile, edgeFile,edgetype):
 	'''imports the node and edge file and makes the graph'''
 	G = import_graph(nodeFile,edgeFile,edgetype)
@@ -141,7 +145,51 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 	return None
 
 
-def network_structure(net_path,networkNames, filePath, edgetype):
+
+
+#####################################################################################
+
+#####################################################################################
+
+#####################################################################################
+
+
+
+
+def make_table(net_path, networkNames, filePath, edgetype, inputFolder, inputFileEnd):
+	networks,treatments = get_network_fullnames(networkNames)
+	#graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
+
+	samples = {}
+	for n in networks:
+		samples[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S100')
+	print samples.keys()
+
+	table = np.zeros(shape=(len(INPUT_METRICS)+2, len(networkNames)*len(treatments)+1), dtype='S100')
+	i,j = 0,1 # i is row, j is column
+	column = ['Zones','Treatments']
+	column.extend([sm.__name__.replace('_',' ').capitalize() for sm in INPUT_METRICS])
+	table[:,0]=column
+	for location,treatments in networkNames.iteritems():
+		table[i,j]=location
+		for t in treatments:
+			i+=1
+			table[i,j]=t
+			for im in INPUT_METRICS:
+				print "For input table from zone {0} treatment {1} measuring {2}".format(location,t,im.__name__)
+				i+=1
+				S = samples[location+'_'+t]
+				table[i,j]=im(S)
+			j+=1
+			i=0
+
+	print "Saving table: ", filePath
+
+	np.savetxt(filePath, table, delimiter=",", fmt='%s')
+	return None
+
+
+def network_structure(net_path, networkNames, filePath, edgetype):
 	networks,treatments = get_network_fullnames(networkNames)
 	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
 	if treatments != []:
@@ -163,7 +211,7 @@ def network_structure(net_path,networkNames, filePath, edgetype):
 				j+=1
 				i=0
 	else:
-		print 'rere'
+		print 'Can only do for multiple treatments. FIX ME'
 
 	np.savetxt(filePath, table, delimiter=",", fmt='%s')
 	return None

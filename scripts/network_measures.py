@@ -66,6 +66,24 @@ def average_path_on_largest_connected_component(G):
 #     H.add_edges_from(G.edges())
 #     return nx.numeric_assortativity_coefficient(H,'att')
 
+def remove_headers(S):
+    return S[1:-1,1:-1].astype(np.float)
+
+def normalize(S):
+    col_sums = S.sum(axis=0)
+    nS = S / col_sums[np.newaxis,:]
+    return nS
+
+
+def richness(S):
+    S = remove_headers(S)
+    return S.shape[0]
+
+def shannon_diversity(S):
+    D = 0
+    S = normalize(remove_headers(S))
+    D = -sum(np.mean(row) * np.log(np.mean(row)) for row in S)    
+    return D
 
 
 NODES = os.path.join(_root_dir, 'tests', 'test_nodes_friends.txt')
