@@ -91,6 +91,77 @@ def get_network_fullnames(networkNames):
 	return networks,treatments
 
 
+
+#####################################################################################
+
+#####################################################################################
+
+#####################################################################################
+
+
+
+
+
+def load_samples_info(samplesFile):
+	print samplesFile
+	samplesTable = np.loadtxt(samplesFile, comments=None, delimiter='\t', dtype='S100')
+	return samplesTable
+
+def get_info_per_samples(samplesFile, samples, feature):
+	'''gets a list of samples and an ecological feature,
+	 and returns a dicttionary of sample values for the desired feature'''
+	sampleInfo = {}
+	table = load_samples_info(samplesFile)
+	for s in samples:
+		row = np.where(table[:,0]==s)[0][0]
+		column = np.where(table[0,:]==feature)[0][0]
+		sampleInfo[s] = table[row,column]
+	return sampleInfo
+
+def make_OTU_feature_table(net_path, networkNames, inputFolder, inputFileEnd, samplesFile, features):
+	'''makes an OTU table with avg depth and othe features per OTU'''
+
+	networks,treatments = get_network_fullnames(networkNames)
+
+	otuTable = {}
+	for n in networks:
+		otuTable[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S100')
+	print otuTable.keys()
+
+	for location,treatments in networkNames.iteritems():
+		for t in treatments:
+			abundances = otuTable[location+'_'+t]
+			sampleNames = abundances[0,1:-1]
+			sampleCounts = abundances[1:-1,1:-1].astype(np.float).sum(axis=0)
+			for i,f in enumerate(features):
+				print "For input table from zone {0} treatment {1} calculating feature {2}".format(location,t,f)
+				featureTable = np.zeros(shape=(abundances.shape[0]-1,2+len(features)), dtype='S100')
+				header = ['OTUs']
+				header.extend(features)
+				header.extend(['Taxonomy'])
+				featureTable[0,:] = np.array(header)
+				fdist = get_info_per_samples(samplesFile, sampleNames, f)
+				print fdist
+
+				for r,row in enumerate(abundances[1:-1,]):
+					otu = row[0]
+					ab = row[1:-1].astype(np.float)/sampleCounts
+					tax = row[-1]
+					featureTable[r+1][0]=otu
+					featureTable[r+1][-1]='tax'#tax
+					fcount = 0
+					for j,s in enumerate(sampleNames):
+						print s, fdist[s]
+						fcount += ab[j]*float(fdist[s]) #abundance times sample feature value
+					featureTable[r+1][i+1]=np.mean(fcount)
+				print featureTable
+				sys.exit()
+
+	print "Saving table: ", filePath
+
+	np.savetxt(filePath, table, delimiter=",", fmt='%s')
+	return None
+
 def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, plot_sequence, edgetype):
 	networks,treatments = get_network_fullnames(networkNames)
 	graphs = get_multiple_graphs(networks, net_path, edgetype, False, False)
@@ -144,26 +215,14 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 	print "Saving the figure file: ", figurePath
 	return None
 
-
-
-
-#####################################################################################
-
-#####################################################################################
-
-#####################################################################################
-
-
-
-
-def make_table(net_path, networkNames, filePath, edgetype, inputFolder, inputFileEnd):
+def make_ecological_table(net_path, networkNames, filePath, edgetype, inputFolder, inputFileEnd):
 	networks,treatments = get_network_fullnames(networkNames)
 	#graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
 
-	samples = {}
+	otuTable = {}
 	for n in networks:
-		samples[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S100')
-	print samples.keys()
+		otuTable[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S100')
+	print otuTable.keys()
 
 	table = np.zeros(shape=(len(INPUT_METRICS)+2, len(networkNames)*len(treatments)+1), dtype='S100')
 	i,j = 0,1 # i is row, j is column
@@ -178,7 +237,7 @@ def make_table(net_path, networkNames, filePath, edgetype, inputFolder, inputFil
 			for im in INPUT_METRICS:
 				print "For input table from zone {0} treatment {1} measuring {2}".format(location,t,im.__name__)
 				i+=1
-				S = samples[location+'_'+t]
+				S = otuTable[location+'_'+t]
 				table[i,j]=im(S)
 			j+=1
 			i=0
@@ -488,8 +547,10 @@ def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,m
 
 
 
-'''
-to do:
-switch the oms and the measures to make a diff graph
-run on all networks
-'''
+
+
+
+
+
+
+

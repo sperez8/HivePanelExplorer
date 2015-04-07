@@ -13,6 +13,7 @@ from network_simulation import *
 PATH = '/Users/sperez/Desktop/LTSPnetworks'
 FOLDER = 'by_treatment'
 FIGURE_PATH = os.path.join(PATH,'plots')
+SAMPLES_FILE = os.path.join(PATH, 'Bacterialtags_info_edited.txt')
 
 INPUT_FOLDER = 'input'
 INPUT_FILE_END = '_BAC-filtered-lineages_final.txt'
@@ -36,6 +37,7 @@ def main(*argv):
 	parser.add_argument('-calculate', help='Calculates networks properties', action = 'store_true')
 	parser.add_argument('-distribution', help='Plots degree distribution', action = 'store_true')
 	parser.add_argument('-assess', help='Assess ecological properties', action = 'store_true')
+	parser.add_argument('-maketable', help='Make OTU table with eclogical measures', action = 'store_true')
 	parser.add_argument('-edgetype', help='Specify which types edges to use', default = 'both')
 	#arguments used when running simulations
 	parser.add_argument('-fraction', help='Fraction of nodes to remove', default = PROP_TO_REMOVE)
@@ -47,16 +49,11 @@ def main(*argv):
 	args = parser.parse_args()
 	
 	#check that one of the options is true
-	choices = [args.simulate,args.distribution,args.calculate,args.assess]
-	if sum([1 for c in choices if c])>1:
+	choices = [args.simulate,args.distribution,args.calculate,args.assess,args.maketable]
+	if sum([1 for c in choices if c])>1 or sum([1 for c in choices if c])==0:
 		print "\n***You must specify one of the three options to calculate, simulate or plot the distribution.***\n"
 		parser.print_help()
 		sys.exit()	
-
-	if (not args.simulate and not args.distribution and not args.calculate and not args.assess):
-		print "\n***You must specify what you want to plot or measure.***\n"
-		parser.print_help()
-		sys.exit()
 
 	if args.edgetype not in ['both','pos','neg']:
 		print "\n***You must specify what edges you want to use to build the network: both, pos or neg.***\n"
@@ -70,6 +67,7 @@ def main(*argv):
 	else:
 		networks = {('BAC_'+n if 'BAC_' not in n else n):TREATMENTS for n in args.networks}
 
+	###depending on option specified, choose different things
 	if args.calculate:
 		print "\nCalculating structural properties on "+edgetype+" type of edges of networks:"
 		print ", ".join(networks), '\n'
@@ -80,7 +78,13 @@ def main(*argv):
 		print "\nCalculating ecological metrics of sample collection for the following networks:"
 		print ", ".join(networks), '\n'
 		filePath = os.path.join(FIGURE_PATH,'ecological_measures_'+'_'.join(args.networks)+'.csv')
-		make_table(net_path,networks,filePath,edgetype,os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END)
+		make_ecological_table(net_path,networks,filePath,edgetype,os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END)
+
+	elif args.maketable:
+		print "\nMaking OTU table with ecological metrics for the following networks:"
+		print ", ".join(networks), '\n'
+		features = ['Soil Horizon']
+		make_OTU_feature_table(net_path, networks, os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END, SAMPLES_FILE, features)
 
 	elif args.distribution:
 		for net in networks.keys():
