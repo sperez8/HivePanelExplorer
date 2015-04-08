@@ -13,6 +13,7 @@ import argparse
 import numpy as np
 from math import pi
 import hive as hive
+import scipy.stats
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))
 _root_dir = os.path.dirname(_cur_dir)
@@ -21,6 +22,8 @@ sys.path.insert(0, _root_dir)
 import networkx as nx
 from make_network import *
 
+DECIMALS = 3 #for rounding measures
+
 
 def number_of_nodes(G):
 	return G.number_of_nodes()
@@ -28,23 +31,32 @@ def number_of_nodes(G):
 def number_of_edges(G):
 	return G.number_of_edges()
 
+def number_of_nodes_of_largest_connected_component(G):
+    return nx.connected_component_subgraphs(G)[0].number_of_nodes()
+
+def number_of_edges_of_largest_connected_component(G):
+    return nx.connected_component_subgraphs(G)[0].number_of_edges()
+
+def number_of_components(G):
+    return len(nx.connected_component_subgraphs(G))
+
 def average_degree(G):
-    return np.mean(G.degree().values())
+    return round(np.mean(G.degree().values()), DECIMALS)
 
 def connectance(G):
-    return nx.density(G)
+    return round(nx.density(G), DECIMALS)
 
 def global_clustering_coefficient(G):
-    return nx.average_clustering(G)
+    return round(nx.average_clustering(G), DECIMALS)
 
 def fraction_of_possible_triangles(G):
-    return nx.transitivity(G)
+    return round(nx.transitivity(G), DECIMALS)
 
 def size_of_largest_clique(G):
     return nx.graph_clique_number(G)
 
 def degree_assortativity(G):
-    return nx.degree_assortativity_coefficient(G)
+    return round(nx.degree_assortativity_coefficient(G), DECIMALS)
 
 def diameter_of_largest_connected_component(G):
     H = nx.connected_component_subgraphs(G)[0]
@@ -52,19 +64,23 @@ def diameter_of_largest_connected_component(G):
 
 def average_path_on_largest_connected_component(G):
     H = nx.connected_component_subgraphs(G)[0]
-    return nx.average_shortest_path_length(H)
+    return round(nx.average_shortest_path_length(H), DECIMALS)
+
+def correlation_of_degree_and_betweenness_centrality(G):
+    bc = nx.betweenness_centrality(G)
+    d = nx.degree(G)
+    bcn = []
+    dn = []
+    for n in G.nodes():
+        bcn.append(bc[n])
+        dn.append(d[n])
+
+    r = scipy.stats.spearmanr(dn, bcn)
+    return str((round(r[0],DECIMALS),round(r[1],5)))
 
 
+### Ecological measures
 
-
-# def assortativity_of_degree_and_betweenness_centrality(G):
-#     bc = nx.betweenness_centrality(G)
-#     H = nx.Graph()
-#     for n in G.nodes(): 
-#         H.add_nodes_from(n, att = bc[n])
-#         print n,bc[n]
-#     H.add_edges_from(G.edges())
-#     return nx.numeric_assortativity_coefficient(H,'att')
 
 def remove_headers(S):
     return S[1:-1,1:-1].astype(np.float)
@@ -84,6 +100,61 @@ def shannon_diversity(S):
     S = normalize(remove_headers(S))
     D = -sum(np.mean(row) * np.log(np.mean(row)) for row in S)    
     return D
+
+
+########## Measures using an OTU table and features
+
+def correlation_of_edge_depth(G,featureTable):
+    feature = 'Soil Horizon avg'
+    return compute_feature_correlation(G,feature,featureTable)
+
+
+def correlation_of_degree_and_depth(G,featureTable):
+    feature = 'Soil Horizon avg'
+    return compute_feature_degree_correlation(G,feature,featureTable)
+    
+def compute_feature_degree_correlation(G,feature,featureTable):
+    col = np.where(featureTable[0,:]==feature)[0][0]
+    d = nx.degree(G)
+    H = nx.Graph()
+    degrees = []
+    depths = []
+    for n in d.keys():
+        row = findRow(n,featureTable)
+        if row:
+            degrees.append(d[n])
+            depths.append(featureTable[row][col])
+        else: continue
+    r = scipy.stats.spearmanr(degrees, depths)
+    return str((round(r[0],DECIMALS),round(r[1],5)))
+
+
+def compute_feature_correlation(G,feature,featureTable):
+    col = np.where(featureTable[0,:]==feature)[0][0]
+    iF = []
+    jF = []
+    for (i,j) in G.edges():
+        irow = findRow(i,featureTable)
+        jrow = findRow(j,featureTable)
+        if irow and jrow:
+            iF.append(featureTable[irow][col])
+            jF.append(featureTable[jrow][col])
+        else:
+            continue
+    r = scipy.stats.spearmanr(iF,jF)
+    return str((round(r[0],DECIMALS),round(r[1],5)))
+
+
+
+def findRow(otu,table):
+    if 'Otu' in otu:
+        row = np.where(table==otu.replace('OTU-',''))[0][0]
+    else:
+        row = None
+    return row
+
+
+
 
 
 NODES = os.path.join(_root_dir, 'tests', 'test_nodes_friends.txt')

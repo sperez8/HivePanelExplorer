@@ -12,6 +12,7 @@ import os
 import argparse
 import numpy as np
 import prettyplotlib as ppl
+import math
 
 # prettyplotlib imports 
 import matplotlib.pyplot as plt
@@ -31,27 +32,35 @@ np.random.seed(RANDSEED)
 DPI = 400 #resolution of plot #low for testing
 RAND_NAME = 'random_network_size_of_'
 SCALE_NAME = 'scalefree_network_size_of_'
+FILTER_NON_OTUS = True
+
 
 STRUCTURE_METRICS = [nm.number_of_nodes, 
 					nm.number_of_edges,
+					nm.number_of_components,
+					nm.number_of_nodes_of_largest_connected_component, 
+					nm.number_of_edges_of_largest_connected_component,
 					nm.average_degree, 
 					nm.connectance, 
 					nm.global_clustering_coefficient,
 					nm.fraction_of_possible_triangles,
 					#nm.size_of_largest_clique,
-					nm.degree_assortativity,
-					#nm.assortativity_of_degree_and_betweenness_centrality
 					nm.diameter_of_largest_connected_component,
-					#nm.average_path_on_largest_connected_component
+					#nm.average_path_on_largest_connected_component,
+					nm.degree_assortativity,
+					nm.correlation_of_degree_and_betweenness_centrality,
 					]
 
 INPUT_METRICS = [nm.richness,
 				nm.shannon_diversity,
 				]
+OTU_METRICS = [nm.correlation_of_degree_and_depth,
+				nm.correlation_of_edge_depth,
+				]
 
 def make_graph(nodeFile, edgeFile,edgetype):
 	'''imports the node and edge file and makes the graph'''
-	G = import_graph(nodeFile,edgeFile,edgetype)
+	G = import_graph(nodeFile,edgeFile,edgetype,FILTER_NON_OTUS)
 	return G
 
 def get_multiple_graphs(networks, path, edgetype, add_random, add_scalefree):
@@ -103,7 +112,6 @@ def get_network_fullnames(networkNames):
 
 
 def load_samples_info(samplesFile):
-	print samplesFile
 	samplesTable = np.loadtxt(samplesFile, comments=None, delimiter='\t', dtype='S100')
 	return samplesTable
 
@@ -118,7 +126,7 @@ def get_info_per_samples(samplesFile, samples, feature):
 		sampleInfo[s] = table[row,column]
 	return sampleInfo
 
-def make_OTU_feature_table(net_path, networkNames, inputFolder, inputFileEnd, samplesFile, features):
+def make_OTU_feature_table(net_path, networkNames, inputFolder, inputFileEnd, samplesFile, features, path, featureFile):
 	'''makes an OTU table with avg depth and othe features per OTU'''
 
 	networks,treatments = get_network_fullnames(networkNames)
@@ -126,40 +134,45 @@ def make_OTU_feature_table(net_path, networkNames, inputFolder, inputFileEnd, sa
 	otuTable = {}
 	for n in networks:
 		otuTable[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S100')
-	print otuTable.keys()
+
+	header = ['OTUs','Abundance']
+	for f in features:
+		header.append(f+ ' avg')
+		header.append(f+ ' std')
+	header.append('Taxonomy')
+				
 
 	for location,treatments in networkNames.iteritems():
 		for t in treatments:
 			abundances = otuTable[location+'_'+t]
 			sampleNames = abundances[0,1:-1]
 			sampleCounts = abundances[1:-1,1:-1].astype(np.float).sum(axis=0)
+			featureTable = np.zeros(shape=(abundances.shape[0]-1,3+len(features)*2), dtype='S100')
+			featureTable[0,:] = np.array(header)
 			for i,f in enumerate(features):
 				print "For input table from zone {0} treatment {1} calculating feature {2}".format(location,t,f)
-				featureTable = np.zeros(shape=(abundances.shape[0]-1,2+len(features)), dtype='S100')
-				header = ['OTUs']
-				header.extend(features)
-				header.extend(['Taxonomy'])
-				featureTable[0,:] = np.array(header)
-				fdist = get_info_per_samples(samplesFile, sampleNames, f)
-				print fdist
-
+				fdist = get_info_per_samples(samplesFile, sampleNames, f)				
 				for r,row in enumerate(abundances[1:-1,]):
 					otu = row[0]
 					ab = row[1:-1].astype(np.float)/sampleCounts
 					tax = row[-1]
 					featureTable[r+1][0]=otu
-					featureTable[r+1][-1]='tax'#tax
-					fcount = 0
-					for j,s in enumerate(sampleNames):
-						print s, fdist[s]
-						fcount += ab[j]*float(fdist[s]) #abundance times sample feature value
-					featureTable[r+1][i+1]=np.mean(fcount)
-				print featureTable
-				sys.exit()
+					featureTable[r+1][1]=np.mean(ab)
+					featureTable[r+1][-1]=tax
+					fcount = []
+					stdCount = []
+					featureValues = [float(fdist[s]) for s in sampleNames]
+					avg = np.average(featureValues, weights = ab)
+					std = math.sqrt(np.average((featureValues-avg)**2, weights=ab))
+					featureTable[r+1][i+2]=avg
+					featureTable[r+1][i+3]=std
 
-	print "Saving table: ", filePath
 
-	np.savetxt(filePath, table, delimiter=",", fmt='%s')
+			fileName = featureFile+'_{0}_{1}.txt'.format(location,t)
+			tableFile = os.path.join(path,fileName)
+			print "Saving table: ",tableFile
+
+			np.savetxt(tableFile, featureTable, delimiter="\t", fmt='%s')
 	return None
 
 def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, plot_sequence, edgetype):
@@ -222,7 +235,6 @@ def make_ecological_table(net_path, networkNames, filePath, edgetype, inputFolde
 	otuTable = {}
 	for n in networks:
 		otuTable[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S100')
-	print otuTable.keys()
 
 	table = np.zeros(shape=(len(INPUT_METRICS)+2, len(networkNames)*len(treatments)+1), dtype='S100')
 	i,j = 0,1 # i is row, j is column
@@ -244,35 +256,54 @@ def make_ecological_table(net_path, networkNames, filePath, edgetype, inputFolde
 
 	print "Saving table: ", filePath
 
-	np.savetxt(filePath, table, delimiter=",", fmt='%s')
+	np.savetxt(filePath, table, delimiter="\t", fmt='%s')
 	return None
 
 
-def network_structure(net_path, networkNames, filePath, edgetype):
+def network_structure(net_path, networkNames, filePath, edgetype, inputFolder, inputFileEnd,featurePath, featureFile):
 	networks,treatments = get_network_fullnames(networkNames)
 	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
+
+	otuTable = {}
+	for n in networks:
+		otuTable[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S100')
+
 	if treatments != []:
-		table = np.zeros(shape=(len(STRUCTURE_METRICS)+2, len(networkNames)*len(treatments)+1), dtype='S100')
+		table = np.zeros(shape=(len(INPUT_METRICS)+len(STRUCTURE_METRICS)+len(OTU_METRICS)+2, len(networkNames)*len(treatments)+1), dtype='S100')
 		i,j = 0,1 # i is row, j is column
 		column = ['Zones','Treatments']
+		column.extend([sm.__name__.replace('_',' ').capitalize() for sm in INPUT_METRICS])
 		column.extend([sm.__name__.replace('_',' ').capitalize() for sm in STRUCTURE_METRICS])
+		column.extend([om.__name__.replace('_',' ').capitalize() for om in OTU_METRICS])
 		table[:,0]=column
 		for location,treatments in networkNames.iteritems():
 			table[i,j]=location
 			for t in treatments:
 				i+=1
 				table[i,j]=t
+				for im in INPUT_METRICS:
+					print "For input table from zone {0} treatment {1} measuring {2}".format(location,t,im.__name__)
+					i+=1
+					S = otuTable[location+'_'+t]
+					table[i,j]=im(S)
 				for sm in STRUCTURE_METRICS:
 					print "For network for zone {0} treatment {1} calculating metric {2}".format(location,t,sm.__name__)
 					i+=1
 					G = graphs[location+'_'+t]
 					table[i,j]=sm(G)
+				for om in OTU_METRICS:
+					print "For network for zone {0} treatment {1} calculating metric {2}".format(location,t,om.__name__)
+					i+=1
+					G = graphs[location+'_'+t]
+					featureTable = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
+					otufileName = np.loadtxt(featureTable,delimiter='\t', dtype='S100')
+					table[i,j]=om(G,otufileName)
 				j+=1
 				i=0
 	else:
 		print 'Can only do for multiple treatments. FIX ME'
 
-	np.savetxt(filePath, table, delimiter=",", fmt='%s')
+	np.savetxt(filePath, table, delimiter="\t", fmt='%s')
 	return None
 
 def plot_multiple(net_path, networkNames, measures, plotby, fraction, figurePath, edgetype, add_random, add_scalefree):

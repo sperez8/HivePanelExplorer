@@ -29,7 +29,7 @@ def import_graphml(graphmlFile):
     G = nx.read_graphml(graphmlFile)
     return G
 
-def import_graph(nodeFile, edgeFile, edgetype):
+def import_graph(nodeFile, edgeFile, edgetype, filterNonOtus):
     '''make a networkx graph from a csv or tsv using methods from the hive class'''
     hive = Hive.Hive(debug=False)
     hive.get_nodes(nodeFile)
@@ -50,6 +50,10 @@ def import_graph(nodeFile, edgeFile, edgetype):
             for p,v in edgeProperties.iteritems():
                 G[e[0]][e[1]][p] = v[i]
 
+    if filterNonOtus:
+        for node in G.nodes():
+            if 'Otu' not in node:
+                G.remove_node(node)
     return G
 
 def measure_all(G):

@@ -18,6 +18,10 @@ SAMPLES_FILE = os.path.join(PATH, 'Bacterialtags_info_edited.txt')
 INPUT_FOLDER = 'input'
 INPUT_FILE_END = '_BAC-filtered-lineages_final.txt'
 
+FEATURE_PATH = os.path.join(PATH,'tables')
+FEATURE_FILE = 'feature_table'
+FEATURES = ['Soil Horizon']
+
 TREATMENTS = ['OM3','OM2','OM1','OM0']
 MEASURES = [nx.betweenness_centrality, 
 			nx.degree_centrality,
@@ -71,20 +75,19 @@ def main(*argv):
 	if args.calculate:
 		print "\nCalculating structural properties on "+edgetype+" type of edges of networks:"
 		print ", ".join(networks), '\n'
-		filePath = os.path.join(FIGURE_PATH,'table_of_measures_'+'_'.join(args.networks)+'_'+edgetype+'.csv')
-		network_structure(net_path,networks,filePath,edgetype)
+		filePath = os.path.join(FIGURE_PATH,'table_of_measures_'+'_'.join(args.networks)+'_'+edgetype+'.txt')
+		network_structure(net_path,networks,filePath,edgetype, os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END, FEATURE_PATH, FEATURE_FILE)
 
 	elif args.assess:
 		print "\nCalculating ecological metrics of sample collection for the following networks:"
 		print ", ".join(networks), '\n'
-		filePath = os.path.join(FIGURE_PATH,'ecological_measures_'+'_'.join(args.networks)+'.csv')
+		filePath = os.path.join(FIGURE_PATH,'ecological_measures_'+'_'.join(args.networks)+'.txt')
 		make_ecological_table(net_path,networks,filePath,edgetype,os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END)
 
 	elif args.maketable:
 		print "\nMaking OTU table with ecological metrics for the following networks:"
 		print ", ".join(networks), '\n'
-		features = ['Soil Horizon']
-		make_OTU_feature_table(net_path, networks, os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END, SAMPLES_FILE, features)
+		make_OTU_feature_table(net_path, networks, os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END, SAMPLES_FILE, FEATURES, FEATURE_PATH, FEATURE_FILE)
 
 	elif args.distribution:
 		for net in networks.keys():
@@ -94,7 +97,7 @@ def main(*argv):
 				figureName = 'plot_distribution_'+net+'_'+edgetype+'.png'
 			figurePath = os.path.join(FIGURE_PATH,figureName)
 			print "\nPlotting the degree distribution on "+edgetype+" type of edges of network ", net
-			plot_degree_distribution_per_treatment(net_path, {net: networks[net]}, figurePath, DEGREE_SEQUENCE, edgetype)
+			plot_degree_distribution_per_treatment(net_path, {net: networks[net]}, figurePath, DEGREE_SEQUENCE, edgetype, FEATURE_PATH, FEATURE_FILE)
 
 	elif args.simulate:
 		if not args.treatment and not args.measure:
