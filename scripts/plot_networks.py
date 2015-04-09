@@ -26,7 +26,8 @@ TREATMENTS = ['OM3','OM2','OM1','OM0']
 MEASURES = [nx.betweenness_centrality, 
 			nx.degree_centrality,
 			nx.closeness_centrality, 
-			nx.eigenvector_centrality]
+			#nx.eigenvector_centrality,
+			]
 
 PROP_TO_REMOVE = 1 #only removing this percent of nodes
 DEGREE_SEQUENCE = False
@@ -97,7 +98,7 @@ def main(*argv):
 				figureName = 'plot_distribution_'+net+'_'+edgetype+'.png'
 			figurePath = os.path.join(FIGURE_PATH,figureName)
 			print "\nPlotting the degree distribution on "+edgetype+" type of edges of network ", net
-			plot_degree_distribution_per_treatment(net_path, {net: networks[net]}, figurePath, DEGREE_SEQUENCE, edgetype, FEATURE_PATH, FEATURE_FILE)
+			plot_degree_distribution_per_treatment(net_path, {net: networks[net]}, figurePath, DEGREE_SEQUENCE, edgetype)
 
 	elif args.simulate:
 		if not args.treatment and not args.measure:

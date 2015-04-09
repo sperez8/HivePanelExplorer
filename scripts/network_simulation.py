@@ -33,6 +33,8 @@ DPI = 400 #resolution of plot #low for testing
 RAND_NAME = 'random_network_size_of_'
 SCALE_NAME = 'scalefree_network_size_of_'
 FILTER_NON_OTUS = True
+MAX_Y_AXIS = 5.5
+MARKER_SIZE = 200
 
 
 STRUCTURE_METRICS = [nm.number_of_nodes, 
@@ -63,13 +65,15 @@ def make_graph(nodeFile, edgeFile,edgetype):
 	G = import_graph(nodeFile,edgeFile,edgetype,FILTER_NON_OTUS)
 	return G
 
-def get_multiple_graphs(networks, path, edgetype, add_random, add_scalefree):
+def get_multiple_graphs(networks, path, edgetype, add_random, add_scalefree, LC=False):
 	'''makes multiple graphs from names of networks and a file path'''
 	graphs = {}
 	for netName in networks:
 		nodeFile = os.path.join(path,netName+'_nodes.txt')
 		edgeFile = os.path.join(path,netName+'_edges.txt')
 		G = make_graph(nodeFile,edgeFile,edgetype)
+		if LC:
+			G = nx.connected_component_subgraphs(G)[0]
 		graphs[netName] = G
 		print 'Made the networkx graph {0} with N = {1}, E = {2}.'.format(netName,G.number_of_nodes(),G.number_of_edges())
 		
@@ -78,12 +82,16 @@ def get_multiple_graphs(networks, path, edgetype, add_random, add_scalefree):
 			M = nx.number_of_edges(G)
 			N = nx.number_of_nodes(G)
 			H = nx.gnm_random_graph(N,M,seed=RANDSEED)
+			if LC:
+				H = nx.connected_component_subgraphs()[0]
 			graphs[RAND_NAME+netName] = H
 		if add_scalefree:
 			N = nx.number_of_nodes(G)
 			H = nx.scale_free_graph(N,seed=RANDSEED)
 			UH = H.to_undirected()
 			UH = nx.Graph(UH)
+			if LC:
+				UH = nx.connected_component_subgraphs(UH)[0]			
 			graphs[SCALE_NAME+netName] = UH
 	return graphs
 
@@ -190,7 +198,7 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 	for t,net in zip(treatments,networks):
 		G = graphs[net]
 		if plot_sequence:
-			ax.set_title('Degree histogram of '+network+' network')
+			ax.set_title('Degree histogram of '+network+' network with '+edgetype+' type of edges')
 			ax.set_xlabel('nodes ranked by degree')
 			ax.set_ylabel('degree')
 			
@@ -203,9 +211,10 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 				label=str(t),
 				color=colors[t])
 		else:
-			ax.set_title('Degree distribution of '+network+' network')
+			ax.set_title('Degree distribution of '+network+' network with '+edgetype+' type of edges')
 			ax.set_xlabel('degree')
 			ax.set_ylabel('frequency of degree')
+			ax.set_yscale('log')
 			N = G.number_of_nodes()
 			ds = [] #each degree
 			fds = [] #each degree's frequency
@@ -217,13 +226,19 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 			ppl.scatter(ds,
 				fds,
 				marker='.',
+				s=MARKER_SIZE,
 				#linestyle='-',
 				label=str(t),
 				color=colors[t])
 
+		
+
+	#ppl.scatter(ds,[max(fds)*math.exp(-d/6.0) for d in ds],color='black')
+	ax.set_ylim([0,1])
+
 	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
 
-	fig.set_size_inches(9,6)
+	fig.set_size_inches(10,9)
 	fig.savefig(figurePath, dpi=DPI, bbox_extra_artists=(lgd,), bbox_inches='tight')
 	print "Saving the figure file: ", figurePath
 	return None
@@ -308,7 +323,7 @@ def network_structure(net_path, networkNames, filePath, edgetype, inputFolder, i
 
 def plot_multiple(net_path, networkNames, measures, plotby, fraction, figurePath, edgetype, add_random, add_scalefree):
 	networks,treatments = get_network_fullnames(networkNames)
-	graphs = get_multiple_graphs(networks,net_path,edgetype, add_random, add_scalefree)
+	graphs = get_multiple_graphs(networks,net_path,edgetype, add_random, add_scalefree, LC=True)
 	data = {}
 	for netName,G in graphs.iteritems():
 		print 'Running simulation on {0}.'.format(netName)
@@ -318,14 +333,15 @@ def plot_multiple(net_path, networkNames, measures, plotby, fraction, figurePath
 			targ_lc_sizes, targ_sc_sizes = target_attack(G, m, fraction)
 			data[netName][m.__name__] = (targ_lc_sizes, targ_sc_sizes)
 	networkNamesPlot = networkNames.keys()
+	title = 'Robustness simulation on LC of networks {0} with {1} type of edges'.format(','.join([n.replace('BAC_','') for n in networkNamesPlot]), edgetype)
 	if add_random:
 		networkNamesPlot.extend([RAND_NAME+n for n in networkNames.keys()])
 	if add_scalefree:
 		networkNamesPlot.extend([SCALE_NAME+n for n in networkNames.keys()])
 	if plotby == 'by_treatment':
-		multi_plot_robustness_by_treatment(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path)
+		multi_plot_robustness_by_treatment(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path, title)
 	elif plotby == 'by_measure':
-		multi_plot_robustness_by_measure(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path)
+		multi_plot_robustness_by_measure(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path, title)
 	return None
 
 
@@ -423,7 +439,7 @@ def plot_individual(path,networkNames,fraction):
 		plot_robustness(data, netName)
 	return None
 
-def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels, measures, fraction, net_path):
+def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels, measures, fraction, net_path, title):
 	'''plots the simulations in a multiplot: each row is a location and each column is a treatment'''
 
 	# plotting locations in rows and treatments in columns
@@ -461,7 +477,7 @@ def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels,
 			sc_values = multidata[net+'_'+treatment][measure][1]
 			min_yvalue = min(min_yvalue ,min(lc_values))
 			max_yvalue = max(max_yvalue ,max(sc_values))
-			x = [float(r)/len(lc_values)*fraction for r in range(len(lc_values))]
+			x = [float(r)*fraction for r in range(len(lc_values))]
 			ppl.plot(ax,
 				x, 
 				lc_values,
@@ -487,21 +503,27 @@ def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels,
 
 		if not x_axis_label_done:
 			x_axis_label_done = True
-			ax.set_xlabel('fraction of removed nodes')
+			ax.set_xlabel('Number of removed nodes')
 
+	for ax in axes:
 		ax.set_autoscaley_on(False)
+		if max_yvalue > MAX_Y_AXIS:
+			max_yvalue = MAX_Y_AXIS
 		ax.set_ylim([min_yvalue,max_yvalue])
+
+	figureTitle = fig.suptitle(title,
+         horizontalalignment='center',
+         fontsize=20) 
 
 	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
 
 	figureFile = os.path.join(net_path,figurePath)
-	#fig.tight_layout()
-	fig.set_size_inches(9*len(colLabels),7*len(rowLabels))
-	fig.savefig(figureFile, dpi=DPI,  bbox_extra_artists=(lgd,), bbox_inches='tight')
+	fig.set_size_inches(10*len(colLabels),7*len(rowLabels))
+	fig.savefig(figureFile, dpi=DPI,  bbox_extra_artists=(lgd,figureTitle), bbox_inches='tight')
 	print "Saving the figure file: ", figureFile
 	return None
 
-def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,measures,fraction, net_path):
+def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,measures,fraction, net_path, title):
 	'''plots the simulations in a multiplot: each row is a location and each column is a centrality measure'''
 
 	# plotting locations in rows and centralities in columns
@@ -563,15 +585,22 @@ def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,m
 			ax.set_xlabel('fraction of removed nodes')
 
 
+	for ax in axes:
 		ax.set_autoscaley_on(False)
+		if max_yvalue > MAX_Y_AXIS:
+			max_yvalue = MAX_Y_AXIS
 		ax.set_ylim([min_yvalue,max_yvalue])
+
+	figureTitle = fig.suptitle(title,
+         horizontalalignment='center',
+         fontsize=20)
 
 	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
 
 	figureFile = os.path.join(net_path, figurePath)
 	#fig.tight_layout()
 	fig.set_size_inches(9*len(treatments),9*len(rowLabels))
-	fig.savefig(figureFile, dpi=DPI, bbox_extra_artists=(lgd,), bbox_inches='tight')
+	fig.savefig(figureFile, dpi=DPI, bbox_extra_artists=(lgd,figureTitle), bbox_inches='tight')
 	print "Saving the figure file: ", figureFile
 	return None
 

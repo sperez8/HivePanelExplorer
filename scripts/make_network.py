@@ -43,7 +43,7 @@ def import_graph(nodeFile, edgeFile, edgetype, filterNonOtus):
 
     for i,e in enumerate(zip(sources, targets)):
         if edgetype == 'pos' and 'mutualExclusion' in edgeProperties['interactionType'][i]:
-                G.remove_edge(e[0],e[1])
+            G.remove_edge(e[0],e[1])
         elif edgetype == 'neg' and 'copresence' in edgeProperties['interactionType'][i]:
             G.remove_edge(e[0],e[1])
         else:
@@ -54,6 +54,11 @@ def import_graph(nodeFile, edgeFile, edgetype, filterNonOtus):
         for node in G.nodes():
             if 'Otu' not in node:
                 G.remove_node(node)
+
+    for n in G.nodes():
+        if G.degree(n) == 0:
+            G.remove_node(n)
+
     return G
 
 def measure_all(G):
