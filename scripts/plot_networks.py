@@ -30,6 +30,7 @@ MEASURES = [nx.betweenness_centrality,
 			]
 
 PROP_TO_REMOVE = 1 #only removing this percent of nodes
+MAX_Y_AXIS = None
 DEGREE_SEQUENCE = False
 
 def main(*argv):
@@ -50,6 +51,7 @@ def main(*argv):
 	parser.add_argument('-addscalefree', help='Runs simulation on scale network of same size', action = 'store_true')
 	parser.add_argument('-treatment', help='Makes a plot for each treatment', action = 'store_true')
 	parser.add_argument('-measure', help='Makes a plot for each centrality measure', action = 'store_true')
+	parser.add_argument('-showcomponents', help='Average size of large component fragments to show', default = MAX_Y_AXIS)
 	
 	args = parser.parse_args()
 	
@@ -117,9 +119,12 @@ def main(*argv):
 			add_random = True
 		else:
 			add_random = False
+		max_y = args.showcomponents
+		if max_y:
+			max_y = float(max_y)
 
 		fraction = float(args.fraction)
-		figureName = 'plot_'+'_'.join(args.networks)+'_'+edgetype+'_'+ plot_by +'_prop='+str(fraction)+'.png'
+		figureName = 'plot_'+'_'.join(args.networks)+'_'+edgetype+'_'+ plot_by +'_prop='+str(fraction)+'_maxy='+str(max_y)+'.png'
 		figurePath = os.path.join(FIGURE_PATH,figureName)
 		measures = MEASURES
 
@@ -128,7 +133,7 @@ def main(*argv):
 		print "and plotting "+str(fraction)+" fraction of nodes "+plot_by+" and with following measures:"
 		print ", ".join([m.__name__ for m in measures])
 		print "\n"
-		plot_multiple(net_path, networks, measures, plot_by, fraction, figurePath, edgetype, add_random, add_scalefree)
+		plot_multiple(net_path, networks, measures, plot_by, fraction, figurePath, edgetype, add_random, add_scalefree, max_y)
 	
 if __name__ == "__main__":
 	main(*sys.argv[1:])

@@ -33,7 +33,6 @@ DPI = 400 #resolution of plot #low for testing
 RAND_NAME = 'random_network_size_of_'
 SCALE_NAME = 'scalefree_network_size_of_'
 FILTER_NON_OTUS = True
-MAX_Y_AXIS = 5.5
 MARKER_SIZE = 200
 
 
@@ -321,7 +320,7 @@ def network_structure(net_path, networkNames, filePath, edgetype, inputFolder, i
 	np.savetxt(filePath, table, delimiter="\t", fmt='%s')
 	return None
 
-def plot_multiple(net_path, networkNames, measures, plotby, fraction, figurePath, edgetype, add_random, add_scalefree):
+def plot_multiple(net_path, networkNames, measures, plotby, fraction, figurePath, edgetype, add_random, add_scalefree, max_y):
 	networks,treatments = get_network_fullnames(networkNames)
 	graphs = get_multiple_graphs(networks,net_path,edgetype, add_random, add_scalefree, LC=True)
 	data = {}
@@ -339,9 +338,9 @@ def plot_multiple(net_path, networkNames, measures, plotby, fraction, figurePath
 	if add_scalefree:
 		networkNamesPlot.extend([SCALE_NAME+n for n in networkNames.keys()])
 	if plotby == 'by_treatment':
-		multi_plot_robustness_by_treatment(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path, title)
+		multi_plot_robustness_by_treatment(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path, title, max_y)
 	elif plotby == 'by_measure':
-		multi_plot_robustness_by_measure(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path, title)
+		multi_plot_robustness_by_measure(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path, title, max_y)
 	return None
 
 
@@ -439,7 +438,7 @@ def plot_individual(path,networkNames,fraction):
 		plot_robustness(data, netName)
 	return None
 
-def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels, measures, fraction, net_path, title):
+def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels, measures, fraction, net_path, title, max_y):
 	'''plots the simulations in a multiplot: each row is a location and each column is a treatment'''
 
 	# plotting locations in rows and treatments in columns
@@ -507,8 +506,8 @@ def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels,
 
 	for ax in axes:
 		ax.set_autoscaley_on(False)
-		if max_yvalue > MAX_Y_AXIS:
-			max_yvalue = MAX_Y_AXIS
+		if max_y and max_yvalue > max_y:
+			max_yvalue = max_y
 		ax.set_ylim([min_yvalue,max_yvalue])
 
 	figureTitle = fig.suptitle(title,
@@ -523,7 +522,7 @@ def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels,
 	print "Saving the figure file: ", figureFile
 	return None
 
-def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,measures,fraction, net_path, title):
+def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,measures,fraction, net_path, title, max_y):
 	'''plots the simulations in a multiplot: each row is a location and each column is a centrality measure'''
 
 	# plotting locations in rows and centralities in columns
@@ -584,11 +583,10 @@ def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,m
 			x_axis_label_done = True
 			ax.set_xlabel('fraction of removed nodes')
 
-
 	for ax in axes:
 		ax.set_autoscaley_on(False)
-		if max_yvalue > MAX_Y_AXIS:
-			max_yvalue = MAX_Y_AXIS
+		if max_y and max_yvalue > max_y:
+			max_yvalue = max_y
 		ax.set_ylim([min_yvalue,max_yvalue])
 
 	figureTitle = fig.suptitle(title,
