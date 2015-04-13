@@ -14,8 +14,8 @@ var numAxes = 3
 
 var nodeColor = 'darkgrey'
     edgeColor = ['darkgrey']
-    linkwidth = 1.3
-    oplink = 0.8
+    linkwidth = 0.8
+    oplink = 0.7
     opnode = 1
     opnode_more = 1
 
@@ -32,6 +32,6 @@ var hoverOverTime = 900
 var columntraits = ["degree", "degree", "degree"];
     rowtraits = ["degree","degree", "degree"];
 
-var columnTraitScales = ["linear","log","even"]
-var rowTraitScales = ["linear","log","rank"]
+var columnTraitScales = ["linear","log"]//,"even"]
+var rowTraitScales = ["linear","log"]//,"rank"]
 

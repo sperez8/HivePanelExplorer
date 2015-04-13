@@ -276,8 +276,9 @@ def make_ecological_table(net_path, networkNames, filePath, edgetype, inputFolde
 
 def network_structure(net_path, networkNames, filePath, edgetype, inputFolder, inputFileEnd,featurePath, featureFile):
 	networks,treatments = get_network_fullnames(networkNames)
+	print networks, treatments
 	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
-
+	sys.exit()
 	otuTable = {}
 	for n in networks:
 		otuTable[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S100')
