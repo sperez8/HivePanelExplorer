@@ -33,11 +33,14 @@ DPI = 400 #resolution of plot #low for testing
 RAND_NAME = 'random_network_size_of_'
 SCALE_NAME = 'scalefree_network_size_of_'
 FILTER_NON_OTUS = True
+MARKER_SIZE = 200
 
+NOT_A_NODE_VALUE = 'NA'
 
 STRUCTURE_METRICS = [nm.number_of_nodes, 
 					nm.number_of_edges,
 					nm.number_of_components,
+					nm.size_of_components,
 					nm.number_of_nodes_of_largest_connected_component, 
 					nm.number_of_edges_of_largest_connected_component,
 					nm.average_degree, 
@@ -57,19 +60,39 @@ INPUT_METRICS = [nm.richness,
 OTU_METRICS = [nm.correlation_of_degree_and_depth,
 				nm.correlation_of_edge_depth,
 				]
+MEASURES = [nm.node_degrees,
+			nx.betweenness_centrality, 
+			nx.closeness_centrality, 
+			nm.in_largest_connected_component,
+			]
+
+PHYLA = ['Proteobacteria',
+			'Acidobacteria',
+			'Actinobacteria',
+			'Chloroflexi',
+			'unclassified',
+			'Bacteroidetes',
+			'Planctomycetes',
+			'Verrucomicrobia',
+			'Gemmatimonadetes',
+			'WCHB1-60',
+			'Cyanobacteria',
+			]
 
 def make_graph(nodeFile, edgeFile,edgetype):
 	'''imports the node and edge file and makes the graph'''
 	G = import_graph(nodeFile,edgeFile,edgetype,FILTER_NON_OTUS)
 	return G
 
-def get_multiple_graphs(networks, path, edgetype, add_random, add_scalefree):
+def get_multiple_graphs(networks, path, edgetype, add_random, add_scalefree, LC=False):
 	'''makes multiple graphs from names of networks and a file path'''
 	graphs = {}
 	for netName in networks:
 		nodeFile = os.path.join(path,netName+'_nodes.txt')
 		edgeFile = os.path.join(path,netName+'_edges.txt')
 		G = make_graph(nodeFile,edgeFile,edgetype)
+		if LC:
+			G = nx.connected_component_subgraphs(G)[0]
 		graphs[netName] = G
 		print 'Made the networkx graph {0} with N = {1}, E = {2}.'.format(netName,G.number_of_nodes(),G.number_of_edges())
 		
@@ -78,12 +101,16 @@ def get_multiple_graphs(networks, path, edgetype, add_random, add_scalefree):
 			M = nx.number_of_edges(G)
 			N = nx.number_of_nodes(G)
 			H = nx.gnm_random_graph(N,M,seed=RANDSEED)
+			if LC:
+				H = nx.connected_component_subgraphs()[0]
 			graphs[RAND_NAME+netName] = H
 		if add_scalefree:
 			N = nx.number_of_nodes(G)
 			H = nx.scale_free_graph(N,seed=RANDSEED)
 			UH = H.to_undirected()
 			UH = nx.Graph(UH)
+			if LC:
+				UH = nx.connected_component_subgraphs(UH)[0]			
 			graphs[SCALE_NAME+netName] = UH
 	return graphs
 
@@ -91,7 +118,6 @@ def get_network_fullnames(networkNames):
 	networks = []
 	key = networkNames.keys()[0]
 	if networkNames[key] == []:
-		print 'here'
 		return networkNames.keys(),None
 	for location,treatments in networkNames.iteritems():
 		location, treatments
@@ -106,9 +132,6 @@ def get_network_fullnames(networkNames):
 #####################################################################################
 
 #####################################################################################
-
-
-
 
 
 def load_samples_info(samplesFile):
@@ -130,6 +153,8 @@ def make_OTU_feature_table(net_path, networkNames, inputFolder, inputFileEnd, sa
 	'''makes an OTU table with avg depth and othe features per OTU'''
 
 	networks,treatments = get_network_fullnames(networkNames)
+	if len(MEASURES)>=1:
+		graphs = get_multiple_graphs(networks, net_path, 'pos', False, False)
 
 	otuTable = {}
 	for n in networks:
@@ -139,15 +164,17 @@ def make_OTU_feature_table(net_path, networkNames, inputFolder, inputFileEnd, sa
 	for f in features:
 		header.append(f+ ' avg')
 		header.append(f+ ' std')
+	header.extend([m.__name__.replace('_',' ').capitalize() for m in MEASURES])
 	header.append('Taxonomy')
 				
+	print header
 
 	for location,treatments in networkNames.iteritems():
 		for t in treatments:
 			abundances = otuTable[location+'_'+t]
 			sampleNames = abundances[0,1:-1]
 			sampleCounts = abundances[1:-1,1:-1].astype(np.float).sum(axis=0)
-			featureTable = np.zeros(shape=(abundances.shape[0]-1,3+len(features)*2), dtype='S100')
+			featureTable = np.zeros(shape=(abundances.shape[0]-1,3+len(features)*2+len(MEASURES)), dtype='S100')
 			featureTable[0,:] = np.array(header)
 			for i,f in enumerate(features):
 				print "For input table from zone {0} treatment {1} calculating feature {2}".format(location,t,f)
@@ -167,6 +194,22 @@ def make_OTU_feature_table(net_path, networkNames, inputFolder, inputFileEnd, sa
 					featureTable[r+1][i+2]=avg
 					featureTable[r+1][i+3]=std
 
+			column_bias = 2+len(features)*2
+			for i,m in enumerate(MEASURES):
+				print "For input table from zone {0} treatment {1} calculating measure {2}".format(location,t,m.__name__)
+				col = i+column_bias
+				G = graphs[location+'_'+t]
+				values = m(G)
+				for r,row in enumerate(abundances[1:-1,]):
+					otu = row[0]
+					measureValue = 0
+					if otu in G.nodes():
+						measureValue = values[otu]
+					elif 'OTU-'+otu in G.nodes():
+						measureValue = values['OTU-'+otu]
+					else:
+						measureValue = NOT_A_NODE_VALUE				
+					featureTable[r+1][col]=measureValue
 
 			fileName = featureFile+'_{0}_{1}.txt'.format(location,t)
 			tableFile = os.path.join(path,fileName)
@@ -190,7 +233,7 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 	for t,net in zip(treatments,networks):
 		G = graphs[net]
 		if plot_sequence:
-			ax.set_title('Degree histogram of '+network+' network')
+			ax.set_title('Degree histogram of '+network+' network with '+edgetype+' type of edges')
 			ax.set_xlabel('nodes ranked by degree')
 			ax.set_ylabel('degree')
 			
@@ -203,9 +246,10 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 				label=str(t),
 				color=colors[t])
 		else:
-			ax.set_title('Degree distribution of '+network+' network')
+			ax.set_title('Degree distribution of '+network+' network with '+edgetype+' type of edges')
 			ax.set_xlabel('degree')
 			ax.set_ylabel('frequency of degree')
+			ax.set_yscale('log')
 			N = G.number_of_nodes()
 			ds = [] #each degree
 			fds = [] #each degree's frequency
@@ -217,13 +261,19 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 			ppl.loglog(ds,
 				fds,
 				marker='.',
+				s=MARKER_SIZE,
 				#linestyle='-',
 				label=str(t),
 				color=colors[t])
 
+		
+
+	#ppl.scatter(ds,[max(fds)*math.exp(-d/6.0) for d in ds],color='black')
+	ax.set_ylim([0,1])
+
 	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
 
-	fig.set_size_inches(9,6)
+	fig.set_size_inches(10,9)
 	fig.savefig(figurePath, dpi=DPI, bbox_extra_artists=(lgd,), bbox_inches='tight')
 	print "Saving the figure file: ", figurePath
 	return None
@@ -259,11 +309,45 @@ def make_ecological_table(net_path, networkNames, filePath, edgetype, inputFolde
 	np.savetxt(filePath, table, delimiter="\t", fmt='%s')
 	return None
 
+def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile):
+	networks,treatments = get_network_fullnames(networkNames)
+	graphs = get_multiple_graphs(networks,net_path,'pos', False, False)
+	colName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
+
+	for location,treatments in networkNames.iteritems():
+		for t in treatments:
+			G = graphs[location+'_'+t]
+			featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
+			featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S100')
+			col = np.where(featureTable[0,:]==colName)[0][0]
+			centralities = []
+			for i,p in enumerate(PHYLA):
+				centralities.append([])
+				for n in G.nodes():
+					row = nm.findRow(n,featureTable)
+					if p in featureTable[row][-1]:
+						value = featureTable[row][col]
+						if value != NOT_A_NODE_VALUE and value !='0.0':
+							centralities[i].append(float(value))
+
+			labels = [p+' ('+str(len(centralities[i]))+')' for i,p in enumerate(PHYLA)]
+			fig, ax = plt.subplots()
+			ppl.boxplot(ax, centralities, xticklabels = labels)
+
+			title = "Centrality of phyla present in network {0} with treatment {1}".format(location,t)
+			figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=20)
+
+			fig.set_size_inches(3*len(PHYLA),5)
+			figureFile = os.path.join(net_path,figurePath,'centrality_plot_'+location+'_'+t+'.png')
+			fig.savefig(figureFile, dpi=DPI,bbox_inches='tight')
+			print "Saving the figure file: ", figureFile
+	return None
 
 def network_structure(net_path, networkNames, filePath, edgetype, inputFolder, inputFileEnd,featurePath, featureFile):
 	networks,treatments = get_network_fullnames(networkNames)
+	print networks, treatments
 	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
-
+	#sys.exit()
 	otuTable = {}
 	for n in networks:
 		otuTable[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S100')
@@ -295,9 +379,9 @@ def network_structure(net_path, networkNames, filePath, edgetype, inputFolder, i
 					print "For network for zone {0} treatment {1} calculating metric {2}".format(location,t,om.__name__)
 					i+=1
 					G = graphs[location+'_'+t]
-					featureTable = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
-					otufileName = np.loadtxt(featureTable,delimiter='\t', dtype='S100')
-					table[i,j]=om(G,otufileName)
+					featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
+					featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S100')
+					table[i,j]=om(G,featureTable)
 				j+=1
 				i=0
 	else:
@@ -306,9 +390,9 @@ def network_structure(net_path, networkNames, filePath, edgetype, inputFolder, i
 	np.savetxt(filePath, table, delimiter="\t", fmt='%s')
 	return None
 
-def plot_multiple(net_path, networkNames, measures, plotby, fraction, figurePath, edgetype, add_random, add_scalefree):
+def plot_multiple(net_path, networkNames, measures, plotby, fraction, figurePath, edgetype, add_random, add_scalefree, max_y):
 	networks,treatments = get_network_fullnames(networkNames)
-	graphs = get_multiple_graphs(networks,net_path,edgetype, add_random, add_scalefree)
+	graphs = get_multiple_graphs(networks,net_path,edgetype, add_random, add_scalefree, LC=True)
 	data = {}
 	for netName,G in graphs.iteritems():
 		print 'Running simulation on {0}.'.format(netName)
@@ -318,14 +402,15 @@ def plot_multiple(net_path, networkNames, measures, plotby, fraction, figurePath
 			targ_lc_sizes, targ_sc_sizes = target_attack(G, m, fraction)
 			data[netName][m.__name__] = (targ_lc_sizes, targ_sc_sizes)
 	networkNamesPlot = networkNames.keys()
+	title = 'Robustness simulation on LC of networks {0} with {1} type of edges'.format(','.join([n.replace('BAC_','') for n in networkNamesPlot]), edgetype)
 	if add_random:
 		networkNamesPlot.extend([RAND_NAME+n for n in networkNames.keys()])
 	if add_scalefree:
 		networkNamesPlot.extend([SCALE_NAME+n for n in networkNames.keys()])
 	if plotby == 'by_treatment':
-		multi_plot_robustness_by_treatment(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path)
+		multi_plot_robustness_by_treatment(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path, title, max_y)
 	elif plotby == 'by_measure':
-		multi_plot_robustness_by_measure(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path)
+		multi_plot_robustness_by_measure(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path, title, max_y)
 	return None
 
 
@@ -423,7 +508,7 @@ def plot_individual(path,networkNames,fraction):
 		plot_robustness(data, netName)
 	return None
 
-def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels, measures, fraction, net_path):
+def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels, measures, fraction, net_path, title, max_y):
 	'''plots the simulations in a multiplot: each row is a location and each column is a treatment'''
 
 	# plotting locations in rows and treatments in columns
@@ -461,7 +546,7 @@ def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels,
 			sc_values = multidata[net+'_'+treatment][measure][1]
 			min_yvalue = min(min_yvalue ,min(lc_values))
 			max_yvalue = max(max_yvalue ,max(sc_values))
-			x = [float(r)/len(lc_values)*fraction for r in range(len(lc_values))]
+			x = [float(r)*fraction for r in range(len(lc_values))]
 			ppl.plot(ax,
 				x, 
 				lc_values,
@@ -487,21 +572,27 @@ def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels,
 
 		if not x_axis_label_done:
 			x_axis_label_done = True
-			ax.set_xlabel('fraction of removed nodes')
+			ax.set_xlabel('Number of removed nodes')
 
+	for ax in axes:
 		ax.set_autoscaley_on(False)
+		if max_y and max_yvalue > max_y:
+			max_yvalue = max_y
 		ax.set_ylim([min_yvalue,max_yvalue])
+
+	figureTitle = fig.suptitle(title,
+         horizontalalignment='center',
+         fontsize=20) 
 
 	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
 
 	figureFile = os.path.join(net_path,figurePath)
-	#fig.tight_layout()
-	fig.set_size_inches(9*len(colLabels),7*len(rowLabels))
-	fig.savefig(figureFile, dpi=DPI,  bbox_extra_artists=(lgd,), bbox_inches='tight')
+	fig.set_size_inches(10*len(colLabels),7*len(rowLabels))
+	fig.savefig(figureFile, dpi=DPI,  bbox_extra_artists=(lgd,figureTitle), bbox_inches='tight')
 	print "Saving the figure file: ", figureFile
 	return None
 
-def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,measures,fraction, net_path):
+def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,measures,fraction, net_path, title, max_y):
 	'''plots the simulations in a multiplot: each row is a location and each column is a centrality measure'''
 
 	# plotting locations in rows and centralities in columns
@@ -562,16 +653,22 @@ def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,m
 			x_axis_label_done = True
 			ax.set_xlabel('fraction of removed nodes')
 
-
+	for ax in axes:
 		ax.set_autoscaley_on(False)
+		if max_y and max_yvalue > max_y:
+			max_yvalue = max_y
 		ax.set_ylim([min_yvalue,max_yvalue])
+
+	figureTitle = fig.suptitle(title,
+         horizontalalignment='center',
+         fontsize=20)
 
 	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
 
 	figureFile = os.path.join(net_path, figurePath)
 	#fig.tight_layout()
 	fig.set_size_inches(9*len(treatments),9*len(rowLabels))
-	fig.savefig(figureFile, dpi=DPI, bbox_extra_artists=(lgd,), bbox_inches='tight')
+	fig.savefig(figureFile, dpi=DPI, bbox_extra_artists=(lgd,figureTitle), bbox_inches='tight')
 	print "Saving the figure file: ", figureFile
 	return None
 

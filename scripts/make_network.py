@@ -6,9 +6,22 @@ by sperez
 Contains functions used by hive class to measure things like network properties
 '''
 
+import sys
+import os
+import argparse
+
 #need a specific version of networkx for read_gexf to work
 #import pkg_resources
 #pkg_resources.require("networkx==1.7")
+
+#comment these lines when converting a gexf?
+_cur_dir = os.path.dirname(os.path.realpath(__file__))
+_root_dir = os.path.dirname(_cur_dir)
+sys.path.insert(0, _root_dir)
+
+import networkx as nx
+
+
 import networkx
 
 #library imports
@@ -43,7 +56,7 @@ def import_graph(nodeFile, edgeFile, edgetype, filterNonOtus):
 
     for i,e in enumerate(zip(sources, targets)):
         if edgetype == 'pos' and 'mutualExclusion' in edgeProperties['interactionType'][i]:
-                G.remove_edge(e[0],e[1])
+            G.remove_edge(e[0],e[1])
         elif edgetype == 'neg' and 'copresence' in edgeProperties['interactionType'][i]:
             G.remove_edge(e[0],e[1])
         else:
@@ -54,6 +67,11 @@ def import_graph(nodeFile, edgeFile, edgetype, filterNonOtus):
         for node in G.nodes():
             if 'Otu' not in node:
                 G.remove_node(node)
+
+    for n in G.nodes():
+        if G.degree(n) == 0:
+            G.remove_node(n)
+
     return G
 
 def measure_all(G):
@@ -134,6 +152,22 @@ def convert_graph(G,fileName):
 
 
 
+def main(*argv):
+    '''handles user input and runs plsa'''
+    parser = argparse.ArgumentParser(description='This scripts converts networks to txt node and edge files')
+    parser.add_argument('-input', help='Location of network file')
+    parser.add_argument('-format', help='Input format of network')
+    args = parser.parse_args()
+
+    if args.format=='graphml':
+        print "Converting graphml input file: ", args.input
+        convert_graphml(args.input)
+    if args.format=='gexf':
+        convert_gexf(args.input)
+
+
+if __name__ == "__main__":
+    main(*sys.argv[1:])
 
 # file = "C:\\Users\\Sarah\\Dropbox\\1-Hive panels\\Diseasome\\diseasome.gexf"
 # f = open(file,'r')

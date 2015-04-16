@@ -44,6 +44,7 @@ var angles = d3.scale.ordinal()
 
 var asgScales = {};
     posScales = {};
+    minmax_scale = {};
 
 //get witdh of the "panel" div and the number of traits to figure out the number of hive plots and their size in the panel
 var width = document.getElementById("panel").offsetWidth
@@ -145,6 +146,7 @@ for (var i in columntraits) {
         min = d3.min(nodes, function(d) {
             return Number(d[trait])});
         type = 'linear'
+        minmax_scale[trait] = [min,max]
         if (columnTraitScales[i]=="even"){
             t = even_thresholds(trait)
             asgScales[trait+String(i)] = d3.scale.threshold()
@@ -276,16 +278,18 @@ svg.append("text")
     .attr("x", (width - padding - size)/2)
     .attr("y", -(size/2 + padding*3/4))
     .attr("text-anchor", "middle")
-    .attr("class","legend")
+    .attr("font-family", "Helvetica Neue")
+    .attr("font-size", "14px")
     .text('A X I S   A S S I G N M E N T') //add name of property used for node positionning, the rowtrait
 
 svg.append("text")
     .attr("x", -(width - padding - size)/2)
     .attr("y", -(size/2 + padding*3/4))
     .attr("text-anchor", "middle")
-    .attr("class","legend")
+    .attr("font-family", "Helvetica Neue")
+    .attr("font-size", "14px")
     .text('A X I S   P O S I T I O N') //add name of property used for node positionning, the rowtrait
-    .attr("transform", function(d) { 
+    .attr("transform", function (d) { 
         return "rotate(-90)";
         })
 
@@ -309,11 +313,14 @@ function formatAxisLegend(trait,j,axis){
         range = asgScales[trait+String(j)].invertExtent(axis)
         r0 = Math.round(range[0]*100)/100
         r1 = Math.round(range[1]*100)/100
-        if (isNaN(range[0])){return 'x≤'+ r1}
-        else if (isNaN(range[1])){return 'x>'+ r0}
-        else {return r0+'<x≤'+r1}
-        }
+        min = Math.round(minmax_scale[trait][0]*100/100)
+        max = Math.round(minmax_scale[trait][1]*100/100)
+        if (isNaN(range[0])){return min+'-'+ r1}
+        else if (isNaN(range[1])){return r0+'-'+max}
+        else {return r0+'-'+r1} 
+        }   
 }
+
 
 //build each hive plot
 function plot(p){
@@ -330,7 +337,8 @@ function plot(p){
         .attr("x", function(d) { return d.i})
         .attr("y", function(d) { return d.j-size/2 -padding/2})
         .attr("text-anchor", "middle")
-        .attr("class","viztext")
+        .attr("font-family", "Helvetica Neue")
+        .attr("font-size", "14px")
         .text(capitalize(p.y + ' (' + rowTraitScales[p.j] + ')')) //add name of property used for node positionning, the rowtrait
         .attr("transform", function(d) { 
             return "rotate(-90)";
@@ -343,7 +351,8 @@ function plot(p){
         .attr("x", function(d) { return d.i;})
         .attr("y", function(d) { return d.j-size/2 - padding/2;})
         .attr("text-anchor", "middle")
-        .attr("class","viztext")
+        .attr("font-family", "Helvetica Neue")
+        .attr("font-size", "14px")
         .text(capitalize(p.x + ' (' + columnTraitScales[p.i] + ')')) //add name of property used for node assignment, the columntrait
 
     }
@@ -352,7 +361,7 @@ function plot(p){
     //some parameters
     var outer_radius = radius.range()[1]*1.05
         x_shift = 50
-        y_shift = 45
+        y_shift = 40
         stagger = 0
 
     cell.selectAll(".axis")
@@ -378,7 +387,8 @@ function plot(p){
             //console.log(theta, x, y, stagger)
             return "translate("+x+","+y+")";
         })
-        .attr("class","legend")
+        .attr("font-family", "Helvetica Neue")
+        .attr("font-size", "11px")
         .attr("text-anchor", function(d,i) {
             if (!doubleAxes){
                 a = angles(d)

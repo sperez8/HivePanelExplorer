@@ -38,7 +38,20 @@ def number_of_edges_of_largest_connected_component(G):
     return nx.connected_component_subgraphs(G)[0].number_of_edges()
 
 def number_of_components(G):
-    return len(nx.connected_component_subgraphs(G))
+    return nx.number_connected_components(G)
+
+def size_of_components(G):
+    cc = sorted(nx.connected_components(G), key = len, reverse=True)
+    sizes = [str(len(c)) for c in cc]
+    return ','.join(sizes)
+
+def in_largest_connected_component(G):
+    CC = nx.connected_component_subgraphs(G)[0].nodes()
+    members = {n:(1 if n in CC else 0) for n in G.nodes()}
+    return members
+
+def node_degrees(G):
+    return G.degree()
 
 def average_degree(G):
     return round(np.mean(G.degree().values()), DECIMALS)
