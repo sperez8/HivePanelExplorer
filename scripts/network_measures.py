@@ -24,6 +24,7 @@ import networkx as nx
 from make_network import *
 
 DECIMALS = 3 #for rounding measures
+FACTOR = 2
 
 
 def number_of_nodes(G):
@@ -209,12 +210,32 @@ def measure_whole(G):
 
     return measures
 
-def findModule(modules,n):
-    for i,m in enumerate(modules):
+def node_modularity(G,factor=FACTOR):
+    '''gets modules using FAG-EC algorithm and returns a dictionary
+    where keys are nodes and value is hte module it belongs to where
+    0 = no module
+    1 = largest module
+    i = ith largets module
+    '''
+    modularity = {}
+    modules = get_modules(G)
+    modules.sort(key=lambda m: len(m),reverse=True) #order by size
+    print modules
+    for n in G.nodes():
+        m = findSubgraph(modules,n)
+        if m != None:
+            m+=1  #start module index at 1
+        else:
+            m = 0 #for not in a module
+        modularity[n]=m
+    return modularity
+
+def findSubgraph(subgraphs,n):
+    for i,m in enumerate(subgraphs):
         if n in m:
             return i
 
-def estimateModule(G,factor,subgraphNodes):
+def testModule(G,factor,subgraphNodes):
     isModule = False
 
     kin = 0
@@ -225,49 +246,74 @@ def estimateModule(G,factor,subgraphNodes):
         elif s in subgraphNodes or t in subgraphNodes:
             kout+=1
 
-    print 'degrees', kin,kout
-    print G.degree(subgraphNodes)
+    #print 'degrees', kin,kout, G.degree(subgraphNodes)
     if kin>kout*factor:
         isModule = True
-        print "MODULE"
+        #print "MODULE"
 
     return isModule
 
-def modularity():
-    #random graph
-    factor = 2
-    G = nx.erdos_renyi_graph(30, 0.05)
+def edge_clustering(G):
+    clusteringcoeffs = {}
+    for s,t in G.edges():
+        c = 0
+        ns = set(nx.all_neighbors(G,s))
+        nt = set(nx.all_neighbors(G,t))
+        commons = ns.intersection(nt)
+        ds = G.degree(s)
+        dt = G.degree(t)
+        c = (len(commons)+1)/float(min([ds,dt]))
+        clusteringcoeffs[(s,t)] = c
+    return clusteringcoeffs
+
+def get_modules(G,factor=FACTOR):
+    '''modularity algorithm from FAG-EC'''
     #initialize nodes as singleton clusters
-    modules = [[n] for n in G.nodes()]
+    subgraphs = [[n] for n in G.nodes()]
+    nonmergeable = []
     #get edge betweenness values and sort them by that value
-    weights = nx.edge_betweenness_centrality(G)
-    Sq = [(e,bc) for e,bc in weights.iteritems()]
+    weights = edge_clustering(G)
+    Sq = [(e,cc) for e,cc in weights.iteritems()]
     Sq.sort(key=lambda tup: tup[1],reverse=True)
 
-    print Sq
     while len(Sq)>0:
-        edge,bc = Sq.pop(0) #get mergeable edge with highest BC
+        edge,cc = Sq.pop(0) #get mergeable edge with highest clustering coefficient
         s,t = edge[0],edge[1]
-        mods = findModule(modules,s)
-        modt = findModule(modules,t)
-        print modules
-        print s,t
+        mods = findSubgraph(subgraphs,s) #get index of the subgraph where node belongs
+        modt = findSubgraph(subgraphs,t)
 
-        if mods==modt:
+        if mods==modt: #already in the same subgraph
             continue
-        else:
-            ms = estimateModule(G,factor,modules[mods])
-            mt = estimateModule(G,factor,modules[modt])
-            if ms and mt:
-                continue  #could optimize this to keep track of non mergeable modules.
+        #check if mergeable, ie. both not in nonmergeable modules
+        elif findSubgraph(nonmergeable,s)==None and findSubgraph(nonmergeable,t)==None:
+            ms = testModule(G,factor,subgraphs[mods])
+            mt = testModule(G,factor,subgraphs[modt])
+            if ms and mt: #if both modules, then non mergeable
+                newmod = subgraphs[mods]
+                nonmergeable.append(newmod)
+                newmod = subgraphs[modt]
+                nonmergeable.append(newmod)
             else: #merge
-                newmod = modules.pop(mods)
-                modt = findModule(modules,t) #need to do it again after poping
-                m2 = modules.pop(modt)
-                newmod.extend(m2)
-                modules.append(newmod) #merging
+                newsubg = subgraphs.pop(mods)
+                modt = findSubgraph(subgraphs,t) #need to do it again after poping
+                s2 = subgraphs.pop(modt)
+                newsubg.extend(s2)
+                subgraphs.append(newsubg) #merging
 
-    return modules
+        #THE FOLLOWING lines are consistent with the original algorithm,
+        # which outputs all subgraphs, some modules some not.
+        # elif findSubgraph(nonmergeable,s)==None:
+        #     newmod = subgraphs[mods]
+        #     nonmergeable.append(newmod)
+        #     #set as non mergeable
+        # elif findSubgraph(nonmergeable,t)==None:
+        #     #set as non mergeable
+        #     newmod = subgraphs[modt]
+        #     nonmergeable.append(newmod)
+        else: #both are modules, or one is a module so we continue
+            continue
+
+    return nonmergeable #return modules only, ie. not all nodes are returned.
 
 def measure_component(G):
     '''measure all interesting global network measures'''
@@ -287,8 +333,10 @@ if __name__ == "__main__":
     #G = main(*sys.argv[1:])
     #measures = measure_whole(G)
     #measures.update(measure_component(G))
-    m = modularity()
-    print '\n\nmodules:',m
+    G=nx.karate_club_graph()
+    m = node_modularity(G)
+    # for i,n in m.iteritems():
+    #     print i,n
     '''Use  commands like:
     nx.attribute_mixing_matrix(G, 'Gender')
     and
