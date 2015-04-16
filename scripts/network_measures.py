@@ -13,7 +13,8 @@ import argparse
 import numpy as np
 from math import pi
 import hive as hive
-import scipy.stats
+import copy
+#import scipy.stats
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))
 _root_dir = os.path.dirname(_cur_dir)
@@ -208,6 +209,66 @@ def measure_whole(G):
 
     return measures
 
+def findModule(modules,n):
+    for i,m in enumerate(modules):
+        if n in m:
+            return i
+
+def estimateModule(G,factor,subgraphNodes):
+    isModule = False
+
+    kin = 0
+    kout = 0
+    for s,t in G.edges():
+        if s in subgraphNodes and t in subgraphNodes:
+            kin+=1
+        elif s in subgraphNodes or t in subgraphNodes:
+            kout+=1
+
+    print 'degrees', kin,kout
+    print G.degree(subgraphNodes)
+    if kin>kout*factor:
+        isModule = True
+        print "MODULE"
+
+    return isModule
+
+def modularity():
+    #random graph
+    factor = 2
+    G = nx.erdos_renyi_graph(30, 0.05)
+    #initialize nodes as singleton clusters
+    modules = [[n] for n in G.nodes()]
+    #get edge betweenness values and sort them by that value
+    weights = nx.edge_betweenness_centrality(G)
+    Sq = [(e,bc) for e,bc in weights.iteritems()]
+    Sq.sort(key=lambda tup: tup[1],reverse=True)
+
+    print Sq
+    while len(Sq)>0:
+        edge,bc = Sq.pop(0) #get mergeable edge with highest BC
+        s,t = edge[0],edge[1]
+        mods = findModule(modules,s)
+        modt = findModule(modules,t)
+        print modules
+        print s,t
+
+        if mods==modt:
+            continue
+        else:
+            ms = estimateModule(G,factor,modules[mods])
+            mt = estimateModule(G,factor,modules[modt])
+            if ms and mt:
+                continue  #could optimize this to keep track of non mergeable modules.
+            else: #merge
+                newmod = modules.pop(mods)
+                modt = findModule(modules,t) #need to do it again after poping
+                m2 = modules.pop(modt)
+                newmod.extend(m2)
+                modules.append(newmod) #merging
+
+    return modules
+
 def measure_component(G):
     '''measure all interesting global network measures'''
     measuresC = {}
@@ -223,10 +284,11 @@ def measure_component(G):
 
 if __name__ == "__main__":
     '''testing purposes'''
-    G = main(*sys.argv[1:])
-    measures = measure_whole(G)
-    measures.update(measure_component(G))
-
+    #G = main(*sys.argv[1:])
+    #measures = measure_whole(G)
+    #measures.update(measure_component(G))
+    m = modularity()
+    print '\n\nmodules:',m
     '''Use  commands like:
     nx.attribute_mixing_matrix(G, 'Gender')
     and
