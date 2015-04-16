@@ -319,7 +319,7 @@ function plot(p){
     var cell = d3.select(this);
 
     //calculate the slength and position of each axes depending on the size of the hive plot.
-    var innerRadius = size*0.03
+    var innerRadius = size*0.05
     var outerRadius = size*0.46
     var radius = d3.scale.linear().range([innerRadius, outerRadius]);
 
@@ -1119,10 +1119,7 @@ function make_coloring(ruleNumber) {
             console.log('Coloring' + ' ' + mark + 's' + ' with a ' + property + equality + value + ' ' + color)
             if (color != ''){
                 if (mark == "node"){
-                    b1 = performance.now()
                     color_marks("circle", "fill", property, value, color, equality)
-                    b2 = performance.now()
-                    alert(b2-b1)
                 } else if (mark == "link"){
                     color_marks("path", "stroke", property, value, color, equality)
                 }
@@ -1227,7 +1224,9 @@ function color_marks(mark, styling, property, value, color, equality) {
      //    		})
      //   	};
         d3.selectAll(mark).each(function (d){
+            console.log(mark, d[property], value, styling, color)
             if (d[property] == value) {
+                console.log(mark, d[property], value, styling, color)
                 d3.select(this)
                     .style(styling, color)
                     .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
