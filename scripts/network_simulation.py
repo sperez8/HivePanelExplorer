@@ -214,7 +214,7 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 				ds.append(d)
 				fds.append(float(degrees.count(d))/N)
 
-			ppl.scatter(ds,
+			ppl.loglog(ds,
 				fds,
 				marker='.',
 				#linestyle='-',

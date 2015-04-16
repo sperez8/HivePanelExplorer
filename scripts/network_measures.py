@@ -118,14 +118,14 @@ def compute_feature_degree_correlation(G,feature,featureTable):
     d = nx.degree(G)
     H = nx.Graph()
     degrees = []
-    depths = []
+    featureValues = []
     for n in d.keys():
         row = findRow(n,featureTable)
         if row:
             degrees.append(d[n])
-            depths.append(featureTable[row][col])
+            featureValues.append(featureTable[row][col])
         else: continue
-    r = scipy.stats.spearmanr(degrees, depths)
+    r = scipy.stats.spearmanr(degrees, featureValues)
     return str((round(r[0],DECIMALS),round(r[1],5)))
 
 
