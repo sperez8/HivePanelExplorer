@@ -12,6 +12,7 @@ from network_simulation import *
 #What to plot
 PATH = '/Users/sperez/Desktop/LTSPnetworks'
 FOLDER = 'by_treatment'
+WHOLE_FOLDER = 'by_zone'
 FIGURE_PATH = os.path.join(PATH,'plots')
 SAMPLES_FILE = os.path.join(PATH, 'Bacterialtags_info_edited.txt')
 
@@ -19,15 +20,13 @@ INPUT_FOLDER = 'input'
 INPUT_FILE_END = '_BAC-filtered-lineages_final.txt'
 
 FEATURE_PATH = os.path.join(PATH,'tables')
-FEATURE_FILE = 'feature_table'
+FEATURE_FILE = 'feature_and_posnode_measures_table'
 FEATURES = ['Soil Horizon']
-
-TREATMENTS = ['OM3','OM2','OM1','OM0']
 MEASURES = [nx.betweenness_centrality, 
 			nx.degree_centrality,
-			nx.closeness_centrality, 
-			#nx.eigenvector_centrality,
-			]
+			 ]
+
+TREATMENTS = ['OM3','OM2','OM1','OM0']
 
 PROP_TO_REMOVE = 1 #only removing this percent of nodes
 MAX_Y_AXIS = None
@@ -35,7 +34,7 @@ DEGREE_SEQUENCE = False
 
 def main(*argv):
 	'''handles user input and runs plsa'''
-	parser = argparse.ArgumentParser(description='This scripts produces robustness plots for networks')
+	parser = argparse.ArgumentParser(description='This scripts analyzes co-occurrence networks')
 	parser.add_argument('-path', help='Path where the networks are', default = PATH)
 	parser.add_argument('-folder', help='Folder in path where the networks are', default = FOLDER)
 	parser.add_argument('-networks', nargs='*', help='Which network to use: SBS, IDF, etc.')
@@ -52,13 +51,15 @@ def main(*argv):
 	parser.add_argument('-treatment', help='Makes a plot for each treatment', action = 'store_true')
 	parser.add_argument('-measure', help='Makes a plot for each centrality measure', action = 'store_true')
 	parser.add_argument('-showcomponents', help='Average size of large component fragments to show', default = MAX_Y_AXIS)
-	
+	parser.add_argument('-wholenetwork', help='Makes a plot for whole network, not per treatments', action = 'store_true')
+	parser.add_argument('-boxplot', help='Makes a boxplot per phylum of otu centrality', action = 'store_true')
+
 	args = parser.parse_args()
 	
 	#check that one of the options is true
-	choices = [args.simulate,args.distribution,args.calculate,args.assess,args.maketable]
+	choices = [args.simulate,args.distribution,args.calculate,args.assess,args.maketable,args.boxplot]
 	if sum([1 for c in choices if c])>1 or sum([1 for c in choices if c])==0:
-		print "\n***You must specify one of the three options to calculate, simulate or plot the distribution.***\n"
+		print "\n***You must specify one of the three options to calculate porperties of, run simulations on or plot networks.***\n"
 		parser.print_help()
 		sys.exit()	
 
@@ -67,12 +68,19 @@ def main(*argv):
 		parser.print_help()
 		sys.exit()
 
+	if args.wholenetwork:
+		treatments = None
+		args.folder = WHOLE_FOLDER
+	else:
+		treatments = TREATMENTS
+
 	edgetype = args.edgetype
 	net_path = os.path.join(args.path,args.folder)
 	if args.folder == 'by_zone':
 		networks = {('BAC_'+n if 'BAC_' not in n else n):[] for n in args.networks}
 	else:
-		networks = {('BAC_'+n if 'BAC_' not in n else n):TREATMENTS for n in args.networks}
+		networks = {('BAC_'+n if 'BAC_' not in n else n):treatments for n in args.networks}
+
 
 	###depending on option specified, choose different things
 	if args.calculate:
@@ -101,6 +109,12 @@ def main(*argv):
 			figurePath = os.path.join(FIGURE_PATH,figureName)
 			print "\nPlotting the degree distribution on "+edgetype+" type of edges of network ", net
 			plot_degree_distribution_per_treatment(net_path, {net: networks[net]}, figurePath, DEGREE_SEQUENCE, edgetype)
+
+	elif args.boxplot:
+		print "\nPlotting phylum centrality for OTUs in the following networks with "+edgetype+" type of edges:"
+		print ", ".join(networks), '\n'
+		centrality_plot(net_path,networks,FIGURE_PATH,FEATURE_PATH, FEATURE_FILE)
+
 
 	elif args.simulate:
 		if not args.treatment and not args.measure:
