@@ -220,7 +220,7 @@ def node_modularity(G,factor=FACTOR):
     modularity = {}
     modules = get_modules(G)
     modules.sort(key=lambda m: len(m),reverse=True) #order by size
-    print modules
+    print "Found {0} modules with sizes: {1}".format(len(modules),','.join([str(len(m)) for m in modules]))
     for n in G.nodes():
         m = findSubgraph(modules,n)
         if m != None:
@@ -333,8 +333,10 @@ if __name__ == "__main__":
     #G = main(*sys.argv[1:])
     #measures = measure_whole(G)
     #measures.update(measure_component(G))
-    G=nx.karate_club_graph()
-    m = node_modularity(G)
+
+    #to test modularity
+    # G=nx.karate_club_graph()
+    # m = node_modularity(G)
     # for i,n in m.iteritems():
     #     print i,n
     '''Use  commands like:

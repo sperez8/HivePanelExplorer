@@ -19,14 +19,17 @@ SAMPLES_FILE = os.path.join(PATH, 'Bacterialtags_info_edited.txt')
 INPUT_FOLDER = 'input'
 INPUT_FILE_END = '_BAC-filtered-lineages_final.txt'
 
+INDVAL_FOLDER = 'indtables'
+INDVAL_FILE_END = '_indvals_combo_om_horizon.txt'
+
 FEATURE_PATH = os.path.join(PATH,'tables')
 FEATURE_FILE = 'feature_and_posnode_measures_table'
-FEATURES = ['Soil Horizon']
+FEATURES = ['SoilHorizon']
 MEASURES = [nx.betweenness_centrality, 
 			nx.degree_centrality,
 			 ]
 
-TREATMENTS = ['OM3','OM2','OM1','OM0']
+TREATMENTS = ['OM3','OM2']#,'OM1','OM0']
 
 PROP_TO_REMOVE = 1 #only removing this percent of nodes
 MAX_Y_AXIS = None
@@ -98,7 +101,7 @@ def main(*argv):
 	elif args.maketable:
 		print "\nMaking OTU table with ecological metrics for the following networks:"
 		print ", ".join(networks), '\n'
-		make_OTU_feature_table(net_path, networks, os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END, SAMPLES_FILE, FEATURES, FEATURE_PATH, FEATURE_FILE)
+		make_OTU_feature_table(net_path, networks, os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END,os.path.join(PATH,INDVAL_FOLDER),INDVAL_FILE_END, SAMPLES_FILE, FEATURES, FEATURE_PATH, FEATURE_FILE)
 
 	elif args.distribution:
 		for net in networks.keys():

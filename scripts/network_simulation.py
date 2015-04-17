@@ -37,6 +37,11 @@ MARKER_SIZE = 200
 
 NOT_A_NODE_VALUE = 'NA'
 
+TAXONOMY = ["kingdom","phylum","class","order","family","genus","species","subspecies","subsubspecies"]
+
+INDVAL_P_CUTOFF = 0.01
+INDVAL_CUTOFF = 0.6
+
 STRUCTURE_METRICS = [nm.number_of_nodes, 
 					nm.number_of_edges,
 					nm.number_of_components,
@@ -62,8 +67,9 @@ OTU_METRICS = [nm.correlation_of_degree_and_depth,
 				]
 MEASURES = [nm.node_degrees,
 			nx.betweenness_centrality, 
-			nx.closeness_centrality, 
+			nx.clustering, 
 			nm.in_largest_connected_component,
+			nm.node_modularity,
 			]
 
 PHYLA = ['Proteobacteria',
@@ -135,7 +141,7 @@ def get_network_fullnames(networkNames):
 
 
 def load_samples_info(samplesFile):
-	samplesTable = np.loadtxt(samplesFile, comments=None, delimiter='\t', dtype='S100')
+	samplesTable = np.loadtxt(samplesFile, comments=None, delimiter='\t', dtype='S1000')
 	return samplesTable
 
 def get_info_per_samples(samplesFile, samples, feature):
@@ -149,7 +155,20 @@ def get_info_per_samples(samplesFile, samples, feature):
 		sampleInfo[s] = table[row,column]
 	return sampleInfo
 
-def make_OTU_feature_table(net_path, networkNames, inputFolder, inputFileEnd, samplesFile, features, path, featureFile):
+def get_ind(table, otu):
+	ind = 0
+	indrowindex = np.where(table[:,0]==otu)
+	if indrowindex[0]: #check that otu is in fact in that table, otherwise ignore and return 0
+		indrow = table[indrowindex[0][0],:]
+		pcol = np.where(table[0,:]=="output$pval[rownames(output$indval)]")[0][0]
+		valcol = np.where(table[0,:]=="output$indcls[rownames(output$indval)]")[0][0]
+		clustercol = np.where(table[0,:]=="output$maxcls[rownames(output$indval)]")[0][0]
+		if float(indrow[pcol]) < INDVAL_P_CUTOFF:
+			if float(indrow[valcol])>INDVAL_CUTOFF:
+				return indrow[clustercol]
+	return ind
+
+def make_OTU_feature_table(net_path, networkNames, inputFolder, inputFileEnd, indvalFolder, indvalFileEnd, samplesFile, features, path, featureFile):
 	'''makes an OTU table with avg depth and othe features per OTU'''
 
 	networks,treatments = get_network_fullnames(networkNames)
@@ -158,43 +177,52 @@ def make_OTU_feature_table(net_path, networkNames, inputFolder, inputFileEnd, sa
 
 	otuTable = {}
 	for n in networks:
-		otuTable[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S100')
+		otuTable[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S1000')
 
-	header = ['OTUs','Abundance']
+	indTable = {}
+	for n in networkNames.keys():
+		indTable[n] = np.loadtxt(os.path.join(indvalFolder,n.replace('BAC_','')+indvalFileEnd), dtype='S1000')
+
+	header = ['OTUs','Abundance','IndforCluster']
+	headerStart = len(header)
 	for f in features:
 		header.append(f+ ' avg')
 		header.append(f+ ' std')
 	header.extend([m.__name__.replace('_',' ').capitalize() for m in MEASURES])
-	header.append('Taxonomy')
-				
-	print header
+	header.extend(TAXONOMY)
+	tax_index = len(TAXONOMY)
 
 	for location,treatments in networkNames.iteritems():
 		for t in treatments:
 			abundances = otuTable[location+'_'+t]
 			sampleNames = abundances[0,1:-1]
 			sampleCounts = abundances[1:-1,1:-1].astype(np.float).sum(axis=0)
-			featureTable = np.zeros(shape=(abundances.shape[0]-1,3+len(features)*2+len(MEASURES)), dtype='S100')
+			featureTable = np.zeros(shape=(abundances.shape[0]-1,headerStart+len(features)*2+len(MEASURES)+tax_index), dtype='S1000')
 			featureTable[0,:] = np.array(header)
+			for r,row in enumerate(abundances[1:-1,]):
+				otu = row[0]
+				ab = row[1:-1].astype(np.float)/sampleCounts
+				tax = row[-1].replace('(100)','')
+				tax = np.asarray(tax.split(';'))[0:tax_index]
+				ind = get_ind(indTable[location], otu)
+				featureTable[r+1][0]=otu
+				featureTable[r+1][1]=np.mean(ab)
+				featureTable[r+1][2]=ind
+				featureTable[r+1][-tax_index:]=tax
 			for i,f in enumerate(features):
 				print "For input table from zone {0} treatment {1} calculating feature {2}".format(location,t,f)
 				fdist = get_info_per_samples(samplesFile, sampleNames, f)				
 				for r,row in enumerate(abundances[1:-1,]):
-					otu = row[0]
 					ab = row[1:-1].astype(np.float)/sampleCounts
-					tax = row[-1]
-					featureTable[r+1][0]=otu
-					featureTable[r+1][1]=np.mean(ab)
-					featureTable[r+1][-1]=tax
 					fcount = []
 					stdCount = []
 					featureValues = [float(fdist[s]) for s in sampleNames]
 					avg = np.average(featureValues, weights = ab)
 					std = math.sqrt(np.average((featureValues-avg)**2, weights=ab))
-					featureTable[r+1][i+2]=avg
-					featureTable[r+1][i+3]=std
+					featureTable[r+1][i+headerStart]=avg
+					featureTable[r+1][i+headerStart+1]=std
 
-			column_bias = 2+len(features)*2
+			column_bias = headerStart+len(features)*2
 			for i,m in enumerate(MEASURES):
 				print "For input table from zone {0} treatment {1} calculating measure {2}".format(location,t,m.__name__)
 				col = i+column_bias
@@ -284,9 +312,9 @@ def make_ecological_table(net_path, networkNames, filePath, edgetype, inputFolde
 
 	otuTable = {}
 	for n in networks:
-		otuTable[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S100')
+		otuTable[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S1000')
 
-	table = np.zeros(shape=(len(INPUT_METRICS)+2, len(networkNames)*len(treatments)+1), dtype='S100')
+	table = np.zeros(shape=(len(INPUT_METRICS)+2, len(networkNames)*len(treatments)+1), dtype='S1000')
 	i,j = 0,1 # i is row, j is column
 	column = ['Zones','Treatments']
 	column.extend([sm.__name__.replace('_',' ').capitalize() for sm in INPUT_METRICS])
@@ -318,7 +346,7 @@ def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile
 		for t in treatments:
 			G = graphs[location+'_'+t]
 			featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
-			featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S100')
+			featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
 			col = np.where(featureTable[0,:]==colName)[0][0]
 			centralities = []
 			for i,p in enumerate(PHYLA):
@@ -350,10 +378,10 @@ def network_structure(net_path, networkNames, filePath, edgetype, inputFolder, i
 	#sys.exit()
 	otuTable = {}
 	for n in networks:
-		otuTable[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S100')
+		otuTable[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S1000')
 
 	if treatments != []:
-		table = np.zeros(shape=(len(INPUT_METRICS)+len(STRUCTURE_METRICS)+len(OTU_METRICS)+2, len(networkNames)*len(treatments)+1), dtype='S100')
+		table = np.zeros(shape=(len(INPUT_METRICS)+len(STRUCTURE_METRICS)+len(OTU_METRICS)+2, len(networkNames)*len(treatments)+1), dtype='S1000')
 		i,j = 0,1 # i is row, j is column
 		column = ['Zones','Treatments']
 		column.extend([sm.__name__.replace('_',' ').capitalize() for sm in INPUT_METRICS])
@@ -380,7 +408,7 @@ def network_structure(net_path, networkNames, filePath, edgetype, inputFolder, i
 					i+=1
 					G = graphs[location+'_'+t]
 					featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
-					featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S100')
+					featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
 					table[i,j]=om(G,featureTable)
 				j+=1
 				i=0
@@ -671,9 +699,6 @@ def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,m
 	fig.savefig(figureFile, dpi=DPI, bbox_extra_artists=(lgd,figureTitle), bbox_inches='tight')
 	print "Saving the figure file: ", figureFile
 	return None
-
-
-
 
 
 
