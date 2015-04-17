@@ -29,7 +29,9 @@ MEASURES = [nx.betweenness_centrality,
 			nx.degree_centrality,
 			 ]
 
-TREATMENTS = ['OM3','OM2']#,'OM1','OM0']
+TAX_LEVEL = 'phylum'
+
+TREATMENTS = ['OM3','OM2','OM1','OM0']
 
 PROP_TO_REMOVE = 1 #only removing this percent of nodes
 MAX_Y_AXIS = None
@@ -55,7 +57,8 @@ def main(*argv):
 	parser.add_argument('-measure', help='Makes a plot for each centrality measure', action = 'store_true')
 	parser.add_argument('-showcomponents', help='Average size of large component fragments to show', default = MAX_Y_AXIS)
 	parser.add_argument('-wholenetwork', help='Makes a plot for whole network, not per treatments', action = 'store_true')
-	parser.add_argument('-boxplot', help='Makes a boxplot per phylum of otu centrality', action = 'store_true')
+	parser.add_argument('-boxplot', help='Makes a boxplot per taxonomic level of otu centrality', action = 'store_true')
+	parser.add_argument('-level', help='Selects taxonomic level at which to make the boxplot', default = TAX_LEVEL)
 
 	args = parser.parse_args()
 	
@@ -114,9 +117,13 @@ def main(*argv):
 			plot_degree_distribution_per_treatment(net_path, {net: networks[net]}, figurePath, DEGREE_SEQUENCE, edgetype)
 
 	elif args.boxplot:
-		print "\nPlotting phylum centrality for OTUs in the following networks with "+edgetype+" type of edges:"
+		level = args.level
+		if level not in TAXONOMY:
+			print level, "is not a taxonomic level"
+			sys.exit()
+		print "\nPlotting "+level+" centrality for OTUs in the following networks with "+edgetype+" type of edges:"
 		print ", ".join(networks), '\n'
-		centrality_plot(net_path,networks,FIGURE_PATH,FEATURE_PATH, FEATURE_FILE)
+		centrality_plot(net_path,networks,FIGURE_PATH,FEATURE_PATH, FEATURE_FILE,level)
 
 
 	elif args.simulate:

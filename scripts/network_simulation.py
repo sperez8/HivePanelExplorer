@@ -29,7 +29,7 @@ import network_measures as nm
 
 RANDSEED = 2
 np.random.seed(RANDSEED)
-DPI = 400 #resolution of plot #low for testing
+DPI = 300 #resolution of plot #low for testing
 RAND_NAME = 'random_network_size_of_'
 SCALE_NAME = 'scalefree_network_size_of_'
 FILTER_NON_OTUS = True
@@ -72,18 +72,7 @@ MEASURES = [nm.node_degrees,
 			nm.node_modularity,
 			]
 
-PHYLA = ['Proteobacteria',
-			'Acidobacteria',
-			'Actinobacteria',
-			'Chloroflexi',
-			'unclassified',
-			'Bacteroidetes',
-			'Planctomycetes',
-			'Verrucomicrobia',
-			'Gemmatimonadetes',
-			'WCHB1-60',
-			'Cyanobacteria',
-			]
+
 
 def make_graph(nodeFile, edgeFile,edgetype):
 	'''imports the node and edge file and makes the graph'''
@@ -130,15 +119,6 @@ def get_network_fullnames(networkNames):
 		for t in treatments:
 			networks.append(location+'_'+t)
 	return networks,treatments
-
-
-
-#####################################################################################
-
-#####################################################################################
-
-#####################################################################################
-
 
 def load_samples_info(samplesFile):
 	samplesTable = np.loadtxt(samplesFile, comments=None, delimiter='\t', dtype='S1000')
@@ -337,39 +317,93 @@ def make_ecological_table(net_path, networkNames, filePath, edgetype, inputFolde
 	np.savetxt(filePath, table, delimiter="\t", fmt='%s')
 	return None
 
-def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile):
+def get_taxonomic_levels(featurePath,featureFile,location, treatments, tax_level):
+	taxonomies = []
+	for t in treatments:
+		featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
+		featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
+		taxcol = np.where(featureTable[0,:]==tax_level)[0][0]
+		taxonomies.extend(list(np.unique(featureTable[1:,taxcol])))
+	
+	taxonomies = list(set(taxonomies))	
+	taxonomies.sort()
+	return taxonomies
+
+def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile, tax_level):
 	networks,treatments = get_network_fullnames(networkNames)
 	graphs = get_multiple_graphs(networks,net_path,'pos', False, False)
 	colName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
 
+	if tax_level not in TAXONOMY:
+		tax_level = TAXONOMY[1] #phylum
+
+	fig, axes = plt.subplots(len(treatments))
+	netNames = treatments
+	max_y = 0
+
 	for location,treatments in networkNames.iteritems():
-		for t in treatments:
+		for ax,t in zip(axes,treatments):
 			G = graphs[location+'_'+t]
 			featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
 			featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
 			col = np.where(featureTable[0,:]==colName)[0][0]
-			centralities = []
-			for i,p in enumerate(PHYLA):
-				centralities.append([])
-				for n in G.nodes():
-					row = nm.findRow(n,featureTable)
-					if p in featureTable[row][-1]:
-						value = featureTable[row][col]
-						if value != NOT_A_NODE_VALUE and value !='0.0':
-							centralities[i].append(float(value))
+			taxcol = np.where(featureTable[0,:]==tax_level)[0][0]
+			taxonomies = get_taxonomic_levels(featurePath,featureFile,location, treatments, tax_level)
+			centralities = [[] for tax in taxonomies]
+			for n in G.nodes():
+				row = nm.findRow(n,featureTable)
+				taxonlevel = featureTable[row][taxcol]
+				value = featureTable[row][col]
+				if value != NOT_A_NODE_VALUE:
+					max_y = max(max_y,float(value))
+					centralities[taxonomies.index(taxonlevel)].append(float(value))
 
-			labels = [p+' ('+str(len(centralities[i]))+')' for i,p in enumerate(PHYLA)]
-			fig, ax = plt.subplots()
+			labels = [tax+' ('+str(len(centralities[i]))+')' for i,tax in enumerate(taxonomies)]
 			ppl.boxplot(ax, centralities, xticklabels = labels)
+			ax.set_ylabel('Treatment '+t)
 
-			title = "Centrality of phyla present in network {0} with treatment {1}".format(location,t)
-			figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=20)
+		for ax in axes:
+			#ax.set_autoscaley_on(False)
+			#m,x = ax.get_ylim()
+			#ax.set_ylim([m,max_y])
+			ax.set_yscale('log')
+			ax.grid()
 
-			fig.set_size_inches(3*len(PHYLA),5)
-			figureFile = os.path.join(net_path,figurePath,'centrality_plot_'+location+'_'+t+'.png')
-			fig.savefig(figureFile, dpi=DPI,bbox_inches='tight')
-			print "Saving the figure file: ", figureFile
+		title = "Centrality of taxonomic level '{0}' present in network {1}".format(tax_level,location,t)
+		figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=20)
+
+		fig.set_size_inches(2.5*len(taxonomies),6*len(treatments))
+		figureFile = os.path.join(net_path,figurePath,'centrality_plot_'+location+'_log.png')
+		fig.savefig(figureFile, dpi=DPI,bbox_inches='tight')
+		print "Saving the figure file: ", figureFile
 	return None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#####################################################################################
+
+#####################################################################################
+
+#####################################################################################
+
 
 def network_structure(net_path, networkNames, filePath, edgetype, inputFolder, inputFileEnd,featurePath, featureFile):
 	networks,treatments = get_network_fullnames(networkNames)
