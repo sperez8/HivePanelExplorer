@@ -7,7 +7,7 @@
 
 // ****************************************** //
 
-var SVGTitle = 'Friends Forever' + ' Hive Panel'
+var SVGTitle = 'Scale-free network' + ' Hive Panel'
 
 var numAxes = 3
     doubleAxes = false

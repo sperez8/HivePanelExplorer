@@ -6,6 +6,9 @@
 
 // ****************************************** //
 
+
+a1 = performance.now()
+
 //display title of panel and number of nodes and links
 d3.select("body").select("#title").select("#thetitle")
     .html(SVGTitle)
@@ -28,12 +31,8 @@ var angle = get_angles(numAxes,doubleAxes)
 
 //if doubled axes are requested, then we need to bind twice the amount of DOM elements from the nodes{} and links{} datasets
 if (doubleAxes){
-    var seriesLinksNames = [0,1]
-    var seriesNodesNames = [0,1]
     var angleRange = d3.range(numAxes*2)
 } else {
-    var seriesLinksNames = [0]
-    var seriesNodesNames = [0]
     var angleRange = d3.range(numAxes)
 };
 
@@ -44,7 +43,6 @@ var angles = d3.scale.ordinal()
 
 var asgScales = {};
     posScales = {};
-    minmax_scale = {};
 
 //get witdh of the "panel" div and the number of traits to figure out the number of hive plots and their size in the panel
 var width = document.getElementById("panel").offsetWidth
@@ -141,37 +139,35 @@ for (var i in columntraits) {
         console.log('Categorical trait', trait, 'has categories: ', keys)
         columnTraitScales[trait]="categorical"
     } else {
-        max = d3.max(nodes, function(d) {
+        max = d3.max(nodes, function (d) {
             return Number(d[trait])});
-        min = d3.min(nodes, function(d) {
+        min = d3.min(nodes, function (d) {
             return Number(d[trait])});
         type = 'linear'
-        minmax_scale[trait] = [min,max]
-        if (columnTraitScales[i]=="even"){
+        if (columnTraitScales[trait]=="even"){
             t = even_thresholds(trait)
-            asgScales[trait+String(i)] = d3.scale.threshold()
+            asgScales[trait] = d3.scale.threshold()
                     .domain(t)
                     .range(d3.range(numAxes))
             type = "even-distribution"
         }
-        else if (columnTraitScales[i]=="log" && ((max>=0&&min>=0 ) || (max<=0&&min<=0)) ){
+        else if (columnTraitScales[trait]=="log" && ((max>=0&&min>=0 ) || (max<=0&&min<=0)) ){
             t = log_thresholds(min,max)
-            asgScales[trait+String(i)] = d3.scale.threshold()
+            asgScales[trait] = d3.scale.threshold()
                                 .domain(t)
                                 .range(d3.range(numAxes))
             type = 'log'
         } else {
-            asgScales[trait+String(i)] = d3.scale.quantile()
+            asgScales[trait] = d3.scale.quantile()
                                 .domain([min,max])
                                 .range(d3.range(numAxes));
         }
-        console.log('Quantitative trait', trait+String(i), 'has a', type, 'scale, and cut offs: ')
-        for (var j = 0;j <= numAxes-1;j++) {
-            console.log('\t axis', j, asgScales[trait+String(i)].invertExtent(j))
+        console.log('Quantitative trait', trait, 'has a', type, 'scale, and cut offs: ')
+        for (var i = 0;i <= numAxes-1;i++) {
+            console.log('\t axis', i, asgScales[trait].invertExtent(i))
         };
     }
 }
-
 
 // get the rowtraits used for node positionning on axes and build the desired linear orlog 
 //scales to use later when plotting nodes and links
@@ -187,44 +183,43 @@ for (var i in rowtraits) {
         console.log('Categorical trait', trait, 'has categories: ', keys)
         rowTraitScales[trait]=="categorical"
     } else {
-        max = d3.max(nodes, function(d) {
+        max = d3.max(nodes, function (d) {
             return Number(d[trait])});
-        min = d3.min(nodes, function(d) {
+        min = d3.min(nodes, function (d) {
             return Number(d[trait])});
-        type = 'linear' 
+        type = 'linear'
 
-        if (rowTraitScales[i]=="rank"){
+        if (rowTraitScales[trait]=="rank"){
             type = 'rank'            
             rankScale = make_rank_scale(trait)
             posScales[trait] = rankScale
-
-        } else if (rowTraitScales[i]=="log"){
+        } else if (rowTraitScales[trait]=="log"){
             if ((max > 0 && min > 0)||(max < 0 && min < 0)){
                 type = 'log'
-                posScales[trait+String(i)] = d3.scale.log()
+                posScales[trait] = d3.scale.log()
                                         .domain([min,max])
                                         .range([0, 1])
             } else if (max > 0 && min == 0){
                 type = 'log'
-                posScales[trait+String(i)] = logspecial()
+                posScales[trait] = logspecial()
                                         .domain([min,max])
                                         .range([0, 1])
             } else if (max == 0 && min < 0){ 
                 type = 'log'
-                posScales[trait+String(i)] = logspecial(false)
+                posScales[trait] = logspecial(false)
                                         .domain([min,max])
                                         .range([0, 1])
             } else {
-                posScales[trait+String(i)] = d3.scale.linear()
+                posScales[trait] = d3.scale.linear()
                                     .domain([min,max])
                                     .range([0, 1]);
             }
         } else {
-            posScales[trait+String(i)] = d3.scale.linear()
+            posScales[trait] = d3.scale.linear()
                                     .domain([min,max])
                                     .range([0, 1]);
         }
-        console.log('Quantitative trait', trait+String(i), 'has', type, 'scale with min and max value: ', min, ',', max)
+        console.log('Quantitative trait', trait, 'has', type, 'scale with min and max value: ', min, ',', max)
     }
 }
 
@@ -298,66 +293,26 @@ var cell = svg.selectAll(".cell")
   .data(cross(columntraits,rowtraits)) //data is the combination or column and row traits.
 .enter().append("g")
   .attr("class", "cell")
-  .attr("transform", function(d) { return "translate(" + (d.i) * size + "," + d.j * size + ")";})
+  .attr("transform", function (d) { return "translate(" + (d.i) * size + "," + d.j * size + ")";})
   .each(plot);
-
-
-function isInt(value) {
-  return !isNaN(value) && (function(x) { return (x | 0) === x; })(parseFloat(value))
-}
-
-
+  
 //format the labels for axes
-function formatAxisLegend(trait,j,axis){
-    values = asgScales[trait+String(j)].domain()
-    type = columnTraitScales[j]
+function formatAxisLegend(trait,axis){
+    values = asgScales[trait].domain()
+    type = columnTraitScales[trait]
     //console.log(values, type)
 
     if (type=="categorical"){
         return values[axis]
     } else {
-        range = asgScales[trait+String(j)].invertExtent(axis)
-        r0 = range[0]
-        r1 = range[1]
-        r0 = Math.round(r0*100)/100
-        r1 = Math.round(r1*100)/100
-        min = Math.round(minmax_scale[trait][0]*100/100)
-        max = Math.round(minmax_scale[trait][1]*100/100)
-        console.log(min,max,r0,r1)
-        if(isInt(r0)&&isInt(r1)){
-            r1 = r1-1
-            r0 = r0+1
-            return r0+'-'+r1
+        range = asgScales[trait].invertExtent(axis)
+        r0 = Math.round(range[0]*100)/100
+        r1 = Math.round(range[1]*100)/100
+        if (isNaN(range[0])){return 'x≤'+ r1}
+        else if (isNaN(range[1])){return 'x>'+ r0}
+        else {return r0+'<x≤'+r1}
         }
-        else if(isInt(min)&&isInt(r1)){
-            return min+'-'+r1
-        }
-        else if(isInt(r0)&&isInt(max)){
-            return r0+'-'+max
-        }
-        else{
-            if (isNaN(range[0])){
-                console.log('a',r0,r1)
-                r1 = r1-0.01
-                r1 = Math.round(r1*100)/100
-                return min+'-'+ r1
-                }
-            else if (isNaN(range[1])){
-                console.log('b',r0,r1)
-                r0 = r0 - 0.01
-                r0 = Math.round(r0*100)/100
-                return r0+'-'+max
-                }
-            else {
-                console.log('c',r0,r1)
-                r1 = r1 - 0.02
-                r1 = Math.round(r1*100)/100
-                return r0+'-'+r1
-                } 
-            }
-        }   
 }
-
 
 //build each hive plot
 function plot(p){
@@ -371,13 +326,13 @@ function plot(p){
     //row labels (when one plotting first column, where p.i=0)
     if (p.i == 0){
     cell.append("text")
-        .attr("x", function(d) { return d.i})
-        .attr("y", function(d) { return d.j-size/2 -padding/2})
+        .attr("x", function (d) { return d.i})
+        .attr("y", function (d) { return d.j-size/2 -padding/2})
         .attr("text-anchor", "middle")
         .attr("font-family", "Helvetica Neue")
         .attr("font-size", "14px")
-        .text(capitalize(p.y + ' (' + rowTraitScales[p.j] + ')')) //add name of property used for node positionning, the rowtrait
-        .attr("transform", function(d) { 
+        .text(capitalize(p.y+' ('+rowTraitScales[p.y]+')').replace('_',' ')) //add name of property used for node positionning, the rowtrait
+        .attr("transform", function (d) { 
             return "rotate(-90)";
             })
     }
@@ -385,12 +340,11 @@ function plot(p){
     //column labels (when one plotting first row, where p.j=0)
     if (p.j==0){
     cell.append("text")
-        .attr("x", function(d) { return d.i;})
-        .attr("y", function(d) { return d.j-size/2 - padding/2;})
+        .attr("x", function (d) { return d.i;})
+        .attr("y", function (d) { return d.j-size/2 - padding/2;})
         .attr("text-anchor", "middle")
         .attr("font-family", "Helvetica Neue")
-        .attr("font-size", "14px")
-        .text(capitalize(p.x + ' (' + columnTraitScales[p.i] + ')')) //add name of property used for node assignment, the columntrait
+        .text(capitalize(p.x+' ('+columnTraitScales[p.x]+')').replace('_',' ')) //add name of property used for node assignment, the columntrait
 
     }
 
@@ -398,7 +352,7 @@ function plot(p){
     //some parameters
     var outer_radius = radius.range()[1]*1.05
         x_shift = 50
-        y_shift = 40
+        y_shift = 60
         stagger = 0
 
     cell.selectAll(".axis")
@@ -416,7 +370,7 @@ function plot(p){
             x = -h*Math.sin(theta)
             if (x>20){x = x-x_shift} else if (x<-20) {x = x+x_shift}
             if (y>30){
-                console.log(theta, x, y, stagger)
+                //console.log(theta, x, y, stagger)
                 y = y+y_shift+stagger
 
                 stagger = -stagger
@@ -445,9 +399,9 @@ function plot(p){
                 return "middle"
             }
         })
-        .text(function(d,k) {
-            if (!doubleAxes){return formatAxisLegend(p.x,String(p.i),k)}
-            else if (k % 2 == 0){return formatAxisLegend(p.x,String(p.i),k/2)}
+        .text(function (d,i) {
+            if (!doubleAxes){return formatAxisLegend(p.x,i)}
+            else if (i % 2 == 0){return formatAxisLegend(p.x,i/2)}
             else {return ''}
         })
 
@@ -456,53 +410,57 @@ function plot(p){
         .data(angle)
       .enter().append("line")
         .attr("class", "axis")
-        .attr("transform", function(d) { return "rotate(" + degrees(angles(d)) + ")";})
+        .attr("transform", function (d) { return "rotate(" + degrees(angles(d)) + ")";})
         .attr("x1", radius.range()[0])
         .attr("x2", radius.range()[1])
         .attr("stroke-width",0.7)
         .attr("stroke", "black");
 
-    //seriesLinks reflects the fact that double axes are being plotted.
-    var seriesLinks = cell.selectAll(".seriesLinks")
-                        .data(seriesLinksNames)
-                      .enter().append("g")
-                        .attr("class", "seriesLinks")
-                        .each(hiveLinks);
+    if (doubleAxes){
+        hiveLinks(0)
+        hiveLinks(1)
+        hiveNodes(0)
+        hiveNodes(1)
+    } else {
+        hiveLinks(0)
+        hiveNodes(0)
+        }
+
 
     //plot links as paths between nodes
     function hiveLinks(h){
-        var axesType = d3.select(this);
         var isSource = true
 
-        axesType.selectAll(".link")
+
+        cell.append("g").selectAll(".link")
             .data(links)
           .enter().append("path")
-            .attr("class", "link")
+            //.attr("class", "link")
             .attr("d", d3.hive.link() //use Mbostocks hive plot library
-                .angle(function(d) {
+                .angle(function (l) {
                     if (!doubleAxes){
-                        a = angles(asgScales[p.x+String(p.i)](d[p.x]))
+                        a = angles(asgScales[p.x](l[p.x]))
                     } else if (isSource){ //keep track of source and target to make link
-                        a = angles(asgScales[p.x+String(p.i)](d[p.x]*2+h)) //on h==0, want the source to be on the 1st axis but on h==1 we want the source to become the target
+                        a = angles(asgScales[p.x](l[p.x])*2+h) //on h==0, want the source to be on the 1st axis but on h==1 we want the source to become the target
                         isSource = false
                     } else {
-                        a = angles(asgScales[p.x+String(p.i)](d[p.x]*2+1-h))
+                        a = angles(asgScales[p.x](l[p.x])*2+1-h)
                         isSource = true
                     }
                     return a
                 })
                 .radius(function (l) {
-                    if (rowTraitScales[p.j]=="rank"){
+                    if (rowTraitScales[p.y]=="rank"){
                         return radius(rankScale[nodes.indexOf(l)])
                     } else {
-                        return radius(posScales[p.y+String(p.j)](l[p.y])) //pos
+                        return radius(posScales[p.y](l[p.y])) //pos
                     }
                 })
-            )            
+            )
             .attr("show", function (l) { //the 'show' attribute is false when links are between nodes on the same axes
                 //or when the link connects nodes that are not on neighboring axes and cross over a third axes.
-                s = asgScales[p.x+String(p.i)](l.source[p.x])
-                t = asgScales[p.x+String(p.i)](l.target[p.x])
+                s = asgScales[p.x](l.source[p.x])
+                t = asgScales[p.x](l.target[p.x])
                 if (!doubleAxes){
                     if (t == s) {
                         return false
@@ -541,7 +499,7 @@ function plot(p){
             })
             .style("fill", linkfill) //linkfill is "none" so that only the arc of the path is seen.
             .style("stroke-opacity", oplink)
-            .style("stroke", function(l) {
+            .style("stroke", function (l) {
                 if (edgeColor){
                 return edgeColor} else {
                     return "grey"
@@ -549,7 +507,7 @@ function plot(p){
             })
             .style("stroke-width", linkwidth)
             .classed({"clicked":false})
-            .on("click", function(){
+            .on("click", function (l){
                 if (d3.select(this).classed("clicked")){
                     d3.select(this)
                         .classed({"clicked":false})
@@ -559,20 +517,20 @@ function plot(p){
                 } else {
                     d3.select(this)
                         .classed({"clicked":true})
-                        .call(link_full_reveal,d,d.source.name, d.target.name)
+                        .call(link_full_reveal,l,l.source.name, l.target.name)
                 }
             })
-            .on("mouseover", function(l){
+            .on("mouseover", function (l){
                 var link = d3.select(this)
                 var cx = d3.event.pageX
                 var cy = d3.event.pageY
 
-                hoverTimer = setTimeout(function(){
+                hoverTimer = setTimeout(function (){
                         link_tooltip(cx, cy, l, l.source.name, l.target.name);
                         //link.call(highlight_links)  //not responsive because manipulating the DOM is expensive.
                     }, hoverDelay)
             })
-            .on("mouseout", function(){
+            .on("mouseout", function (){
                 clearHoverTimer()
                 remove_tooltip()
                 //if (!d3.select(this).classed("clicked")){
@@ -580,49 +538,42 @@ function plot(p){
                 //}
             });
 
-        //removes any edges between nodes on same axis.
-        axesType.selectAll("path[show="+false+"]").remove()
-
         };
 
-    var seriesNodes = cell.selectAll(".seriesNodes")
-                    .data(seriesLinksNames)
-                  .enter().append("g")
-                    .attr("class", "seriesNodes")
-                    .each(hiveNodes);
 
     //plot nodes second so they appear on top of links
     function hiveNodes(h){
-        var axesType = d3.select(this);
-        axesType.selectAll(".node")
+
+        cell//.append("g")
+        	.selectAll(".node")
             .data(nodes)
           .enter().append("circle")
-            .attr("class", "node")
-            .attr("transform", function(d) { 
+            //.attr("class", function (d,i) {return "n"+String(i)})
+            .attr("transform", function (d) { 
                 if (doubleAxes){ //plot nodes of even axes when h=0 then on odd axes when h=1
-                    return "rotate(" + degrees(angles(asgScales[p.x+String(p.i)](d[p.x]*2 + h))) + ")"  
+                    return "rotate(" + ~~degrees(angles(asgScales[p.x](d[p.x])*2 + h)) + ")"  //Use  ~~ to round values
                 } else {
-                    return "rotate(" + degrees(angles(asgScales[p.x+String(p.i)](d[p.x]))) + ")"
+                    return "rotate(" + ~~degrees(angles(asgScales[p.x](d[p.x]))) + ")"
                }
             })
 
             .attr("cx", function (d) {
-                //console.log(d.name, p.y, d[p.y], posScales[p.y+String(p.j)](d[p.y]))
-                if (rowTraitScales[p.j]=="rank"){
-                    return radius(rankScale[nodes.indexOf(d)])
+                //console.log(d.name, p.y, d[p.y], posScales[p.y](d[p.y]))
+                if (rowTraitScales[p.y]=="rank"){
+                    return ~~radius(rankScale[nodes.indexOf(d)])
                 } else {
-                    return radius(posScales[p.y+String(p.j)](d[p.y])) //pos
+                    return ~~radius(posScales[p.y](d[p.y])) //pos
                 }
             })
             .attr("r", nodesize)
             .attr("stroke-width", nodestroke)
             .attr("stroke", nodestrokecolor)
             .style("fill-opacity", opnode)
-            .style("fill", function(d) { 
+            .style("fill", function (d) { 
                 return nodeColor
             })
             .classed({"clicked":false})
-            .on("click", function(d){
+            .on("click", function (d){
                 if (d3.select(this).classed("clicked")){
                     d3.select(this).classed({"clicked":false})
                     node_mouseout()
@@ -634,18 +585,18 @@ function plot(p){
                         .call(node_full_reveal,d)
                 }
             })
-            .on("mouseover", function(d){
+            .on("mouseover", function (d){
                 clearHoverTimer()
                 //var node = d3.select(this)
                 var cx = d3.event.pageX
                 var cy = d3.event.pageY
 
-                hoverTimer = setTimeout(function(){
-                        node_tooltip(cx, cy, d, p.x, p.y, d[p.x], d[p.y]);
+                hoverTimer = setTimeout(function (){
+                        node_tooltip(cx, cy, d, p.x,p.y, d[p.x], d[p.y]);
                         //node.call(highlight_nodes) //not responsive because manipulating the DOM is expensive.
                     }, hoverDelay)
             })
-            .on("mouseout", function(d){                
+            .on("mouseout", function (d){                
                 remove_tooltip() 
                 clearHoverTimer()
                 //if (!d3.select(this).classed("clicked")){
@@ -653,6 +604,9 @@ function plot(p){
                 //        .call(node_mouseout)  
                 //} 
             })
+
+        //removes any edges between nodes on same axis.
+        cell.selectAll("path[show="+false+"]").remove()
     };
 
     };
@@ -666,7 +620,7 @@ function plot(p){
 
 // ****************************************** //
 
-var node_tooltip = function(cx, cy, d, px, py, x, y){
+var node_tooltip = function (cx, cy, d, px, py, x, y){
     if (py!=px){
         text = '<b>' + d.name +'</b><br>'+ px + ': ' + round_value(x) + '<br>' + py + ': ' + round_value(y)
     } else { text = '<b>' + d.name +'</b><br>'+ px + ': ' + round_value(x)}
@@ -679,11 +633,11 @@ var node_tooltip = function(cx, cy, d, px, py, x, y){
 }
 
 
-var node_full_reveal = function(node,d) {
+var node_full_reveal = function (node,d) {
     revealNode(d, node.style("fill"))
 
     d3.selectAll(".node")
-        .each(function(n){
+        .each(function (n){
             if (n.name == d.name){
                 node = d3.select(this)
                 node.classed({"clicked":true})
@@ -693,14 +647,14 @@ var node_full_reveal = function(node,d) {
 }
 
 /////with queue brocken@!!!!!
-/*var node_full_reveal = function(node,d) {
+/*var node_full_reveal = function (node,d) {
     revealQueue = queue(1)
     revealQueue
         .defer(revealNode, d, node.style("fill"))
 
     tasks = []
     d3.selectAll(".node")
-        .each(function(n){
+        .each(function (n){
             if (n.name == d.name){
                 node = d3.select(this)
                 node.classed({"clicked":true})
@@ -710,10 +664,10 @@ var node_full_reveal = function(node,d) {
                 tasks.push(t)
             }
         })
-    tasks.forEach(function(t) {console.log(t[1]); revealQueue.defer(t[0], t[1])})
+    tasks.forEach(function (t) {console.log(t[1]); revealQueue.defer(t[0], t[1])})
 }*/
 
-var node_mouseout = function(node) {
+var node_mouseout = function (node) {
     if (node){
         node
             .transition()
@@ -721,7 +675,7 @@ var node_mouseout = function(node) {
             .attr("r", nodesize)
             .attr("stroke-width", nodestroke)
             .attr("stroke", nodestrokecolor)
-            .style("fill-opacity", function(d,i){
+            .style("fill-opacity", function (d,i){
                 if (d3.select(this).classed("important")){
                     return opnode_more
                 }else{
@@ -734,7 +688,7 @@ var node_mouseout = function(node) {
             .attr("r", nodesize)
             .attr("stroke-width", nodestroke)
             .attr("stroke", nodestrokecolor)
-            .style("fill-opacity", function(d,i){
+            .style("fill-opacity", function (d,i){
                 if (d3.select(this).classed("important")){
                     return opnode_more
                 }else{
@@ -744,17 +698,17 @@ var node_mouseout = function(node) {
 }
 
 
-var remove_tooltip = function(){
+var remove_tooltip = function (){
     tooltip.style("opacity", 0);
 }
+//***BROCKEN****
+// d3.selection.prototype.moveToFront = function () {
+//   return this.each(function (){
+//     this.parentNode.parentNode.appendChild(this.parentNode);
+//   });
+// };
 
-d3.selection.prototype.moveToFront = function() {
-  return this.each(function(){
-    this.parentNode.appendChild(this);
-  });
-};
-
-var highlight_nodes = function(selection) {
+var highlight_nodes = function (selection) {
     selection
         .transition()
         .duration(highlightTime)
@@ -764,23 +718,23 @@ var highlight_nodes = function(selection) {
         .style("fill-opacity", 1)
     };
 
-var link_full_reveal = function(link,d,source,target) {
+var link_full_reveal = function (link,d,source,target) {
     revealLink(d, link.style("stroke"));
     d3.selectAll(".link")
-        .each(function(l){
+        .each(function (l){
             if (l.source.name == source && l.target.name == target){
                 d3.select(this).call(highlight_links)
             }
         })
     d3.selectAll(".node")
-        .each(function(n){
+        .each(function (n){
             if (n.name == source || n.name == target){
                 d3.select(this).call(highlight_nodes)
             }
         })
 }
 
-var link_tooltip = function(cx, cy, d, source, target){
+var link_tooltip = function (cx, cy, d, source, target){
     tooltip    
         .style("opacity", tooltipOpacity);
     tooltip.html('source: ' + source + '<br>' + 'target: ' + target)
@@ -789,7 +743,7 @@ var link_tooltip = function(cx, cy, d, source, target){
         .style("top", (cy - 28) + "px");
 }
 
-var link_mouseout = function(link) {
+var link_mouseout = function (link) {
     if (link){
         link
             .transition()
@@ -805,7 +759,7 @@ var link_mouseout = function(link) {
     }
 }
 
-var highlight_links = function(selection) {
+var highlight_links = function (selection) {
     selection            
         .transition()
         .duration(highlightTime)
@@ -840,7 +794,7 @@ function make_link_reveal_text(link) {
     return text
 }
 
-var revealNode = function(d, color, callback){
+var revealNode = function (d, color, callback){
     removeReveal()
     d3.select("body").select("#reveal").append("p")
         .html(make_node_full_reveal_text(d))
@@ -852,14 +806,14 @@ var revealNode = function(d, color, callback){
     //callback(null,true)
     };
 
-var revealLink = function(d,color){
+var revealLink = function (d,color){
     removeReveal()
     d3.select("body").select("#reveal").append("p")
         .html(make_link_reveal_text(d))
         .style("color", color)
     };
 
-var removeReveal = function(){
+var removeReveal = function (){
     d3.select("body").select("#reveal").selectAll("p")
         .remove();
     };
@@ -876,7 +830,7 @@ var removeReveal = function(){
 function show_node() {
     var node = document.getElementById("lostNode").value
     var revealed = false
-    d3.selectAll("circle").each(function(d) {
+    d3.selectAll("circle").each(function (d) {
         if (d['name'] == node) {
             d3.select(this)
                 .moveToFront()
@@ -1058,7 +1012,7 @@ function make_value_options(ruleNumber) {
 function create_color_box(ruleNumber) {
 
     colorBox = document.getElementById("node_color" + ruleNumber)
-    d3.select(colorBox).on('input', function() {
+    d3.select(colorBox).on('input', function () {
         colorBox = document.getElementById("node_color" + ruleNumber) //need to do this again or it grabs the recent colorBox
         color = colorBox.value // get the current value of the input field.
         colorBox.style.fontWeight = "800"
@@ -1097,7 +1051,7 @@ function color_filter_or_undo(sel) {
         d3.selectAll(".link")
             .style("stroke", edgeColor)
             .style("visibility", "visible")
-            .style("fill-opacity", oplink)
+            .style("stroke-opacity", oplink)
 
         d3.selectAll(".node")
             .style("fill", nodeColor)
@@ -1115,6 +1069,34 @@ function color_filter_or_undo(sel) {
     }
 }
 
+function count_marks_colored(mark,property,value,equality) {
+    count = 0
+    if (mark == "node"){
+        data = nodes
+    }
+    else if (mark == "link"){
+        data = links
+    }
+
+    if (equality == '>'){
+        for (var i = data.length - 1; i >= 0; i--) {
+             if (data[i][property] > value) {count ++}};
+    }
+    else if (equality == '<') {
+        for (var i = data.length - 1; i >= 0; i--) {
+             if (data[i][property] < value) {count ++}};
+    }
+    else if (equality == '=') {
+        for (var i = data.length - 1; i >= 0; i--) {
+             if (data[i][property] == value) {count ++}};
+    }
+    else if (equality == '!=') {
+        for (var i = data.length - 1; i >= 0; i--) {
+             if (data[i][property] != value) {count ++}};
+    }
+    return count
+}
+
 function make_coloring(ruleNumber) {
     mark = document.getElementById("node_or_link"+ruleNumber).value
     property = document.getElementById("property"+ruleNumber).value
@@ -1126,52 +1108,63 @@ function make_coloring(ruleNumber) {
     color = ''
     filter = ''
     count = 0
-    if (ruleButton != null) {
-        color = ruleButton.value
-        console.log('Coloring ' + ' ' + mark + 's' + ' with a ' + property + equality + value + ' ' + color)
-        if (color != ''){
-            if (mark == "node"){
-                count = color_marks("circle", "fill", property, value, color, equality)
-            } else if (mark == "link"){
-                count = color_marks("path", "stroke", property, value, color, equality)
-            }
-        }
-    } else if (filterButton != null) {
-        filter = filterButton.value
-        console.log('Filtering (' + filter + ') ' + mark + 's' + ' with a ' + property + equality + value)
-        if (filter == 'keep') {
-            if (equality == '='){
-                equality = '!='
-            } else if (equality == '<'){
-                equality = '>'
-            } else if (equality == '>'){
-                equality = '<'
-            }
-        }
-        if (mark == "node"){
-            count = color_marks("circle", "visibility", property, value, "hidden", equality)
-        } else if (mark == "link"){
-            count = color_marks("path", "visibility", property, value, "hidden", equality)
-        }
-    }
+
+    count = count_marks_colored(mark,property,value,equality)
+
     if (count > 0){
         success = true
-        reveal_count(mark, filter, color, count)
+
+        if (ruleButton != null) {
+            color = ruleButton.value
+            console.log('Coloring' + ' ' + mark + 's' + ' with a ' + property + equality + value + ' ' + color)
+            if (color != ''){
+                if (mark == "node"){
+                    b1 = performance.now()
+                    color_marks("circle", "fill", property, value, color, equality)
+                    b2 = performance.now()
+                    alert(b2-b1)
+                } else if (mark == "link"){
+                    color_marks("path", "stroke", property, value, color, equality)
+                }
+            }
+        } else if (filterButton != null) {
+            filter = filterButton.value
+            console.log('Filtering (' + filter + ') ' + mark + 's' + ' with a ' + property + equality + value)
+            if (filter == 'keep') {
+                if (equality == '='){
+                    equality = '!='
+                } else if (equality == '<'){
+                    equality = '>'
+                } else if (equality == '>'){
+                    equality = '<'
+                }
+            }
+            if (mark == "node"){
+                color_marks("circle", "visibility", property, value, "hidden", equality)
+            } else if (mark == "link"){
+                color_marks("path", "visibility", property, value, "hidden", equality)
+            }
+        }
     }
+    reveal_count(mark, filter, color, count)
     return success
 }
 
 function reveal_count(mark, filter, color, count){
-    if (filter == 'hide' || filter == 'keep'){action = 'filtered out'
+    if (filter == 'hide'){action = 'filtered out'
+    } else if (filter == 'keep'){
+    	action = 'filtered out'
+    	count = N-count
     } else {action = 'colored'}
 
-    if (mark == 'link'){beginning = 'On average, per hive, '
-    } else {beginning = ''}
+    if (count > 1 || count == 0){mark = mark + 's were'
+    } else if (count == 1) {mark = mark + ' was'}
 
-    if (count > 1){mark = mark + 's were'
-    } else {mark = mark + ' was'}
+    if (count == 0) {
+        number = 'No'
+    } else {number = Math.ceil(count)}
 
-    text = beginning + Math.ceil(count) + ' ' + mark + ' ' + action + '.'
+    text = number + ' ' + mark + ' ' + action + '.'
 
 
     removeReveal()
@@ -1181,22 +1174,16 @@ function reveal_count(mark, filter, color, count){
 };
 
 function color_marks(mark, styling, property, value, color, equality) {
-    count = 0
     if (equality == '>'){
-        d3.selectAll(mark).each(function(d){
+        d3.selectAll(mark).each(function (d){
             if (Number(d[property]) > Number(value)) {
-                count ++
                 d3.select(this)
-                    .each(function(){
-                        if (mark == 'cirle'){
-                            d3.select(this).moveToFront()}
-                    })
                     .style(styling, color)
-                    .style("fill-opacity", opnode_more)
+                    .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
                     .classed({"important":true})
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
-                        .each(function(l){
+                        .each(function (l){
                             if (l.source.name == d.name || l.target.name == d.name){
                                 d3.select(this).style(styling, color)
                             }
@@ -1206,20 +1193,15 @@ function color_marks(mark, styling, property, value, color, equality) {
         })
     }
     else if (equality == '<'){
-        d3.selectAll(mark).each(function(d){
+        d3.selectAll(mark).each(function (d){
             if (Number(d[property]) < Number(value)) {
-                count ++
                 d3.select(this)
-                    .each(function(){
-                        if (mark == 'cirle'){
-                            d3.select(this).moveToFront()}
-                    })
                     .style(styling, color)
-                    .style("fill-opacity", opnode_more)
+                    .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
                     .classed({"important":true})
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
-                        .each(function(l){
+                        .each(function (l){
                             if (l.source.name == d.name || l.target.name == d.name){
                                 //d3.select(this).style(styling, color)
                             }
@@ -1229,20 +1211,30 @@ function color_marks(mark, styling, property, value, color, equality) {
         })
     }
     else if (equality == '='){
-        d3.selectAll(mark).each(function(d){
+
+    	// data = nodes
+    	// ids = []
+    	// for (var i = data.length - 1; i >= 0; i--) {
+     //         if (data[i][property] == value) {ids.push("n"+String(i))}
+     //     }
+     //    for (var i = ids.length - 1; i >= 0; i--) {
+     //    	console.log(ids[i])
+     //    	d3.selectAll("."+ids[i]).each(function (d) {
+     //    		d3.select(this)
+	    //     		.style(styling, color)
+	    //             .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
+	    //             .classed({"important":true})
+     //    		})
+     //   	};
+        d3.selectAll(mark).each(function (d){
             if (d[property] == value) {
-                count ++
                 d3.select(this)
-                    .each(function(){
-                        if (mark == 'cirle'){
-                            d3.select(this).moveToFront()}
-                    })
                     .style(styling, color)
-                    .style("fill-opacity", opnode_more)
+                    .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
                     .classed({"important":true})
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
-                        .each(function(l){
+                        .each(function (l){
                             if (l.source.name == d.name || l.target.name == d.name){
                                 d3.select(this).style(styling, color)
                             }
@@ -1251,20 +1243,15 @@ function color_marks(mark, styling, property, value, color, equality) {
            }
         })
     } else if (equality == '!='){
-        d3.selectAll(mark).each(function(d){
+        d3.selectAll(mark).each(function (d){
             if (d[property] != value) {
-                count ++
                 d3.select(this)
-                    .each(function(){
-                        if (mark == 'cirle'){
-                            d3.select(this).moveToFront()}
-                    })
                     .style(styling, color)
-                    .style("fill-opacity", opnode_more)
+                    .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
                     .classed({"important":true})
                 if (styling == 'visibility' && mark == 'circle'){
                     d3.selectAll(".link")
-                        .each(function(l){
+                        .each(function (l){
                             if (l.source.name == d.name || l.target.name == d.name){
                                 d3.select(this).style(styling, color)
                             }
@@ -1273,8 +1260,8 @@ function color_marks(mark, styling, property, value, color, equality) {
            }
         })
     }
-    if (!doubleAxes){return count/num_panels}
-    else {return count/num_panels/2}
+    //if (!doubleAxes){return count/num_panels}
+    //else {return count/num_panels/2}
 };
 
 
@@ -1457,7 +1444,7 @@ function hasClass(element, cls) {
 
 function capitalize(str) {
     var lower = str.toLowerCase();
-    return lower.replace(/(^| )(\w)/g, function(x) {
+    return lower.replace(/(^| )(\w)/g, function (x) {
         return x.toUpperCase();
         });
 }
@@ -1490,8 +1477,8 @@ function round_value(value){
 }
 
 function get_categories(trait){
-    values = d3.nest().key(function(d) {return d[trait]})
-                    .rollup(function(leaves) { return leaves.length;})
+    values = d3.nest().key(function (d) {return d[trait]})
+                    .rollup(function (leaves) { return leaves.length;})
                     .entries(nodes);
     var keys = [];
 
@@ -1524,18 +1511,18 @@ function d3_scale_log(linear, base, positive, domain) {
     return linear(log(x));
   }
 
-  scale.invert = function(x) {
+  scale.invert = function (x) {
     return pow(linear.invert(x));
   };
 
-  scale.domain = function(x) {
+  scale.domain = function (x) {
     if (!arguments.length) return domain;
     positive = x[0] >= 0;
     linear.domain((domain = x.map(Number)).map(log));
     return scale;
   };
 
-  scale.base = function(_) {
+  scale.base = function (_) {
     if (!arguments.length) return base;
     base = +_;
     linear.domain(domain.map(log));
@@ -1600,7 +1587,11 @@ function place_remove_icon(ruleNumber) {
     }
 
     var icon = document.createElement("d")
-    icon.innerHTML = "<img src='remove_icon.svg' class='icon' id = 'removeIcon"+ruleNumber+"' onclick='remove_rule(this)'>"
+    icon.innerHTML = "<img src='../remove_icon.svg' class='icon' id = 'removeIcon"+ruleNumber+"' onclick='remove_rule(this)'>"
     var div = document.getElementById("equality"+ruleNumber);
     insertAfter(div, icon);
 }
+
+a2 = performance.now()
+
+//alert(a2-a1)
