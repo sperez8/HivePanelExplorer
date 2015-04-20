@@ -243,6 +243,7 @@ def module_sizes(G,factor=FACTOR):
     modules = get_modules(G)
     if modules:
         modules.sort(key=lambda m: len(m),reverse=True) #order by size
+        print modules
         module_sizes = ','.join([str(len(m)) for m in modules])
         return module_sizes
     else:
