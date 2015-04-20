@@ -46,6 +46,7 @@ def main(*argv):
 	parser.add_argument('-networks', nargs='*', help='Which network to use: SBS, IDF, etc.')
 	parser.add_argument('-simulate', help='Simulates node removal', action = 'store_true')
 	parser.add_argument('-calculate', help='Calculates networks properties', action = 'store_true')
+	parser.add_argument('-modules', help='Calculates module properties', action = 'store_true')
 	parser.add_argument('-distribution', help='Plots degree distribution', action = 'store_true')
 	parser.add_argument('-assess', help='Assess ecological properties', action = 'store_true')
 	parser.add_argument('-maketable', help='Make OTU table with eclogical measures', action = 'store_true')
@@ -64,7 +65,7 @@ def main(*argv):
 	args = parser.parse_args()
 	
 	#check that one of the options is true
-	choices = [args.simulate,args.distribution,args.calculate,args.assess,args.maketable,args.boxplot]
+	choices = [args.simulate,args.distribution,args.calculate,args.assess,args.maketable,args.boxplot,args.modules]
 	if sum([1 for c in choices if c])>1 or sum([1 for c in choices if c])==0:
 		print "\n***You must specify one of the three options to calculate porperties of, run simulations on or plot networks.***\n"
 		parser.print_help()
@@ -97,6 +98,14 @@ def main(*argv):
 		filePath = os.path.join(FIGURE_PATH,'table_of_measures_'+'_'.join(args.networks)+'_'+edgetype+'.txt')
 		print filePath
 		network_structure(net_path,networks,filePath,edgetype, os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END, FEATURE_PATH, FEATURE_FILE)
+
+	elif args.modules:
+		print "\nCalculating structural properties on "+edgetype+" type of edges of modules in networks:"
+		print ", ".join(networks), '\n'
+		filePath = os.path.join(FIGURE_PATH,'table_of_module_measures_'+'_'.join(args.networks)+'_'+edgetype+'.txt')
+		print filePath
+		module_structure(net_path,networks,filePath,edgetype, os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END, FEATURE_PATH, FEATURE_FILE)
+
 
 	elif args.assess:
 		print "\nCalculating ecological metrics of sample collection for the following networks:"
