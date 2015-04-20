@@ -14,7 +14,7 @@ import numpy as np
 from math import pi
 import hive as hive
 import copy
-#import scipy.stats
+import scipy.stats
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))
 _root_dir = os.path.dirname(_cur_dir)
@@ -24,8 +24,9 @@ import networkx as nx
 from make_network import *
 
 DECIMALS = 3 #for rounding measures
-FACTOR = 2
+FACTOR = 3
 
+SOILHORIZON_FEAT_NAME = 'SoilHorizon avg'
 
 def number_of_nodes(G):
 	return G.number_of_nodes()
@@ -120,12 +121,12 @@ def shannon_diversity(S):
 ########## Measures using an OTU table and features
 
 def correlation_of_edge_depth(G,featureTable):
-    feature = 'Soil Horizon avg'
+    feature = SOILHORIZON_FEAT_NAME
     return compute_feature_correlation(G,feature,featureTable)
 
 
 def correlation_of_degree_and_depth(G,featureTable):
-    feature = 'Soil Horizon avg'
+    feature = SOILHORIZON_FEAT_NAME
     return compute_feature_degree_correlation(G,feature,featureTable)
     
 def compute_feature_degree_correlation(G,feature,featureTable):
@@ -162,10 +163,14 @@ def compute_feature_correlation(G,feature,featureTable):
 
 
 def findRow(otu,table):
-    if 'Otu' in otu:
+    if 'OTU' in otu:
         row = np.where(table==otu.replace('OTU-',''))[0][0]
+    elif 'Otu' in otu:
+        row = np.where(table==otu)[0][0]
     else:
         row = None
+        print "WARNING: Didn't find the otu: ", otu
+        sys.exit()
     return row
 
 
@@ -210,9 +215,42 @@ def measure_whole(G):
 
     return measures
 
+def compute_modularity_horizon(G,featureTable):
+    feature = SOILHORIZON_FEAT_NAME
+    return compute_modularity_feature(G,feature,featureTable)
+
+def compute_modularity_feature(G,feature,featureTable,factor=FACTOR):
+    col = np.where(featureTable[0,:]==feature)[0][0]
+    modularity = node_modularity(G)
+    # H = nx.Graph()
+    module_features = {m:[] for m in set(modularity.values())}
+
+    for node,mod in modularity.iteritems():
+            row = findRow(node,featureTable)
+            if row:
+                module_features[mod].append(float(featureTable[row][col]))
+            else: continue
+
+    feature_values = {}
+    for m,values in module_features.iteritems():
+       avg = np.average(values)
+       std = np.std(values)
+       feature_values[m] =str( (round(avg,DECIMALS),round(std,5)) )
+    return ';'.join([str(k)+':'+str(v) for k,v in feature_values.iteritems()])
+
+
+def module_sizes(G,factor=FACTOR):
+    modules = get_modules(G)
+    if modules:
+        modules.sort(key=lambda m: len(m),reverse=True) #order by size
+        module_sizes = ','.join([str(len(m)) for m in modules])
+        return module_sizes
+    else:
+        return 'None'
+
 def node_modularity(G,factor=FACTOR):
     '''gets modules using FAG-EC algorithm and returns a dictionary
-    where keys are nodes and value is hte module it belongs to where
+    where keys are nodes and value is e module it belongs to where
     0 = no module
     1 = largest module
     i = ith largets module

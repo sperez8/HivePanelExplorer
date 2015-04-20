@@ -10,7 +10,8 @@ import numpy as np
 from network_simulation import *
 
 #What to plot
-PATH = '/Users/sperez/Desktop/LTSPnetworks'
+#PATH = '/Users/sperez/Desktop/LTSPnetworks'
+PATH = '\Users\Sarah\Desktop\LTSPnetworks'
 FOLDER = 'by_treatment'
 WHOLE_FOLDER = 'by_zone'
 FIGURE_PATH = os.path.join(PATH,'plots')
@@ -82,6 +83,7 @@ def main(*argv):
 
 	edgetype = args.edgetype
 	net_path = os.path.join(args.path,args.folder)
+	print net_path
 	if args.folder == 'by_zone':
 		networks = {('BAC_'+n if 'BAC_' not in n else n):[] for n in args.networks}
 	else:
@@ -93,6 +95,7 @@ def main(*argv):
 		print "\nCalculating structural properties on "+edgetype+" type of edges of networks:"
 		print ", ".join(networks), '\n'
 		filePath = os.path.join(FIGURE_PATH,'table_of_measures_'+'_'.join(args.networks)+'_'+edgetype+'.txt')
+		print filePath
 		network_structure(net_path,networks,filePath,edgetype, os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END, FEATURE_PATH, FEATURE_FILE)
 
 	elif args.assess:
