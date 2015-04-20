@@ -45,16 +45,15 @@ INDVAL_CUTOFF = 0.6
 STRUCTURE_METRICS = [nm.number_of_nodes, 
 					nm.number_of_edges,
 					nm.number_of_components,
-					nm.size_of_components,
+					nm.size_of_big_components,
 					nm.number_of_nodes_of_largest_connected_component, 
 					nm.number_of_edges_of_largest_connected_component,
-					nm.module_sizes,
+					nm.diameter_of_largest_connected_component,
 					nm.average_degree, 
 					nm.connectance, 
 					nm.global_clustering_coefficient,
 					nm.fraction_of_possible_triangles,
 					#nm.size_of_largest_clique,
-					nm.diameter_of_largest_connected_component,
 					#nm.average_path_on_largest_connected_component,
 					nm.degree_assortativity,
 					nm.correlation_of_degree_and_betweenness_centrality,
@@ -65,7 +64,6 @@ INPUT_METRICS = [nm.richness,
 				]
 OTU_METRICS = [nm.correlation_of_degree_and_depth,
 				nm.correlation_of_edge_depth,
-				nm.compute_modularity_horizon,
 				]
 MEASURES = [nm.node_degrees,
 			nx.betweenness_centrality, 
@@ -74,6 +72,18 @@ MEASURES = [nm.node_degrees,
 			nm.node_modularity,
 			]
 
+MODULE_METRICS = [
+				nm.module_sizes,
+				#nm.module_edges,
+				#nm.module_connectance,
+				#nm.module_diameter,
+				#correlation_of_degree_and_depth,
+				#correlation_of_betweenness_centrality_and_deth
+				]
+
+MODULE_OTU_METRICS = [
+					#nm.compute_modularity_horizon,
+					]
 
 
 def make_graph(nodeFile, edgeFile,edgetype):
@@ -410,6 +420,63 @@ def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile
 #####################################################################################
 
 
+def module_structure(net_path, networkNames, filePath, edgetype, inputFolder, inputFileEnd,featurePath, featureFile):
+	networks,treatments = get_network_fullnames(networkNames)
+	print networks, treatments
+	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
+	otuTable = {}
+	modules = {}
+	number_modules = {}
+	for n in networks:
+		otuTable[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S1000')
+		mods = nm.get_modules(graphs[n])
+		modules[n] = mods
+		number_modules[n] = len(mods)
+	print number_modules
+	print sum(number_modules.values())
+
+
+	if treatments != []:
+		table = np.zeros(shape=(len(MODULE_METRICS)+len(MODULE_OTU_METRICS)+2, sum(number_modules.values())+len(treatments)+1), dtype='S1000')
+		i,j = 0,1 # i is row, j is column
+		column = ['Zones','Treatments']
+		column.extend([sm.__name__.replace('_',' ').capitalize() for sm in MODULE_METRICS])
+		column.extend([om.__name__.replace('_',' ').capitalize() for om in MODULE_OTU_METRICS])
+		table[:,0]=column
+		for location,treatments in networkNames.iteritems():
+			table[i,j]=location
+			for t in treatments:
+				i+=1
+				number_mods = number_modules[location+'_'+t]
+				print t
+				table[i,j]= t
+				print table
+				for sm in MODULE_METRICS:
+					print "For network for zone {0} treatment {1} calculating metric {2}".format(location,t,sm.__name__)
+					i+=1
+					G = graphs[location+'_'+t]
+					print sm(G)
+					print number_mods
+					table[i,j:j+number_mods]=sm(G)
+					j+= +number_mods
+				for om in MODULE_OTU_METRICS:
+					print "For network for zone {0} treatment {1} calculating metric {2}".format(location,t,om.__name__)
+					i+=1
+					G = graphs[location+'_'+t]
+					featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
+					featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
+					table[i,j]=om(G,featureTable)
+				j+=1
+				i=0
+	else:
+		print 'Can only do for multiple treatments. FIX ME'
+
+	np.savetxt(filePath, table, delimiter="\t", fmt='%s')
+	return None
+
+
+
+
 def network_structure(net_path, networkNames, filePath, edgetype, inputFolder, inputFileEnd,featurePath, featureFile):
 	networks,treatments = get_network_fullnames(networkNames)
 	print networks, treatments
@@ -741,7 +808,69 @@ def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,m
 
 
 
+'''
 
+def module_structure(net_path, networkNames, filePath, edgetype, inputFolder, inputFileEnd,featurePath, featureFile):
+	networks,treatments = get_network_fullnames(networkNames)
+	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
+	otuTable = {}
+	modules = {}
+	max_number_modules = 0
+	for n in networks:
+		otuTable[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S1000')
+		mods = nm.get_modules(graphs[n])
+		modules[n] = mods
+		max_number_modules = max(len(mods), max_number_modules)
+
+	if treatments != []:
+		table = np.zeros(shape=((len(MODULE_METRICS)+len(MODULE_OTU_METRICS))+3, len(networkNames)*len(treatments)*(max_number_modules+1)+1), dtype='S1000')
+		i,j = 0,1 # i is row, j is column
+		column = ['Zones','Treatments','Modules']
+		column.extend([sm.__name__.replace('_',' ').capitalize() for sm in MODULE_METRICS])
+		column.extend([om.__name__.replace('_',' ').capitalize() for om in MODULE_OTU_METRICS])
+		table[:,0]=column
+		for location,treatments in networkNames.iteritems():
+			table[i,j]=location
+			for t in treatments:
+				i+=1
+				print t
+				table[i,j]=t#.extend(['' for x in range(max_number_modules+1)])
+				mods = modules[location+'_'+t]
+				G = graphs[location+'_'+t]
+				if not mods:
+					table[i,j:j+max_number_modules] = [G.nodes()].extend(['0' for x in range(max_number_modules+1)]))
+		
+				for k,mod in enumerate(mods):
+					print k
+					#i+=1
+					table[i,j]=k
+					i+=1
+					table[i,j]=len(mod)
+
+
+
+					j+= 1
+				print table
+				for im in MODULE_METRICS:
+					print "For network for zone {0} treatment {1} calculating metric {2}".format(location,t,sm.__name__)
+					i+=1
+					G = graphs[location+'_'+t]
+					table[i,j]=sm(G)
+				for om in MODULE_OTU_METRICS:
+					print "For network for zone {0} treatment {1} calculating metric {2}".format(location,t,om.__name__)
+					i+=1
+					G = graphs[location+'_'+t]
+					featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
+					featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
+					table[i,j]=om(G,featureTable)
+				j+=1
+				i=0
+	else:
+		print 'Can only do for multiple treatments. FIX ME'
+
+	np.savetxt(filePath, table, delimiter="\t", fmt='%s')
+	return None
+'''
 
 
 

@@ -43,14 +43,14 @@ def number_of_edges_of_largest_connected_component(G):
 def number_of_components(G):
     return nx.number_connected_components(G)
 
-def size_of_components(G):
+def size_of_big_components(G):
     cc = sorted(nx.connected_components(G), key = len, reverse=True)
-    sizes = [str(len(c)) for c in cc]
+    sizes = [str(len(c)) for c in cc if len(c) > 3]
     return ','.join(sizes)
 
 def in_largest_connected_component(G):
-    CC = nx.connected_component_subgraphs(G)[0].nodes()
-    members = {n:(1 if n in CC else 0) for n in G.nodes()}
+    LCC = nx.connected_component_subgraphs(G)[0].nodes()
+    members = {n:(1 if n in LCC else 0) for n in G.nodes()}
     return members
 
 def node_degrees(G):
@@ -92,7 +92,10 @@ def correlation_of_degree_and_betweenness_centrality(G):
         dn.append(d[n])
 
     r = scipy.stats.spearmanr(dn, bcn)
-    return str((round(r[0],DECIMALS),round(r[1],5)))
+    return format_correlation(r[0],r[1])
+
+def format_correlation(avg,std):
+    return "{0} ({1})".format(round(avg,DECIMALS), round(std,5))
 
 
 ### Ecological measures
@@ -115,7 +118,7 @@ def shannon_diversity(S):
     D = 0
     S = normalize(remove_headers(S))
     D = -sum(np.mean(row) * np.log(np.mean(row)) for row in S)    
-    return D
+    return str(round(D,DECIMALS))
 
 
 ########## Measures using an OTU table and features
@@ -142,7 +145,7 @@ def compute_feature_degree_correlation(G,feature,featureTable):
             featureValues.append(featureTable[row][col])
         else: continue
     r = scipy.stats.spearmanr(degrees, featureValues)
-    return str((round(r[0],DECIMALS),round(r[1],5)))
+    return format_correlation(r[0],r[1])
 
 
 def compute_feature_correlation(G,feature,featureTable):
@@ -158,7 +161,7 @@ def compute_feature_correlation(G,feature,featureTable):
         else:
             continue
     r = scipy.stats.spearmanr(iF,jF)
-    return str((round(r[0],DECIMALS),round(r[1],5)))
+    return format_correlation(r[0],r[1])
 
 
 
@@ -235,7 +238,7 @@ def compute_modularity_feature(G,feature,featureTable,factor=FACTOR):
     for m,values in module_features.iteritems():
        avg = np.average(values)
        std = np.std(values)
-       feature_values[m] =str( (round(avg,DECIMALS),round(std,5)) )
+       feature_values[m] = format_correlation(avg, std)
     return ';'.join([str(k)+':'+str(v) for k,v in feature_values.iteritems()])
 
 
@@ -243,9 +246,9 @@ def module_sizes(G,factor=FACTOR):
     modules = get_modules(G)
     if modules:
         modules.sort(key=lambda m: len(m),reverse=True) #order by size
-        print modules
-        module_sizes = ','.join([str(len(m)) for m in modules])
-        return module_sizes
+        #print modules
+        #module_sizes = ','.join([str(len(m)) for m in modules])
+        return [str(len(m)) for m in modules]
     else:
         return 'None'
 

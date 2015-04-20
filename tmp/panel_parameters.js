@@ -30,7 +30,7 @@ var hoverOverTime = 900
 
 
 var columntraits = ["Gender",'clustering'];
-    rowtraits = ["Height","degree"];// "degree"];
+    rowtraits = ["degree","Height"];// "degree"];
 
-var columnTraitScales = {"Gender":"linear", "clustering":"even", "Height":"even"}
-var rowTraitScales = {"Height": "linear", "degree":"rank"}
+var columnTraitScales = {"Gender":"linear", "clustering":"linear"}
+var rowTraitScales = {"Height": "linear", "degree":"linear"}
