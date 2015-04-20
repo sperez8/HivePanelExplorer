@@ -317,14 +317,15 @@ def make_ecological_table(net_path, networkNames, filePath, edgetype, inputFolde
 	np.savetxt(filePath, table, delimiter="\t", fmt='%s')
 	return None
 
-def get_taxonomic_levels(featurePath,featureFile,location, treatments, tax_level):
+def get_taxonomic_levels(featurePath,featureFile,location,treatments,tax_level,netcol):
 	taxonomies = []
 	for t in treatments:
 		featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
 		featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
-		taxcol = np.where(featureTable[0,:]==tax_level)[0][0]
-		taxonomies.extend(list(np.unique(featureTable[1:,taxcol])))
-	
+		#get tax levels of only levels present in network
+		netfeatureTable = featureTable[np.where(featureTable[:,netcol]!=NOT_A_NODE_VALUE)]
+		taxcol = np.where(netfeatureTable[0,:]==tax_level)[0][0]
+		taxonomies.extend(list(np.unique(netfeatureTable[1:,taxcol])))
 	taxonomies = list(set(taxonomies))	
 	taxonomies.sort()
 	return taxonomies
@@ -341,6 +342,7 @@ def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile
 	netNames = treatments
 	max_y = 0
 
+
 	for location,treatments in networkNames.iteritems():
 		for ax,t in zip(axes,treatments):
 			G = graphs[location+'_'+t]
@@ -348,7 +350,7 @@ def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile
 			featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
 			col = np.where(featureTable[0,:]==colName)[0][0]
 			taxcol = np.where(featureTable[0,:]==tax_level)[0][0]
-			taxonomies = get_taxonomic_levels(featurePath,featureFile,location, treatments, tax_level)
+			taxonomies = get_taxonomic_levels(featurePath,featureFile,location, treatments, tax_level, col)
 			centralities = [[] for tax in taxonomies]
 			for n in G.nodes():
 				row = nm.findRow(n,featureTable)
@@ -359,21 +361,22 @@ def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile
 					centralities[taxonomies.index(taxonlevel)].append(float(value))
 
 			labels = [tax+' ('+str(len(centralities[i]))+')' for i,tax in enumerate(taxonomies)]
-			ppl.boxplot(ax, centralities, xticklabels = labels)
-			ax.set_ylabel('Treatment '+t)
+			ppl.boxplot(ax, centralities)
+			xticks = ax.set_xticklabels(labels,rotation=15,fontsize=14)
+			ax.set_ylabel('Treatment '+t,fontsize=14)
 
 		for ax in axes:
-			#ax.set_autoscaley_on(False)
-			#m,x = ax.get_ylim()
-			#ax.set_ylim([m,max_y])
-			ax.set_yscale('log')
+			ax.set_autoscaley_on(False)
+			m,x = ax.get_ylim()
+			ax.set_ylim([m,max_y])
+			#ax.set_yscale('log')
 			ax.grid()
 
 		title = "Centrality of taxonomic level '{0}' present in network {1}".format(tax_level,location,t)
 		figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=20)
 
 		fig.set_size_inches(2.5*len(taxonomies),6*len(treatments))
-		figureFile = os.path.join(net_path,figurePath,'centrality_plot_'+location+'_log.png')
+		figureFile = os.path.join(net_path,figurePath,'centrality_plot_'+location+'.png')
 		fig.savefig(figureFile, dpi=DPI,bbox_inches='tight')
 		print "Saving the figure file: ", figureFile
 	return None
