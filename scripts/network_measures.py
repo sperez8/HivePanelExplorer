@@ -135,7 +135,6 @@ def correlation_of_degree_and_depth(G,featureTable):
 def compute_feature_degree_correlation(G,feature,featureTable):
     col = np.where(featureTable[0,:]==feature)[0][0]
     d = nx.degree(G)
-    H = nx.Graph()
     degrees = []
     featureValues = []
     for n in d.keys():
@@ -173,7 +172,7 @@ def findRow(otu,table):
     else:
         row = None
         print "WARNING: Didn't find the otu: ", otu
-        sys.exit()
+        #sys.exit()
     return row
 
 
@@ -242,13 +241,41 @@ def compute_modularity_feature(G,feature,featureTable,factor=FACTOR):
     return ';'.join([str(k)+':'+str(v) for k,v in feature_values.iteritems()])
 
 
-def module_sizes(G,factor=FACTOR):
-    modules = get_modules(G)
+def module_sizes(G,factor=FACTOR,modules = []):
+    if not modules:
+        modules = get_modules(G)
     if modules:
         modules.sort(key=lambda m: len(m),reverse=True) #order by size
-        #print modules
-        #module_sizes = ','.join([str(len(m)) for m in modules])
         return [str(len(m)) for m in modules]
+    else:
+        return 'None'
+
+def get_module_graphs(G,factor=FACTOR,modules = []):
+    if not modules:
+        modules = get_modules(G)
+    if modules:
+        modules.sort(key=lambda m: len(m),reverse=True) #order by size
+        graphs = []
+        for m in modules:
+            H = nx.Graph()
+            H.add_nodes_from(m)
+            for s,t in G.edges():
+                if s in m and t in m:
+                    H.add_edge(s,t)
+            graphs.append(H)
+        return graphs
+    else:
+        return []
+
+def module_connectance(G,factor=FACTOR,modules = []):
+    if not modules:
+        modules = get_modules(G)
+    if modules:
+        modules.sort(key=lambda m: len(m),reverse=True) #order by size
+        connectances = []
+        for i,m in enumerate(modules):
+            n = len(m)
+        return [str(e) for e in connectances]
     else:
         return 'None'
 

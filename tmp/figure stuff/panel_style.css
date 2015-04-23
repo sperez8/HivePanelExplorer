@@ -4,7 +4,7 @@ body {
 }
 
 #container, div.tooltip {
-    font: normal 13px"Helvetica Neue";
+    font: normal 13px"Adriana";
     height: 850px;
     width: 1100px;
     margin-left: auto;
@@ -22,11 +22,11 @@ body {
 }
 
 #thetitle {
-    font: 300 34px"Helvetica Neue";
+    font: 300 24px"Adriana";
 }
 
 #info {
-    font: 100 20px"Helvetica Neue";
+    font: 100 16px"Adriana";
 }
 
 #panel {
@@ -56,7 +56,7 @@ body {
     height: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
-    font: normal 15px"Helvetica Neue";
+    font: normal 15px"Adriana";
 }
 
 #controlpanel {
@@ -88,7 +88,7 @@ select, input, input[type="button"] {
     max-width:77px;
     border: 1px solid #d4ccd4;
     border-radius: 4px;
-    font: normal 13px"Helvetica Neue";
+    font: normal 13px"Adriana";
     overflow: hidden;
 }
 

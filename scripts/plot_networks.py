@@ -10,8 +10,12 @@ import numpy as np
 from network_simulation import *
 
 #What to plot
-PATH = '/Users/sperez/Desktop/LTSPnetworks'
-#PATH = '\Users\Sarah\Desktop\LTSPnetworks'
+import platform
+if platform.system() == 'Windows':
+	PATH = '\Users\Sarah\Desktop\LTSPnetworks'
+else:
+	PATH = '/Users/sperez/Desktop/LTSPnetworks'
+
 FOLDER = 'by_treatment'
 WHOLE_FOLDER = 'by_zone'
 FIGURE_PATH = os.path.join(PATH,'plots')

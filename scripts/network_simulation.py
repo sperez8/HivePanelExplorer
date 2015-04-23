@@ -72,17 +72,20 @@ MEASURES = [nm.node_degrees,
 			nm.node_modularity,
 			]
 
-MODULE_METRICS = [
-				nm.module_sizes,
-				#nm.module_edges,
-				#nm.module_connectance,
-				#nm.module_diameter,
-				#correlation_of_degree_and_depth,
-				#correlation_of_betweenness_centrality_and_deth
-				]
+MODULE_METRICS = [nm.number_of_nodes, 
+					nm.number_of_edges,
+					nm.diameter_of_largest_connected_component,
+					nm.average_degree, 
+					nm.connectance, 
+					nm.global_clustering_coefficient,
+					nm.fraction_of_possible_triangles,
+					nm.average_path_on_largest_connected_component,
+					nm.degree_assortativity,
+					nm.correlation_of_degree_and_betweenness_centrality,
+					]
 
-MODULE_OTU_METRICS = [
-					#nm.compute_modularity_horizon,
+MODULE_OTU_METRICS = [nm.correlation_of_degree_and_depth,
+					nm.correlation_of_edge_depth,
 					]
 
 
@@ -158,6 +161,8 @@ def get_ind(table, otu):
 		if float(indrow[pcol]) < INDVAL_P_CUTOFF:
 			if float(indrow[valcol])>INDVAL_CUTOFF:
 				return indrow[clustercol]
+	else:
+		print 'not found:',otu
 	return ind
 
 def make_OTU_feature_table(net_path, networkNames, inputFolder, inputFileEnd, indvalFolder, indvalFileEnd, samplesFile, features, path, featureFile):
@@ -429,7 +434,7 @@ def module_structure(net_path, networkNames, filePath, edgetype, inputFolder, in
 	number_modules = {}
 	for n in networks:
 		otuTable[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S1000')
-		mods = nm.get_modules(graphs[n])
+		mods = nm.get_module_graphs(graphs[n])
 		modules[n] = mods
 		number_modules[n] = len(mods)
 	print number_modules
@@ -448,25 +453,27 @@ def module_structure(net_path, networkNames, filePath, edgetype, inputFolder, in
 			for t in treatments:
 				i+=1
 				number_mods = number_modules[location+'_'+t]
+				mods = modules[location+'_'+t]
 				print t
 				table[i,j]= t
 				print table
 				for sm in MODULE_METRICS:
 					print "For network for zone {0} treatment {1} calculating metric {2}".format(location,t,sm.__name__)
 					i+=1
-					G = graphs[location+'_'+t]
-					print sm(G)
-					print number_mods
-					table[i,j:j+number_mods]=sm(G)
-					j+= +number_mods
+					values = []
+					for mod in mods:
+						values.append(sm(mod))
+					table[i,j:j+number_mods]=values
 				for om in MODULE_OTU_METRICS:
 					print "For network for zone {0} treatment {1} calculating metric {2}".format(location,t,om.__name__)
 					i+=1
-					G = graphs[location+'_'+t]
+					values = []
 					featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
 					featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
-					table[i,j]=om(G,featureTable)
-				j+=1
+					for mod in mods:
+						values.append(om(mod,featureTable))
+					table[i,j:j+number_mods]=values
+				j+= max(1,number_mods)
 				i=0
 	else:
 		print 'Can only do for multiple treatments. FIX ME'

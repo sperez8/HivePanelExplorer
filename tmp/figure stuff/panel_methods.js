@@ -313,42 +313,46 @@ function formatAxisLegend(trait,axis){
     if (type=="categorical"){
         return values[axis]
     } else {
+        min = Math.round(minmax_scale[trait][0]*100/100)
+        max = Math.round(minmax_scale[trait][1]*100/100)
         range = asgScales[trait].invertExtent(axis)
         r0 = range[0]
         r1 = range[1]
+        //console.log('HERE',r0,r1,min,max)
         r0 = Math.round(r0*100)/100
         r1 = Math.round(r1*100)/100
-        min = Math.round(minmax_scale[trait][0]*100/100)
-        max = Math.round(minmax_scale[trait][1]*100/100)
-        console.log(min,max,r0,r1)
+        //console.log(r0,r1,min,max)
         if(isInt(r0)&&isInt(r1)){
             r1 = r1-1
             r0 = r0+1
+            //console.log(r0+'-'+r1)
             return r0+'-'+r1
         }
         else if(isInt(min)&&isInt(r1)){
+            //console.log(min+'-'+r1)
             return min+'-'+r1
         }
         else if(isInt(r0)&&isInt(max)){
+            //console.log(r0+'-'+max)
             return r0+'-'+max
         }
         else{
             if (isNaN(range[0])){
-                console.log('a',r0,r1)
                 r1 = r1-0.01
                 r1 = Math.round(r1*100)/100
+                //console.log(min+'-'+ r1)
                 return min+'-'+ r1
                 }
             else if (isNaN(range[1])){
-                console.log('b',r0,r1)
                 r0 = r0 - 0.01
                 r0 = Math.round(r0*100)/100
+                //console.log(r0+'-'+max)
                 return r0+'-'+max
                 }
             else {
-                console.log('c',r0,r1)
                 r1 = r1 - 0.02
                 r1 = Math.round(r1*100)/100
+                //console.log(r0+'-'+r1)
                 return r0+'-'+r1
                 } 
             }

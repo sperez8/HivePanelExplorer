@@ -7,7 +7,7 @@
 
 // ****************************************** //
 
-var SVGTitle = 'Scale-free network' + ' Hive Panel'
+var SVGTitle = 'Random network' + ' Hive Panel'
 
 var numAxes = 3
     doubleAxes = false
@@ -29,8 +29,8 @@ var linkfill = "none"
 var hoverOverTime = 900
 
 
-var columntraits = ["degree", "degree", "degree"];
-    rowtraits = ["degree","degree", "degree"];
+var columntraits = ["degree", "degree"];
+    rowtraits = ["degree","degree"];
 
 var columnTraitScales = ["linear","log"]//,"even"]
 var rowTraitScales = ["linear","log"]//,"rank"]

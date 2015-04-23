@@ -6,6 +6,8 @@
 
 // ****************************************** //
 
+FONT = "Adriana"
+
 //display title of panel and number of nodes and links
 d3.select("body").select("#title").select("#thetitle")
     .html(SVGTitle)
@@ -278,17 +280,17 @@ svg.append("text")
     .attr("x", (width - padding - size)/2)
     .attr("y", -(size/2 + padding*3/4))
     .attr("text-anchor", "middle")
-    .attr("font-family", "Helvetica Neue")
+    .attr("font-family", FONT)
     .attr("font-size", "14px")
-    .text('A X I S   A S S I G N M E N T') //add name of property used for node positionning, the rowtrait
+    .text('Axis Assignment by degree') //add name of property used for node positionning, the rowtrait
 
 svg.append("text")
     .attr("x", -(width - padding - size)/2)
     .attr("y", -(size/2 + padding*3/4))
     .attr("text-anchor", "middle")
-    .attr("font-family", "Helvetica Neue")
+    .attr("font-family", FONT)
     .attr("font-size", "14px")
-    .text('A X I S   P O S I T I O N') //add name of property used for node positionning, the rowtrait
+    .text('Axis Position by degree') //add name of property used for node positionning, the rowtrait
     .attr("transform", function (d) { 
         return "rotate(-90)";
         })
@@ -316,23 +318,38 @@ function formatAxisLegend(trait,j,axis){
     if (type=="categorical"){
         return values[axis]
     } else {
+    	min = Math.round(minmax_scale[trait][0]*100/100)
+        max = Math.round(minmax_scale[trait][1]*100/100)
         range = asgScales[trait+String(j)].invertExtent(axis)
         r0 = range[0]
         r1 = range[1]
         r0 = Math.round(r0*100)/100
         r1 = Math.round(r1*100)/100
-        min = Math.round(minmax_scale[trait][0]*100/100)
-        max = Math.round(minmax_scale[trait][1]*100/100)
-        console.log(min,max,r0,r1)
+        console.log(r0,r1,min,max)
         if(isInt(r0)&&isInt(r1)){
             r1 = r1-1
-            r0 = r0+1
+            r0 = r0
+            console.log(r0+'-'+r1)
+            return r0+'-'+r1
+        }
+        else if (isInt(r0)){
+            r1 = r1 - 0.01
+            r1 = Math.round(r1*100)/100
+            console.log(r0+'-'+r1)
+            return r0+'-'+r1
+        }
+        else if (isInt(r1)){
+            r0 = r0 - 0.01
+            r0 = Math.round(r0*100)/100
+            console.log(r0+'-'+r1)
             return r0+'-'+r1
         }
         else if(isInt(min)&&isInt(r1)){
+            console.log(min+'-'+r1)
             return min+'-'+r1
         }
         else if(isInt(r0)&&isInt(max)){
+            console.log(r0+'-'+max)
             return r0+'-'+max
         }
         else{
@@ -340,18 +357,21 @@ function formatAxisLegend(trait,j,axis){
                 console.log('a',r0,r1)
                 r1 = r1-0.01
                 r1 = Math.round(r1*100)/100
+                console.log(min+'-'+ r1)
                 return min+'-'+ r1
                 }
             else if (isNaN(range[1])){
                 console.log('b',r0,r1)
                 r0 = r0 - 0.01
                 r0 = Math.round(r0*100)/100
+                console.log(r0+'-'+max)
                 return r0+'-'+max
                 }
             else {
                 console.log('c',r0,r1)
                 r1 = r1 - 0.02
                 r1 = Math.round(r1*100)/100
+                console.log(r0+'-'+r1)
                 return r0+'-'+r1
                 } 
             }
@@ -359,13 +379,16 @@ function formatAxisLegend(trait,j,axis){
 }
 
 
+
+
+
 //build each hive plot
 function plot(p){
     var cell = d3.select(this);
 
     //calculate the slength and position of each axes depending on the size of the hive plot.
-    var innerRadius = size*0.03
-    var outerRadius = size*0.46
+    var innerRadius = size*0.06
+    var outerRadius = size*0.43
     var radius = d3.scale.linear().range([innerRadius, outerRadius]);
 
     //row labels (when one plotting first column, where p.i=0)
@@ -374,9 +397,9 @@ function plot(p){
         .attr("x", function(d) { return d.i})
         .attr("y", function(d) { return d.j-size/2 -padding/2})
         .attr("text-anchor", "middle")
-        .attr("font-family", "Helvetica Neue")
+        .attr("font-family", FONT)
         .attr("font-size", "14px")
-        .text(capitalize(p.y + ' (' + rowTraitScales[p.j] + ')')) //add name of property used for node positionning, the rowtrait
+        .text(capitalize(rowTraitScales[p.j])) //add name of property used for node positionning, the rowtrait
         .attr("transform", function(d) { 
             return "rotate(-90)";
             })
@@ -388,17 +411,17 @@ function plot(p){
         .attr("x", function(d) { return d.i;})
         .attr("y", function(d) { return d.j-size/2 - padding/2;})
         .attr("text-anchor", "middle")
-        .attr("font-family", "Helvetica Neue")
+        .attr("font-family", FONT)
         .attr("font-size", "14px")
-        .text(capitalize(p.x + ' (' + columnTraitScales[p.i] + ')')) //add name of property used for node assignment, the columntrait
+        .text(capitalize(columnTraitScales[p.i])) //add name of property used for node assignment, the columntrait
 
     }
 
     //creates axis labels
     //some parameters
     var outer_radius = radius.range()[1]*1.05
-        x_shift = 50
-        y_shift = 40
+        x_shift = 12
+        y_shift = 17
         stagger = 0
 
     cell.selectAll(".axis")
@@ -424,7 +447,7 @@ function plot(p){
             //console.log(theta, x, y, stagger)
             return "translate("+x+","+y+")";
         })
-        .attr("font-family", "Helvetica Neue")
+        .attr("font-family", FONT)
         .attr("font-size", "11px")
         .attr("text-anchor", function(d,i) {
             if (!doubleAxes){
