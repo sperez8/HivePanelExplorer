@@ -30,9 +30,11 @@ INDVAL_FILE_END = '_indvals_combo_om_horizon.txt'
 FEATURE_PATH = os.path.join(PATH,'tables')
 FEATURE_FILE = 'feature_and_posnode_measures_table'
 FEATURES = ['SoilHorizon']
+BC_FEATURES = ['Betweenness centrality','SoilHorizon avg','SoilHorizon std','Abundance']
 MEASURES = [nx.betweenness_centrality, 
 			nx.degree_centrality,
 			 ]
+PERCENT_BC_NODES = 0.1
 
 TAX_LEVEL = 'phylum'
 
@@ -65,11 +67,12 @@ def main(*argv):
 	parser.add_argument('-wholenetwork', help='Makes a plot for whole network, not per treatments', action = 'store_true')
 	parser.add_argument('-boxplot', help='Makes a boxplot per taxonomic level of otu centrality', action = 'store_true')
 	parser.add_argument('-level', help='Selects taxonomic level at which to make the boxplot', default = TAX_LEVEL)
+	parser.add_argument('-bcplot', help='Makes a boxplot per treatment high BC otu features', action = 'store_true')
 
 	args = parser.parse_args()
 	
 	#check that one of the options is true
-	choices = [args.simulate,args.distribution,args.calculate,args.assess,args.maketable,args.boxplot,args.modules]
+	choices = [args.simulate,args.distribution,args.calculate,args.assess,args.maketable,args.boxplot,args.modules,args.bcplot]
 	if sum([1 for c in choices if c])>1 or sum([1 for c in choices if c])==0:
 		print "\n***You must specify one of the three options to calculate porperties of, run simulations on or plot networks.***\n"
 		parser.print_help()
@@ -140,6 +143,11 @@ def main(*argv):
 		print "\nPlotting "+level+" centrality for OTUs in the following networks with "+edgetype+" type of edges:"
 		print ", ".join(networks), '\n'
 		centrality_plot(net_path,networks,FIGURE_PATH,FEATURE_PATH, FEATURE_FILE,level)
+
+	elif args.bcplot:
+		print "\nPlotting different features of high betweenness centrality OTUs in the following networks with "+edgetype+" type of edges:"
+		print ", ".join(networks), '\n'
+		keystone_quantitative_feature_plot(net_path,networks,FIGURE_PATH,FEATURE_PATH, FEATURE_FILE, BC_FEATURES, PERCENT_BC_NODES)
 
 
 	elif args.simulate:

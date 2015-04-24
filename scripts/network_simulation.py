@@ -401,6 +401,61 @@ def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile
 
 
 
+def keystone_quantitative_feature_plot(net_path, networkNames, figurePath, featurePath, featureFile, features, percentNodes):
+	networks,treatments = get_network_fullnames(networkNames)
+	graphs = get_multiple_graphs(networks,net_path,'pos', False, False)
+	colName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
+	#modName = nm.node_modularity.__name__.replace('_',' ').capitalize()
+
+	fig, axes = plt.subplots(len(features))
+	netNames = treatments
+
+	for location in networkNames.keys():
+		for ax,f in zip(axes,features):
+			featureValues = []
+			for i,t in enumerate(treatments):
+				featureValues.append([])
+				G = graphs[location+'_'+t]
+				featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
+				featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
+				centcol = np.where(featureTable[0,:]==colName)[0][0]
+				featcol = np.where(featureTable[0,:]==f)[0][0]
+				#modcol =  np.where(featureTable[0,:]==modName)[0][0]
+				bcvalues = featureTable[1:,centcol]
+				bcvalues = bcvalues[np.where(bcvalues!=NOT_A_NODE_VALUE)]
+				bcvalues= list([float(k) for k in bcvalues])
+				bcvalues.sort(reverse=True)
+				cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))])
+				for n in G.nodes():
+					row = nm.findRow(n,featureTable)
+					bc = float(featureTable[row][centcol])
+					#mod = int(featureTable[row][modcol])
+					if bc != NOT_A_NODE_VALUE and bc > cutoff: # and mod == 0:
+						value = featureTable[row][featcol]
+						featureValues[i].append(float(value))
+
+
+			labels = [t+' ('+str(len(featureValues[i]))+')' for i,t in enumerate(treatments)]
+			ppl.boxplot(ax, featureValues)
+			xticks = ax.set_xticklabels(labels,rotation=15,fontsize=14)
+			ax.set_ylabel(f,fontsize=14)
+
+		for ax in axes:
+			#ax.set_yscale('log')
+			ax.grid()
+
+		title = "Properties of high betweenness centrality OTUs present in network {0}".format(location)
+		figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=20)
+
+		fig.set_size_inches(2.5*len(treatments),6*len(features))
+		figureFile = os.path.join(net_path,figurePath,'high_bc_feature_plot_'+location+'.png')
+		fig.savefig(figureFile, dpi=DPI,bbox_inches='tight')
+		print "Saving the figure file: ", figureFile
+	return None
+
+
+
+
 
 
 

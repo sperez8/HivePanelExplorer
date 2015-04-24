@@ -217,11 +217,11 @@ def measure_whole(G):
 
     return measures
 
-def compute_modularity_horizon(G,featureTable):
+def compute_modularity_horizon(G,featureTable,modules = None):
     feature = SOILHORIZON_FEAT_NAME
-    return compute_modularity_feature(G,feature,featureTable)
+    return compute_modularity_feature(G,feature,featureTable,modules = modules)
 
-def compute_modularity_feature(G,feature,featureTable,factor=FACTOR):
+def compute_modularity_feature(G,feature,featureTable,factor=FACTOR,modules = None):
     col = np.where(featureTable[0,:]==feature)[0][0]
     modularity = node_modularity(G)
     # H = nx.Graph()
