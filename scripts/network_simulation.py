@@ -347,7 +347,7 @@ def get_taxonomic_levels(featurePath,featureFile,location,treatments,tax_level,n
 	taxonomies.sort()
 	return taxonomies
 
-def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile, tax_level):
+def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile, tax_level, percentNodes):
 	networks,treatments = get_network_fullnames(networkNames)
 	graphs = get_multiple_graphs(networks,net_path,'pos', False, False)
 	colName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
@@ -361,31 +361,49 @@ def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile
 
 
 	for location,treatments in networkNames.iteritems():
-		for ax,t in zip(axes,treatments):
+		taxaSeen = []
+		centralities = {}
+		for t in treatments:
 			G = graphs[location+'_'+t]
 			featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
 			featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
-			col = np.where(featureTable[0,:]==colName)[0][0]
+			centcol = np.where(featureTable[0,:]==colName)[0][0]
 			taxcol = np.where(featureTable[0,:]==tax_level)[0][0]
-			taxonomies = get_taxonomic_levels(featurePath,featureFile,location, treatments, tax_level, col)
-			centralities = [[] for tax in taxonomies]
+			taxonomies = get_taxonomic_levels(featurePath,featureFile,location, treatments, tax_level, centcol)
+			centralities[t] = [[] for tax in taxonomies]
+			bcvalues = featureTable[1:,centcol]
+			bcvalues = bcvalues[np.where(bcvalues!=NOT_A_NODE_VALUE)]
+			bcvalues= list([float(k) for k in bcvalues])
+			bcvalues.sort(reverse=True)
+			cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
+			print cutoff, len(bcvalues)
 			for n in G.nodes():
 				row = nm.findRow(n,featureTable)
 				taxonlevel = featureTable[row][taxcol]
-				value = featureTable[row][col]
-				if value != NOT_A_NODE_VALUE:
+				value = float(featureTable[row][centcol])
+				if value != NOT_A_NODE_VALUE and value > cutoff:
 					max_y = max(max_y,float(value))
-					centralities[taxonomies.index(taxonlevel)].append(float(value))
+					taxaSeen.append(taxonlevel)
+					centralities[t][taxonomies.index(taxonlevel)].append(value)
+		taxaSeen = set(taxaSeen)
+		print centralities
 
-			labels = [tax+' ('+str(len(centralities[i]))+')' for i,tax in enumerate(taxonomies)]
-			ppl.boxplot(ax, centralities)
+		for i,tax in enumerate(taxonomies):
+			if tax not in taxaSeen:
+				taxonomies.pop(i)
+				for t in treatments:
+					centralities[t].pop(i)
+
+		for ax,t in zip(axes,treatments):
+			labels = [tax+' ('+str(len(centralities[t][i]))+')' for i,tax in enumerate(taxonomies)]
+			ppl.boxplot(ax, centralities[t])
 			xticks = ax.set_xticklabels(labels,rotation=15,fontsize=14)
 			ax.set_ylabel('Treatment '+t,fontsize=14)
 
 		for ax in axes:
 			ax.set_autoscaley_on(False)
 			m,x = ax.get_ylim()
-			ax.set_ylim([m,max_y])
+			ax.set_ylim([0,max_y])
 			#ax.set_yscale('log')
 			ax.grid()
 
@@ -393,7 +411,7 @@ def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile
 		figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=20)
 
 		fig.set_size_inches(2.5*len(taxonomies),6*len(treatments))
-		figureFile = os.path.join(net_path,figurePath,'centrality_plot_'+location+'.png')
+		figureFile = os.path.join(net_path,figurePath,'centrality_plot_'+location+'_'+str(percentNodes)+'.png')
 		fig.savefig(figureFile, dpi=DPI,bbox_inches='tight')
 		print "Saving the figure file: ", figureFile
 	return None
@@ -425,7 +443,7 @@ def keystone_quantitative_feature_plot(net_path, networkNames, figurePath, featu
 				bcvalues = bcvalues[np.where(bcvalues!=NOT_A_NODE_VALUE)]
 				bcvalues= list([float(k) for k in bcvalues])
 				bcvalues.sort(reverse=True)
-				cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))])
+				cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
 				for n in G.nodes():
 					row = nm.findRow(n,featureTable)
 					bc = float(featureTable[row][centcol])
@@ -448,7 +466,7 @@ def keystone_quantitative_feature_plot(net_path, networkNames, figurePath, featu
 		figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=20)
 
 		fig.set_size_inches(2.5*len(treatments),6*len(features))
-		figureFile = os.path.join(net_path,figurePath,'high_bc_feature_plot_'+location+'.png')
+		figureFile = os.path.join(net_path,figurePath,'high_bc_feature_plot_'+location+'_'+str(percentNodes)+'.png')
 		fig.savefig(figureFile, dpi=DPI,bbox_inches='tight')
 		print "Saving the figure file: ", figureFile
 	return None

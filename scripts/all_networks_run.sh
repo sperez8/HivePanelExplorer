@@ -1,7 +1,7 @@
 for n in 'MD' 'JP' #'SBS'
 do
 	# python plot_networks.py -networks $n -maketable
-	for edge in 'neg' 'both' 'pos'
+	for edge in 'pos'
 	do
 		python plot_networks.py -networks $n -modules -edgetype $edge
 		# python plot_networks.py -networks $n -calculate -edgetype $edge
@@ -13,5 +13,4 @@ do
 		# 	wait
 		# done
 	done
-	wait
 done
