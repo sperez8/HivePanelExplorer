@@ -64,6 +64,7 @@ INPUT_METRICS = [nm.richness,
 				]
 OTU_METRICS = [nm.correlation_of_degree_and_depth,
 				nm.correlation_of_edge_depth,
+				nm.compute_modularity_horizon,
 				]
 MEASURES = [nm.node_degrees,
 			nx.betweenness_centrality, 
@@ -86,6 +87,8 @@ MODULE_METRICS = [nm.number_of_nodes,
 
 MODULE_OTU_METRICS = [nm.correlation_of_degree_and_depth,
 					nm.correlation_of_edge_depth,
+					#FIX MEEE
+					#nm.avg_depth,
 					]
 
 
@@ -251,10 +254,11 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 	network = network[1]
 
 	# plotting locations in rows and treatments in columns
+	#fig, axes = plt.subplots(len(treatments))
 	fig, ax = plt.subplots(1)
 
 	colors = {treatment: ppl.colors.set1[i] for i,treatment in enumerate(treatments)}
-
+	min_y = 1
 	for t,net in zip(treatments,networks):
 		G = graphs[net]
 		if plot_sequence:
@@ -282,8 +286,9 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 			for d in set(degrees):
 				ds.append(d)
 				fds.append(float(degrees.count(d))/N)
+			min_y = min(min(fds),min_y)
 
-			ppl.loglog(ds,
+			ax.scatter(ds,
 				fds,
 				marker='.',
 				s=MARKER_SIZE,
@@ -291,10 +296,20 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 				label=str(t),
 				color=colors[t])
 
-		
+			# import powerlaw
+			# data = degrees
+			# results = powerlaw.Fit(data)
+			# k = results.power_law.alpha
+			# xmin = results.power_law.xmin
+			# xmax = results.power_law.xmax
+			# sigma = results.power_law.sigma
+			# print k, xmin, sigma
+			# R, p = results.distribution_compare('power_law', 'stretched_exponential')
+			# print R, p
 
-	#ppl.scatter(ds,[max(fds)*math.exp(-d/6.0) for d in ds],color='black')
-	ax.set_ylim([0,1])
+			# ax.plot(ds,[math.exp(-xmin/k)*math.exp(-d/k) for d in ds],color=colors[t])
+	
+	ax.set_ylim([min_y,1])
 
 	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
 
@@ -376,17 +391,15 @@ def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile
 			bcvalues= list([float(k) for k in bcvalues])
 			bcvalues.sort(reverse=True)
 			cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
-			print cutoff, len(bcvalues)
 			for n in G.nodes():
 				row = nm.findRow(n,featureTable)
 				taxonlevel = featureTable[row][taxcol]
 				value = float(featureTable[row][centcol])
-				if value != NOT_A_NODE_VALUE and value > cutoff:
+				if value != NOT_A_NODE_VALUE and value >= cutoff:
 					max_y = max(max_y,float(value))
 					taxaSeen.append(taxonlevel)
 					centralities[t][taxonomies.index(taxonlevel)].append(value)
 		taxaSeen = set(taxaSeen)
-		print centralities
 
 		for i,tax in enumerate(taxonomies):
 			if tax not in taxaSeen:
@@ -448,7 +461,7 @@ def keystone_quantitative_feature_plot(net_path, networkNames, figurePath, featu
 					row = nm.findRow(n,featureTable)
 					bc = float(featureTable[row][centcol])
 					#mod = int(featureTable[row][modcol])
-					if bc != NOT_A_NODE_VALUE and bc > cutoff: # and mod == 0:
+					if bc != NOT_A_NODE_VALUE and bc >= cutoff: # and mod == 0:
 						value = featureTable[row][featcol]
 						featureValues[i].append(float(value))
 

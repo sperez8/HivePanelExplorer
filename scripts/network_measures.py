@@ -24,7 +24,7 @@ import networkx as nx
 from make_network import *
 
 DECIMALS = 3 #for rounding measures
-FACTOR = 3
+FACTOR = 2
 
 SOILHORIZON_FEAT_NAME = 'SoilHorizon avg'
 
@@ -162,7 +162,21 @@ def compute_feature_correlation(G,feature,featureTable):
     r = scipy.stats.spearmanr(iF,jF)
     return format_correlation(r[0],r[1])
 
-
+###FIX MEEE
+def average_depth(G,feature,featureTable):
+    col = np.where(featureTable[0,:]==feature)[0][0]
+    iF = []
+    jF = []
+    for (i,j) in G.edges():
+        irow = findRow(i,featureTable)
+        jrow = findRow(j,featureTable)
+        if irow and jrow:
+            iF.append(featureTable[irow][col])
+            jF.append(featureTable[jrow][col])
+        else:
+            continue
+    r = scipy.stats.spearmanr(iF,jF)
+    return format_correlation(r[0],r[1])
 
 def findRow(otu,table):
     if 'OTU' in otu:
@@ -223,7 +237,7 @@ def compute_modularity_horizon(G,featureTable,modules = None):
 
 def compute_modularity_feature(G,feature,featureTable,factor=FACTOR,modules = None):
     col = np.where(featureTable[0,:]==feature)[0][0]
-    modularity = node_modularity(G)
+    modularity = node_modularity(G, modules = modules)
     # H = nx.Graph()
     module_features = {m:[] for m in set(modularity.values())}
 
@@ -279,7 +293,7 @@ def module_connectance(G,factor=FACTOR,modules = []):
     else:
         return 'None'
 
-def node_modularity(G,factor=FACTOR):
+def node_modularity(G,factor=FACTOR, modules = None):
     '''gets modules using FAG-EC algorithm and returns a dictionary
     where keys are nodes and value is e module it belongs to where
     0 = no module
@@ -287,7 +301,8 @@ def node_modularity(G,factor=FACTOR):
     i = ith largets module
     '''
     modularity = {}
-    modules = get_modules(G)
+    if not modules:
+        modules = get_modules(G)
     modules.sort(key=lambda m: len(m),reverse=True) #order by size
     print "Found {0} modules with sizes: {1}".format(len(modules),','.join([str(len(m)) for m in modules]))
     for n in G.nodes():
