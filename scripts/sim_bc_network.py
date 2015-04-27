@@ -11,7 +11,7 @@ measure the highest betweenness centrality.
 import os
 import sys
 import numpy as np
-#import scipy
+from scipy import stats
 import matplotlib.pyplot as plt
 import prettyplotlib as ppl
 
@@ -39,27 +39,29 @@ def get_highest_betweenness(J):
 
 BCs = []
 
-graphmlFile = "/Users/sperez/Dropbox/1-Hive panels/C.elegans/c.elegans.herm_pharynx_1.graphml"
+graphmlFile = "/Users/Sarah/Dropbox/1-Hive panels/C.elegans/c.elegans.herm_pharynx_1.graphml"
 H = make_network.import_graphml(graphmlFile)
 
 n = 1000
+N = H.number_of_nodes()
 for i in range(n):
 	
 	#degrees = H.degree(H).values()
 	#G = create_graph_samedist(degrees)
-	
-	N = H.number_of_nodes()
 	G = create_graph_scalefree(N)
 
 	bc = get_highest_betweenness(G)
 
 	BCs.append(bc)
 
-x = 0.103
-u = np.mean(BCs)
-s = np.std(BCs)
-z = (x-u)/s
+X = [0.103,0.028,0.036]
 
-#p = scipy.stats.norm.sf(z) #one-sided
+for x in X:
+	u = np.mean(BCs)
+	s = np.std(BCs)
+	z = (x-u)/np.sqrt(s/n)
 
-print n,x,u,s,z#,p
+	print n,x,u,s,z
+
+	p = stats.norm.sf(z) #one-sided#,p
+	print p
