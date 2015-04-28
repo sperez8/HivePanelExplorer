@@ -30,7 +30,7 @@ import network_measures as nm
 
 RANDSEED = 2
 np.random.seed(RANDSEED)
-DPI = 300 #resolution of plot #low for testing
+DPI = 200 #resolution of plot #low for testing
 RAND_NAME = 'random_network_size_of_'
 SCALE_NAME = 'scalefree_network_size_of_'
 FILTER_NON_OTUS = True
@@ -369,43 +369,53 @@ def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFi
 	graphs = get_multiple_graphs(networks,net_path,'pos', False, False)
 	colName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
 
-	if tax_level not in TAXONOMY:
-		tax_level = TAXONOMY[1] #phylum
+	fig, axes = plt.subplots(len(TAXONOMY))
 
-	taxaSeen = {}
-	for location,treatments in networkNames.iteritems():
-		taxaSeen[location] = []
-		centralities = {}
-		for t in treatments:
-			G = graphs[location+'_'+t]
-			featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
-			featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
-			centcol = np.where(featureTable[0,:]==colName)[0][0]
-			taxcol = np.where(featureTable[0,:]==tax_level)[0][0]
-			taxonomies = get_taxonomic_levels(featurePath,featureFile,location, treatments, tax_level, centcol)
-			centralities[t] = [[] for tax in taxonomies]
-			bcvalues = featureTable[1:,centcol]
-			bcvalues = bcvalues[np.where(bcvalues!=NOT_A_NODE_VALUE)]
-			bcvalues= list([float(k) for k in bcvalues])
-			bcvalues.sort(reverse=True)
-			cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
-			for n in G.nodes():
-				row = nm.findRow(n,featureTable)
-				taxonlevel = featureTable[row][taxcol]
-				value = float(featureTable[row][centcol])
-				if value != NOT_A_NODE_VALUE and value >= cutoff:
-					taxaSeen[location].append(taxonlevel)
-					centralities[t][taxonomies.index(taxonlevel)].append(value)
-		taxaSeen[location].remove("unclassified")			
-		taxaSeen[location] = set(taxaSeen[location])
+	# if tax_level not in TAXONOMY:
+	# 	tax_level = TAXONOMY[1] #phylum
 
-	print taxaSeen
-	if len(networkNames)==3:
-		v = venn3(subsets=taxaSeen.values(), set_labels = [k.split('_')[1] for k in taxaSeen.keys()])
-	else:
-		v = venn2(subsets=taxaSeen.values())
-	plt.title("Venn diagram of econoze's central OTUs classified by "+tax_level.capitalize())
-	plt.show()
+	for ax,tax_level in zip(axes, TAXONOMY):
+		taxaSeen = {}
+		for location,treatments in networkNames.iteritems():
+			taxaSeen[location] = []
+			centralities = {}
+			for t in treatments:
+				G = graphs[location+'_'+t]
+				featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
+				featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
+				centcol = np.where(featureTable[0,:]==colName)[0][0]
+				taxcol = np.where(featureTable[0,:]==tax_level)[0][0]
+				taxonomies = get_taxonomic_levels(featurePath,featureFile,location, treatments, tax_level, centcol)
+				centralities[t] = [[] for tax in taxonomies]
+				bcvalues = featureTable[1:,centcol]
+				bcvalues = bcvalues[np.where(bcvalues!=NOT_A_NODE_VALUE)]
+				bcvalues= list([float(k) for k in bcvalues])
+				bcvalues.sort(reverse=True)
+				cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
+				for n in G.nodes():
+					row = nm.findRow(n,featureTable)
+					taxonlevel = featureTable[row][taxcol]
+					value = float(featureTable[row][centcol])
+					if value != NOT_A_NODE_VALUE and value >= cutoff:
+						taxaSeen[location].append(taxonlevel)
+						centralities[t][taxonomies.index(taxonlevel)].append(value)
+			if "unclassified" in taxaSeen:
+				taxaSeen[location].remove("unclassified")			
+			taxaSeen[location] = set(taxaSeen[location])
+
+		if len(networkNames)==3:
+			v = venn3(subsets=taxaSeen.values(), set_labels = [k.split('_')[1] for k in taxaSeen.keys()], ax=ax)
+		else:
+			v = venn2(subsets=taxaSeen.values(), ax = ax)
+		ax.set_ylabel(tax_level)
+
+	title = "Venn diagram of econoze's central OTUs classified by taxonomic level"
+	figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=20)
+
+	fig.set_size_inches(10*len(TAXONOMY),20)
+	figureFile = os.path.join(net_path,figurePath,'Venn_diagram_plot_'+','.join(networkNames.keys())+'_'+str(percentNodes)+'.png')
+	fig.savefig(figureFile, dpi=DPI,bbox_inches='tight')
+	print "Saving the figure file: ", figureFile
 
 	return None
 

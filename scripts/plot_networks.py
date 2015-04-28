@@ -38,7 +38,7 @@ PERCENT_BC_NODES = 0.1
 
 TAX_LEVEL = 'phylum'
 
-TREATMENTS = ['OM0']#,'OM1','OM2','OM3']
+TREATMENTS = ['OM0','OM1','OM2','OM3']
 
 PROP_TO_REMOVE = 1 #only removing this percent of nodes
 MAX_Y_AXIS = None
