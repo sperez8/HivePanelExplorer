@@ -38,7 +38,7 @@ PERCENT_BC_NODES = 0.1
 
 TAX_LEVEL = 'phylum'
 
-TREATMENTS = ['OM3','OM2','OM1','OM0']
+TREATMENTS = ['OM0']#,'OM1','OM2','OM3']
 
 PROP_TO_REMOVE = 1 #only removing this percent of nodes
 MAX_Y_AXIS = None
@@ -69,11 +69,14 @@ def main(*argv):
 	parser.add_argument('-level', help='Selects taxonomic level at which to make the boxplot', default = TAX_LEVEL)
 	parser.add_argument('-bcplot', help='Makes a boxplot per treatment high BC otu features', action = 'store_true')
 	parser.add_argument('-percentnodes', help='Select the proportion of high bc nodes to plot', default = PERCENT_BC_NODES)
+	parser.add_argument('-vennplot', help='Makes a venn diagram of high BC otu per ecozone', action = 'store_true')
 
 	args = parser.parse_args()
 	
 	#check that one of the options is true
-	choices = [args.simulate,args.distribution,args.calculate,args.assess,args.maketable,args.boxplot,args.modules,args.bcplot]
+	choices = [args.simulate,args.distribution,args.calculate,
+				args.assess,args.maketable,args.boxplot,
+				args.modules,args.bcplot,args.vennplot]
 	if sum([1 for c in choices if c])>1 or sum([1 for c in choices if c])==0:
 		print "\n***You must specify one of the three options to calculate porperties of, run simulations on or plot networks.***\n"
 		parser.print_help()
@@ -145,6 +148,17 @@ def main(*argv):
 		print "\nPlotting "+level+" centrality for OTUs in the following networks with "+edgetype+" type of edges:"
 		print ", ".join(networks), '\n'
 		centrality_plot(net_path,networks,FIGURE_PATH,FEATURE_PATH, FEATURE_FILE,level,percentNodes)
+
+	elif args.vennplot:
+		percentNodes = float(args.percentnodes)
+		level = args.level
+		if level not in TAXONOMY:
+			print level, "is not a taxonomic level"
+			sys.exit()
+		print "\nPlotting "+level+" venn diagrma of central OTUs per ecozone with "+edgetype+" type of edges:"
+		print ", ".join(networks), '\n'
+		plot_venn_diagram(net_path,networks,FIGURE_PATH,FEATURE_PATH, FEATURE_FILE,level,percentNodes)
+
 
 	elif args.bcplot:
 		percentNodes = float(args.percentnodes)

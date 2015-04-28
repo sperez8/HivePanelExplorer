@@ -17,6 +17,7 @@ import math
 # prettyplotlib imports 
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from matplotlib_venn import venn3, venn3_circles, venn2
 from prettyplotlib import brewer2mpl
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))
@@ -361,6 +362,52 @@ def get_taxonomic_levels(featurePath,featureFile,location,treatments,tax_level,n
 	taxonomies = list(set(taxonomies))	
 	taxonomies.sort()
 	return taxonomies
+
+
+def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFile, tax_level, percentNodes):
+	networks,treatments = get_network_fullnames(networkNames)
+	graphs = get_multiple_graphs(networks,net_path,'pos', False, False)
+	colName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
+
+	if tax_level not in TAXONOMY:
+		tax_level = TAXONOMY[1] #phylum
+
+	taxaSeen = {}
+	for location,treatments in networkNames.iteritems():
+		taxaSeen[location] = []
+		centralities = {}
+		for t in treatments:
+			G = graphs[location+'_'+t]
+			featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
+			featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
+			centcol = np.where(featureTable[0,:]==colName)[0][0]
+			taxcol = np.where(featureTable[0,:]==tax_level)[0][0]
+			taxonomies = get_taxonomic_levels(featurePath,featureFile,location, treatments, tax_level, centcol)
+			centralities[t] = [[] for tax in taxonomies]
+			bcvalues = featureTable[1:,centcol]
+			bcvalues = bcvalues[np.where(bcvalues!=NOT_A_NODE_VALUE)]
+			bcvalues= list([float(k) for k in bcvalues])
+			bcvalues.sort(reverse=True)
+			cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
+			for n in G.nodes():
+				row = nm.findRow(n,featureTable)
+				taxonlevel = featureTable[row][taxcol]
+				value = float(featureTable[row][centcol])
+				if value != NOT_A_NODE_VALUE and value >= cutoff:
+					taxaSeen[location].append(taxonlevel)
+					centralities[t][taxonomies.index(taxonlevel)].append(value)
+		taxaSeen[location].remove("unclassified")			
+		taxaSeen[location] = set(taxaSeen[location])
+
+	print taxaSeen
+	if len(networkNames)==3:
+		v = venn3(subsets=taxaSeen.values(), set_labels = [k.split('_')[1] for k in taxaSeen.keys()])
+	else:
+		v = venn2(subsets=taxaSeen.values())
+	plt.title("Venn diagram of econoze's central OTUs classified by "+tax_level.capitalize())
+	plt.show()
+
+	return None
 
 def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile, tax_level, percentNodes):
 	networks,treatments = get_network_fullnames(networkNames)
@@ -964,7 +1011,6 @@ def module_structure(net_path, networkNames, filePath, edgetype, inputFolder, in
 	np.savetxt(filePath, table, delimiter="\t", fmt='%s')
 	return None
 '''
-
 
 
 
