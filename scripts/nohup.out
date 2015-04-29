@@ -340,4 +340,198 @@ Found 0 modules with sizes:
 For input table from zone BAC_JP treatment OM1 measuring richness
 For input table from zone BAC_JP treatment OM1 measuring shannon_diversity
 For network for zone BAC_JP treatment OM1 calculating metric number_of_nodes
-For network for zone BA
+For network for zone BAC_JP treatment OM1 calculating metric number_of_edges
+For network for zone BAC_JP treatment OM1 calculating metric number_of_components
+For network for zone BAC_JP treatment OM1 calculating metric size_of_components
+For network for zone BAC_JP treatment OM1 calculating metric number_of_nodes_of_largest_connected_component
+For network for zone BAC_JP treatment OM1 calculating metric number_of_edges_of_largest_connected_component
+For network for zone BAC_JP treatment OM1 calculating metric module_sizes
+For network for zone BAC_JP treatment OM1 calculating metric average_degree
+For network for zone BAC_JP treatment OM1 calculating metric connectance
+For network for zone BAC_JP treatment OM1 calculating metric global_clustering_coefficient
+For network for zone BAC_JP treatment OM1 calculating metric fraction_of_possible_triangles
+For network for zone BAC_JP treatment OM1 calculating metric diameter_of_largest_connected_component
+For network for zone BAC_JP treatment OM1 calculating metric degree_assortativity
+For network for zone BAC_JP treatment OM1 calculating metric correlation_of_degree_and_betweenness_centrality
+For network for zone BAC_JP treatment OM1 calculating metric correlation_of_degree_and_depth
+For network for zone BAC_JP treatment OM1 calculating metric correlation_of_edge_depth
+For network for zone BAC_JP treatment OM1 calculating metric compute_modularity_horizon
+Found 0 modules with sizes: 
+For input table from zone BAC_JP treatment OM0 measuring richness
+For input table from zone BAC_JP treatment OM0 measuring shannon_diversity
+For network for zone BAC_JP treatment OM0 calculating metric number_of_nodes
+For network for zone BAC_JP treatment OM0 calculating metric number_of_edges
+For network for zone BAC_JP treatment OM0 calculating metric number_of_components
+For network for zone BAC_JP treatment OM0 calculating metric size_of_components
+For network for zone BAC_JP treatment OM0 calculating metric number_of_nodes_of_largest_connected_component
+For network for zone BAC_JP treatment OM0 calculating metric number_of_edges_of_largest_connected_component
+For network for zone BAC_JP treatment OM0 calculating metric module_sizes
+For network for zone BAC_JP treatment OM0 calculating metric average_degree
+For network for zone BAC_JP treatment OM0 calculating metric connectance
+For network for zone BAC_JP treatment OM0 calculating metric global_clustering_coefficient
+For network for zone BAC_JP treatment OM0 calculating metric fraction_of_possible_triangles
+For network for zone BAC_JP treatment OM0 calculating metric diameter_of_largest_connected_component
+For network for zone BAC_JP treatment OM0 calculating metric degree_assortativity
+For network for zone BAC_JP treatment OM0 calculating metric correlation_of_degree_and_betweenness_centrality
+For network for zone BAC_JP treatment OM0 calculating metric correlation_of_degree_and_depth
+For network for zone BAC_JP treatment OM0 calculating metric correlation_of_edge_depth
+For network for zone BAC_JP treatment OM0 calculating metric compute_modularity_horizon
+Found 0 modules with sizes: 
+/Users/sperez/Desktop/LTSPnetworks/by_treatment
+
+Calculating structural properties on both type of edges of networks:
+BAC_JP 
+
+/Users/sperez/Desktop/LTSPnetworks/plots/table_of_measures_JP_both.txt
+['BAC_JP_OM3', 'BAC_JP_OM2', 'BAC_JP_OM1', 'BAC_JP_OM0'] ['OM3', 'OM2', 'OM1', 'OM0']
+Made the networkx graph BAC_JP_OM3 with N = 68, E = 39.
+Made the networkx graph BAC_JP_OM2 with N = 762, E = 51441.
+Made the networkx graph BAC_JP_OM1 with N = 788, E = 67035.
+Made the networkx graph BAC_JP_OM0 with N = 1057, E = 52363.
+For input table from zone BAC_JP treatment OM3 measuring richness
+For input table from zone BAC_JP treatment OM3 measuring shannon_diversity
+For network for zone BAC_JP treatment OM3 calculating metric number_of_nodes
+For network for zone BAC_JP treatment OM3 calculating metric number_of_edges
+For network for zone BAC_JP treatment OM3 calculating metric number_of_components
+For network for zone BAC_JP treatment OM3 calculating metric size_of_big_components
+For network for zone BAC_JP treatment OM3 calculating metric number_of_nodes_of_largest_connected_component
+For network for zone BAC_JP treatment OM3 calculating metric number_of_edges_of_largest_connected_component
+For network for zone BAC_JP treatment OM3 calculating metric diameter_of_largest_connected_component
+For network for zone BAC_JP treatment OM3 calculating metric average_degree
+For network for zone BAC_JP treatment OM3 calculating metric connectance
+For network for zone BAC_JP treatment OM3 calculating metric global_clustering_coefficient
+For network for zone BAC_JP treatment OM3 calculating metric fraction_of_possible_triangles
+For network for zone BAC_JP treatment OM3 calculating metric degree_assortativity
+For network for zone BAC_JP treatment OM3 calculating metric correlation_of_degree_and_betweenness_centrality
+For network for zone BAC_JP treatment OM3 calculating metric correlation_of_degree_and_depth
+For network for zone BAC_JP treatment OM3 calculating metric correlation_of_edge_depth
+For input table from zone BAC_JP treatment OM2 measuring richness
+For input table from zone BAC_JP treatment OM2 measuring shannon_diversity
+For network for zone BAC_JP treatment OM2 calculating metric number_of_nodes
+For network for zone BAC_JP treatment OM2 calculating metric number_of_edges
+For network for zone BAC_JP treatment OM2 calculating metric number_of_components
+For network for zone BAC_JP treatment OM2 calculating metric size_of_big_components
+For network for zone BAC_JP treatment OM2 calculating metric number_of_nodes_of_largest_connected_component
+For network for zone BAC_JP treatment OM2 calculating metric number_of_edges_of_largest_connected_component
+For network for zone BAC_JP treatment OM2 calculating metric diameter_of_largest_connected_component
+For network for zone BAC_JP treatment OM2 calculating metric average_degree
+For network for zone BAC_JP treatment OM2 calculating metric connectance
+For network for zone BAC_JP treatment OM2 calculating metric global_clustering_coefficient
+For network for zone BAC_JP treatment OM2 calculating metric fraction_of_possible_triangles
+For network for zone BAC_JP treatment OM2 calculating metric degree_assortativity
+For network for zone BAC_JP treatment OM2 calculating metric correlation_of_degree_and_betweenness_centrality
+For network for zone BAC_JP treatment OM2 calculating metric correlation_of_degree_and_depth
+For network for zone BAC_JP treatment OM2 calculating metric correlation_of_edge_depth
+For input table from zone BAC_JP treatment OM1 measuring richness
+For input table from zone BAC_JP treatment OM1 measuring shannon_diversity
+For network for zone BAC_JP treatment OM1 calculating metric number_of_nodes
+For network for zone BAC_JP treatment OM1 calculating metric number_of_edges
+For network for zone BAC_JP treatment OM1 calculating metric number_of_components
+For network for zone BAC_JP treatment OM1 calculating metric size_of_big_components
+For network for zone BAC_JP treatment OM1 calculating metric number_of_nodes_of_largest_connected_component
+For network for zone BAC_JP treatment OM1 calculating metric number_of_edges_of_largest_connected_component
+For network for zone BAC_JP treatment OM1 calculating metric diameter_of_largest_connected_component
+For network for zone BAC_JP treatment OM1 calculating metric average_degree
+For network for zone BAC_JP treatment OM1 calculating metric connectance
+For network for zone BAC_JP treatment OM1 calculating metric global_clustering_coefficient
+For network for zone BAC_JP treatment OM1 calculating metric fraction_of_possible_triangles
+For network for zone BAC_JP treatment OM1 calculating metric degree_assortativity
+For network for zone BAC_JP treatment OM1 calculating metric correlation_of_degree_and_betweenness_centrality
+For network for zone BAC_JP treatment OM1 calculating metric correlation_of_degree_and_depth
+For network for zone BAC_JP treatment OM1 calculating metric correlation_of_edge_depth
+For input table from zone BAC_JP treatment OM0 measuring richness
+For input table from zone BAC_JP treatment OM0 measuring shannon_diversity
+For network for zone BAC_JP treatment OM0 calculating metric number_of_nodes
+For network for zone BAC_JP treatment OM0 calculating metric number_of_edges
+For network for zone BAC_JP treatment OM0 calculating metric number_of_components
+For network for zone BAC_JP treatment OM0 calculating metric size_of_big_components
+For network for zone BAC_JP treatment OM0 calculating metric number_of_nodes_of_largest_connected_component
+For network for zone BAC_JP treatment OM0 calculating metric number_of_edges_of_largest_connected_component
+For network for zone BAC_JP treatment OM0 calculating metric diameter_of_largest_connected_component
+For network for zone BAC_JP treatment OM0 calculating metric average_degree
+For network for zone BAC_JP treatment OM0 calculating metric connectance
+For network for zone BAC_JP treatment OM0 calculating metric global_clustering_coefficient
+For network for zone BAC_JP treatment OM0 calculating metric fraction_of_possible_triangles
+For network for zone BAC_JP treatment OM0 calculating metric degree_assortativity
+For network for zone BAC_JP treatment OM0 calculating metric correlation_of_degree_and_betweenness_centrality
+For network for zone BAC_JP treatment OM0 calculating metric correlation_of_degree_and_depth
+For network for zone BAC_JP treatment OM0 calculating metric correlation_of_edge_depth
+/Users/sperez/Desktop/LTSPnetworks/by_treatment
+
+Calculating structural properties on pos type of edges of networks:
+BAC_JP 
+
+/Users/sperez/Desktop/LTSPnetworks/plots/table_of_measures_JP_pos.txt
+['BAC_JP_OM3', 'BAC_JP_OM2', 'BAC_JP_OM1', 'BAC_JP_OM0'] ['OM3', 'OM2', 'OM1', 'OM0']
+Made the networkx graph BAC_JP_OM3 with N = 54, E = 32.
+Made the networkx graph BAC_JP_OM2 with N = 718, E = 20031.
+Made the networkx graph BAC_JP_OM1 with N = 773, E = 25897.
+Made the networkx graph BAC_JP_OM0 with N = 997, E = 23670.
+For input table from zone BAC_JP treatment OM3 measuring richness
+For input table from zone BAC_JP treatment OM3 measuring shannon_diversity
+For network for zone BAC_JP treatment OM3 calculating metric number_of_nodes
+For network for zone BAC_JP treatment OM3 calculating metric number_of_edges
+For network for zone BAC_JP treatment OM3 calculating metric number_of_components
+For network for zone BAC_JP treatment OM3 calculating metric size_of_big_components
+For network for zone BAC_JP treatment OM3 calculating metric number_of_nodes_of_largest_connected_component
+For network for zone BAC_JP treatment OM3 calculating metric number_of_edges_of_largest_connected_component
+For network for zone BAC_JP treatment OM3 calculating metric diameter_of_largest_connected_component
+For network for zone BAC_JP treatment OM3 calculating metric average_degree
+For network for zone BAC_JP treatment OM3 calculating metric connectance
+For network for zone BAC_JP treatment OM3 calculating metric global_clustering_coefficient
+For network for zone BAC_JP treatment OM3 calculating metric fraction_of_possible_triangles
+For network for zone BAC_JP treatment OM3 calculating metric degree_assortativity
+For network for zone BAC_JP treatment OM3 calculating metric correlation_of_degree_and_betweenness_centrality
+For network for zone BAC_JP treatment OM3 calculating metric correlation_of_degree_and_depth
+For network for zone BAC_JP treatment OM3 calculating metric correlation_of_edge_depth
+For input table from zone BAC_JP treatment OM2 measuring richness
+For input table from zone BAC_JP treatment OM2 measuring shannon_diversity
+For network for zone BAC_JP treatment OM2 calculating metric number_of_nodes
+For network for zone BAC_JP treatment OM2 calculating metric number_of_edges
+For network for zone BAC_JP treatment OM2 calculating metric number_of_components
+For network for zone BAC_JP treatment OM2 calculating metric size_of_big_components
+For network for zone BAC_JP treatment OM2 calculating metric number_of_nodes_of_largest_connected_component
+For network for zone BAC_JP treatment OM2 calculating metric number_of_edges_of_largest_connected_component
+For network for zone BAC_JP treatment OM2 calculating metric diameter_of_largest_connected_component
+For network for zone BAC_JP treatment OM2 calculating metric average_degree
+For network for zone BAC_JP treatment OM2 calculating metric connectance
+For network for zone BAC_JP treatment OM2 calculating metric global_clustering_coefficient
+For network for zone BAC_JP treatment OM2 calculating metric fraction_of_possible_triangles
+For network for zone BAC_JP treatment OM2 calculating metric degree_assortativity
+For network for zone BAC_JP treatment OM2 calculating metric correlation_of_degree_and_betweenness_centrality
+For network for zone BAC_JP treatment OM2 calculating metric correlation_of_degree_and_depth
+For network for zone BAC_JP treatment OM2 calculating metric correlation_of_edge_depth
+For input table from zone BAC_JP treatment OM1 measuring richness
+For input table from zone BAC_JP treatment OM1 measuring shannon_diversity
+For network for zone BAC_JP treatment OM1 calculating metric number_of_nodes
+For network for zone BAC_JP treatment OM1 calculating metric number_of_edges
+For network for zone BAC_JP treatment OM1 calculating metric number_of_components
+For network for zone BAC_JP treatment OM1 calculating metric size_of_big_components
+For network for zone BAC_JP treatment OM1 calculating metric number_of_nodes_of_largest_connected_component
+For network for zone BAC_JP treatment OM1 calculating metric number_of_edges_of_largest_connected_component
+For network for zone BAC_JP treatment OM1 calculating metric diameter_of_largest_connected_component
+For network for zone BAC_JP treatment OM1 calculating metric average_degree
+For network for zone BAC_JP treatment OM1 calculating metric connectance
+For network for zone BAC_JP treatment OM1 calculating metric global_clustering_coefficient
+For network for zone BAC_JP treatment OM1 calculating metric fraction_of_possible_triangles
+For network for zone BAC_JP treatment OM1 calculating metric degree_assortativity
+For network for zone BAC_JP treatment OM1 calculating metric correlation_of_degree_and_betweenness_centrality
+For network for zone BAC_JP treatment OM1 calculating metric correlation_of_degree_and_depth
+For network for zone BAC_JP treatment OM1 calculating metric correlation_of_edge_depth
+For input table from zone BAC_JP treatment OM0 measuring richness
+For input table from zone BAC_JP treatment OM0 measuring shannon_diversity
+For network for zone BAC_JP treatment OM0 calculating metric number_of_nodes
+For network for zone BAC_JP treatment OM0 calculating metric number_of_edges
+For network for zone BAC_JP treatment OM0 calculating metric number_of_components
+For network for zone BAC_JP treatment OM0 calculating metric size_of_big_components
+For network for zone BAC_JP treatment OM0 calculating metric number_of_nodes_of_largest_connected_component
+For network for zone BAC_JP treatment OM0 calculating metric number_of_edges_of_largest_connected_component
+For network for zone BAC_JP treatment OM0 calculating metric diameter_of_largest_connected_component
+For network for zone BAC_JP treatment OM0 calculating metric average_degree
+For network for zone BAC_JP treatment OM0 calculating metric connectance
+For network for zone BAC_JP treatment OM0 calculating metric global_clustering_coefficient
+For network for zone BAC_JP treatment OM0 calculating metric fraction_of_possible_triangles
+For network for zone BAC_JP treatment OM0 calculating metric degree_assortativity
+For network for zone BAC_JP treatment OM0 calculating metric correlation_of_degree_and_betweenness_centrality
+For network for zone BAC_JP treatment OM0 calculating metric correlation_of_degree_and_depth
+For network for zone BAC_JP treatment OM0 calculating metric correlation_of_edge_depth

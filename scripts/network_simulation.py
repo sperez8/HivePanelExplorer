@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib_venn import venn3, venn3_circles, venn2
 from prettyplotlib import brewer2mpl
+import hive as Hive
 
 _cur_dir = os.path.dirname(os.path.realpath(__file__))
 _root_dir = os.path.dirname(_cur_dir)
@@ -169,12 +170,12 @@ def get_ind(table, otu):
 		print 'not found:',otu
 	return ind
 
-def make_OTU_feature_table(net_path, networkNames, inputFolder, inputFileEnd, indvalFolder, indvalFileEnd, samplesFile, features, path, featureFile):
+def make_OTU_feature_table(net_path, networkNames, inputFolder, inputFileEnd, indvalFolder, indvalFileEnd, samplesFile, features, path, featureFile,edgetype):
 	'''makes an OTU table with avg depth and othe features per OTU'''
 
 	networks,treatments = get_network_fullnames(networkNames)
 	if len(MEASURES)>=1:
-		graphs = get_multiple_graphs(networks, net_path, 'pos', False, False)
+		graphs = get_multiple_graphs(networks, net_path, edgetype, False, False)
 
 	otuTable = {}
 	for n in networks:
@@ -240,7 +241,7 @@ def make_OTU_feature_table(net_path, networkNames, inputFolder, inputFileEnd, in
 						measureValue = NOT_A_NODE_VALUE				
 					featureTable[r+1][col]=measureValue
 
-			fileName = featureFile+'_{0}_{1}.txt'.format(location,t)
+			fileName = featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t)
 			tableFile = os.path.join(path,fileName)
 			print "Saving table: ",tableFile
 
@@ -352,8 +353,9 @@ def make_ecological_table(net_path, networkNames, filePath, edgetype, inputFolde
 
 def get_taxonomic_levels(featurePath,featureFile,location,treatments,tax_level,netcol):
 	taxonomies = []
+	edgetype = 'pos'
 	for t in treatments:
-		featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
+		featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t))
 		featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
 		#get tax levels of only levels present in network
 		netfeatureTable = featureTable[np.where(featureTable[:,netcol]!=NOT_A_NODE_VALUE)]
@@ -365,23 +367,25 @@ def get_taxonomic_levels(featurePath,featureFile,location,treatments,tax_level,n
 
 
 def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFile, tax_level, percentNodes):
+	edgetype = 'pos'
 	networks,treatments = get_network_fullnames(networkNames)
-	graphs = get_multiple_graphs(networks,net_path,'pos', False, False)
+	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
 	colName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
+	taxonomy = TAXONOMY
+	taxonomy.pop(0)
+	fig, axes = plt.subplots(len(taxonomy))
 
-	fig, axes = plt.subplots(len(TAXONOMY))
+	# if tax_level not in taxonomy:
+	# 	tax_level = taxonomy[1] #phylum
 
-	# if tax_level not in TAXONOMY:
-	# 	tax_level = TAXONOMY[1] #phylum
-
-	for ax,tax_level in zip(axes, TAXONOMY):
+	for ax,tax_level in zip(axes, taxonomy):
 		taxaSeen = {}
 		for location,treatments in networkNames.iteritems():
 			taxaSeen[location] = []
 			centralities = {}
 			for t in treatments:
 				G = graphs[location+'_'+t]
-				featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
+				featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t))
 				featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
 				centcol = np.where(featureTable[0,:]==colName)[0][0]
 				taxcol = np.where(featureTable[0,:]==tax_level)[0][0]
@@ -399,20 +403,29 @@ def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFi
 					if value != NOT_A_NODE_VALUE and value >= cutoff:
 						taxaSeen[location].append(taxonlevel)
 						centralities[t][taxonomies.index(taxonlevel)].append(value)
-			if "unclassified" in taxaSeen:
-				taxaSeen[location].remove("unclassified")			
 			taxaSeen[location] = set(taxaSeen[location])
+			if "unclassified" in taxaSeen[location]:
+				taxaSeen[location].remove("unclassified")	
+			if "uncultured" in taxaSeen[location]:
+				taxaSeen[location].remove("uncultured")
 
+		print tax_level
+		print taxaSeen
+		#ax.set_ylabel(tax_level)
+
+		total = sum([len(taxa) for taxa in taxaSeen.values()])
+		circleLabels = [k.split('_')[1] for k in taxaSeen.keys()]
+		if total == 0:
+			circleLabels=[]
 		if len(networkNames)==3:
-			v = venn3(subsets=taxaSeen.values(), set_labels = [k.split('_')[1] for k in taxaSeen.keys()], ax=ax)
+			v = venn3(subsets=taxaSeen.values(), set_labels = circleLabels, set_colors=('b','r','g'), alpha=0.3, ax=ax, axlabel = tax_level)
 		else:
 			v = venn2(subsets=taxaSeen.values(), ax = ax)
-		ax.set_ylabel(tax_level)
-
+		
 	title = "Venn diagram of econoze's central OTUs classified by taxonomic level"
 	figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=20)
 
-	fig.set_size_inches(10*len(TAXONOMY),20)
+	fig.set_size_inches(15,5*len(taxonomy))
 	figureFile = os.path.join(net_path,figurePath,'Venn_diagram_plot_'+','.join(networkNames.keys())+'_'+str(percentNodes)+'.png')
 	fig.savefig(figureFile, dpi=DPI,bbox_inches='tight')
 	print "Saving the figure file: ", figureFile
@@ -421,7 +434,8 @@ def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFi
 
 def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile, tax_level, percentNodes):
 	networks,treatments = get_network_fullnames(networkNames)
-	graphs = get_multiple_graphs(networks,net_path,'pos', False, False)
+	edgetype = 'pos'
+	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
 	colName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
 
 	if tax_level not in TAXONOMY:
@@ -437,7 +451,7 @@ def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile
 		centralities = {}
 		for t in treatments:
 			G = graphs[location+'_'+t]
-			featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
+			featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t))
 			featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
 			centcol = np.where(featureTable[0,:]==colName)[0][0]
 			taxcol = np.where(featureTable[0,:]==tax_level)[0][0]
@@ -491,7 +505,8 @@ def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile
 
 def keystone_quantitative_feature_plot(net_path, networkNames, figurePath, featurePath, featureFile, features, percentNodes):
 	networks,treatments = get_network_fullnames(networkNames)
-	graphs = get_multiple_graphs(networks,net_path,'pos', False, False)
+	edgetype = 'pos'
+	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
 	colName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
 	#modName = nm.node_modularity.__name__.replace('_',' ').capitalize()
 
@@ -504,7 +519,7 @@ def keystone_quantitative_feature_plot(net_path, networkNames, figurePath, featu
 			for i,t in enumerate(treatments):
 				featureValues.append([])
 				G = graphs[location+'_'+t]
-				featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
+				featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t))
 				featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
 				centcol = np.where(featureTable[0,:]==colName)[0][0]
 				featcol = np.where(featureTable[0,:]==f)[0][0]
@@ -611,7 +626,7 @@ def module_structure(net_path, networkNames, filePath, edgetype, inputFolder, in
 					print "For network for zone {0} treatment {1} calculating metric {2}".format(location,t,om.__name__)
 					i+=1
 					values = []
-					featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
+					featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t))
 					featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
 					for mod in mods:
 						values.append(om(mod,featureTable))
@@ -663,7 +678,7 @@ def network_structure(net_path, networkNames, filePath, edgetype, inputFolder, i
 					print "For network for zone {0} treatment {1} calculating metric {2}".format(location,t,om.__name__)
 					i+=1
 					G = graphs[location+'_'+t]
-					featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
+					featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t))
 					featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
 					table[i,j]=om(G,featureTable)
 				j+=1
@@ -956,71 +971,63 @@ def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,m
 	print "Saving the figure file: ", figureFile
 	return None
 
+def make_js_files(netpath, ecozone, treatment, featurePath, featureFile,edgetype):
+    '''make a network in js format'''
+    hive = Hive.Hive(debug=False)
+
+    featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,ecozone,treatment))
+    #featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
+    edgeFile = os.path.join(netpath,ecozone+'_'+treatment+'_edges.txt')
+
+    hive.get_nodes(featureTableFile,removeNA=NOT_A_NODE_VALUE)
+    hive.get_edges(edgeFile)
+    
+    sources, targets, nodes, nodeProperties, edgeProperties = hive.sources, hive.targets, hive.nodes, hive.nodeProperties, hive.edgeProperties
+
+    newnodeFile = os.path.join(netpath,"panel_files", "{0}_{1}_nodes.js".format(ecozone,treatment))
+    newedgeFile = os.path.join(netpath,"panel_files", "{0}_{1}_edges.js".format(ecozone,treatment))
+
+    f = open(newnodeFile, 'w')
+    f.write('var nodes = [\n')
+    for i,node in enumerate(nodes):
+		if 'Otu' in node:
+			line = '    {name: \'' + str(node) +'\''
+			for p,v in nodeProperties.iteritems():
+				if p=="class": p = "Class"
+				line  += ', '+p+': \'' + str(v[i]) + '\''
+			line += '},\n'
+			f.write(line)
+		else: pass
+    f.write('];')
+    f.close()
+
+    f = open(newedgeFile,'w')
+    f.write('var links = [\n')
+    for i,(s,t) in enumerate(zip(sources, targets)):
+    	s = s.replace('OTU-','')
+    	t = t.replace('OTU-','')
+    	if 'Otu' in s and 'Otu' in t:
+	    	line = '  {source: nodes['+str(nodes.index(s))+'], target: nodes['+str(nodes.index(t))+']'
+	        for p,v in edgeProperties.iteritems():
+	            line  += ', '+p+': \'' + str(v[i]) + '\''
+        	line += '},\n'
+        	f.write(line)
+        else: pass
+    f.write('];')
+    f.close()
+    return None
 
 
-'''
-
-def module_structure(net_path, networkNames, filePath, edgetype, inputFolder, inputFileEnd,featurePath, featureFile):
-	networks,treatments = get_network_fullnames(networkNames)
-	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
-	otuTable = {}
-	modules = {}
-	max_number_modules = 0
-	for n in networks:
-		otuTable[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S1000')
-		mods = nm.get_modules(graphs[n])
-		modules[n] = mods
-		max_number_modules = max(len(mods), max_number_modules)
-
-	if treatments != []:
-		table = np.zeros(shape=((len(MODULE_METRICS)+len(MODULE_OTU_METRICS))+3, len(networkNames)*len(treatments)*(max_number_modules+1)+1), dtype='S1000')
-		i,j = 0,1 # i is row, j is column
-		column = ['Zones','Treatments','Modules']
-		column.extend([sm.__name__.replace('_',' ').capitalize() for sm in MODULE_METRICS])
-		column.extend([om.__name__.replace('_',' ').capitalize() for om in MODULE_OTU_METRICS])
-		table[:,0]=column
-		for location,treatments in networkNames.iteritems():
-			table[i,j]=location
-			for t in treatments:
-				i+=1
-				print t
-				table[i,j]=t#.extend(['' for x in range(max_number_modules+1)])
-				mods = modules[location+'_'+t]
-				G = graphs[location+'_'+t]
-				if not mods:
-					table[i,j:j+max_number_modules] = [G.nodes()].extend(['0' for x in range(max_number_modules+1)]))
-		
-				for k,mod in enumerate(mods):
-					print k
-					#i+=1
-					table[i,j]=k
-					i+=1
-					table[i,j]=len(mod)
 
 
 
-					j+= 1
-				print table
-				for im in MODULE_METRICS:
-					print "For network for zone {0} treatment {1} calculating metric {2}".format(location,t,sm.__name__)
-					i+=1
-					G = graphs[location+'_'+t]
-					table[i,j]=sm(G)
-				for om in MODULE_OTU_METRICS:
-					print "For network for zone {0} treatment {1} calculating metric {2}".format(location,t,om.__name__)
-					i+=1
-					G = graphs[location+'_'+t]
-					featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}.txt'.format(location,t))
-					featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
-					table[i,j]=om(G,featureTable)
-				j+=1
-				i=0
-	else:
-		print 'Can only do for multiple treatments. FIX ME'
 
-	np.savetxt(filePath, table, delimiter="\t", fmt='%s')
-	return None
-'''
+
+
+
+
+
+
 
 
 

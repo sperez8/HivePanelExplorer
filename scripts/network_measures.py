@@ -423,6 +423,7 @@ if __name__ == "__main__":
     # m = node_modularity(G)
     # for i,n in m.iteritems():
     #     print i,n
+
     '''Use  commands like:
     nx.attribute_mixing_matrix(G, 'Gender')
     and

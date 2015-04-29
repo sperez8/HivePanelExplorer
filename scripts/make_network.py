@@ -151,7 +151,6 @@ def convert_graph(G,fileName):
     return None
 
 
-
 def main(*argv):
     '''handles user input and runs plsa'''
     parser = argparse.ArgumentParser(description='This scripts converts networks to txt node and edge files')
@@ -164,6 +163,7 @@ def main(*argv):
         convert_graphml(args.input)
     if args.format=='gexf':
         convert_gexf(args.input)
+
 
 
 if __name__ == "__main__":

@@ -91,7 +91,7 @@ class Hive():
         return None
 
 
-    def get_nodes(self,inputFile):
+    def get_nodes(self,inputFile,removeNA=None):
         '''gets nodes and their properties from csv file'''
         
         delimiter = get_delimiter(inputFile)
@@ -102,9 +102,16 @@ class Hive():
         properties = data[0,1:]
         properties = self.format_properties(properties, self.debug)
         
-        #remove first row with column names
-        data = data[1:,]
-        
+        if removeNA:
+            colName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
+            col = np.where(data[0,:]==colName)[0][0]
+            #remove first row with column names
+            data = data[1:,]
+            data = data[np.where(data[:,col]!=removeNA)]
+        else:
+            #remove first row with column names
+            data = data[1:,]
+
         #get all the node data
         nodes = list(data[:,0])
         

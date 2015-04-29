@@ -28,7 +28,7 @@ INDVAL_FOLDER = 'indtables'
 INDVAL_FILE_END = '_indvals_combo_om_horizon.txt'
 
 FEATURE_PATH = os.path.join(PATH,'tables')
-FEATURE_FILE = 'feature_and_posnode_measures_table'
+FEATURE_FILE = 'feature_and_node_measures_table'
 FEATURES = ['SoilHorizon']
 BC_FEATURES = ['Betweenness centrality','SoilHorizon avg','SoilHorizon std','Abundance']
 MEASURES = [nx.betweenness_centrality, 
@@ -38,6 +38,7 @@ PERCENT_BC_NODES = 0.1
 
 TAX_LEVEL = 'phylum'
 
+#TREATMENTS = ['OM3'] #use when testing
 TREATMENTS = ['OM0','OM1','OM2','OM3']
 
 PROP_TO_REMOVE = 1 #only removing this percent of nodes
@@ -70,13 +71,14 @@ def main(*argv):
 	parser.add_argument('-bcplot', help='Makes a boxplot per treatment high BC otu features', action = 'store_true')
 	parser.add_argument('-percentnodes', help='Select the proportion of high bc nodes to plot', default = PERCENT_BC_NODES)
 	parser.add_argument('-vennplot', help='Makes a venn diagram of high BC otu per ecozone', action = 'store_true')
-
+	parser.add_argument('-makejs', help='Makes node and edges files in .js', action = 'store_true')
 	args = parser.parse_args()
 	
 	#check that one of the options is true
 	choices = [args.simulate,args.distribution,args.calculate,
 				args.assess,args.maketable,args.boxplot,
-				args.modules,args.bcplot,args.vennplot]
+				args.modules,args.bcplot,args.vennplot,
+				args.makejs]
 	if sum([1 for c in choices if c])>1 or sum([1 for c in choices if c])==0:
 		print "\n***You must specify one of the three options to calculate porperties of, run simulations on or plot networks.***\n"
 		parser.print_help()
@@ -117,7 +119,6 @@ def main(*argv):
 		print filePath
 		module_structure(net_path,networks,filePath,edgetype, os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END, FEATURE_PATH, FEATURE_FILE)
 
-
 	elif args.assess:
 		print "\nCalculating ecological metrics of sample collection for the following networks:"
 		print ", ".join(networks), '\n'
@@ -127,7 +128,7 @@ def main(*argv):
 	elif args.maketable:
 		print "\nMaking OTU table with ecological metrics for the following networks:"
 		print ", ".join(networks), '\n'
-		make_OTU_feature_table(net_path, networks, os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END,os.path.join(PATH,INDVAL_FOLDER),INDVAL_FILE_END, SAMPLES_FILE, FEATURES, FEATURE_PATH, FEATURE_FILE)
+		make_OTU_feature_table(net_path, networks, os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END,os.path.join(PATH,INDVAL_FOLDER),INDVAL_FILE_END, SAMPLES_FILE, FEATURES, FEATURE_PATH, FEATURE_FILE,edgetype)
 
 	elif args.distribution:
 		for net in networks.keys():
@@ -147,7 +148,7 @@ def main(*argv):
 			sys.exit()
 		print "\nPlotting "+level+" centrality for OTUs in the following networks with "+edgetype+" type of edges:"
 		print ", ".join(networks), '\n'
-		centrality_plot(net_path,networks,FIGURE_PATH,FEATURE_PATH, FEATURE_FILE,level,percentNodes)
+		centrality_plot(net_path,networks,FIGURE_PATH,FEATURE_PATH,FEATURE_FILE,level,percentNodes)
 
 	elif args.vennplot:
 		percentNodes = float(args.percentnodes)
@@ -157,8 +158,14 @@ def main(*argv):
 			sys.exit()
 		print "\nPlotting "+level+" venn diagrma of central OTUs per ecozone with "+edgetype+" type of edges:"
 		print ", ".join(networks), '\n'
-		plot_venn_diagram(net_path,networks,FIGURE_PATH,FEATURE_PATH, FEATURE_FILE,level,percentNodes)
+		plot_venn_diagram(net_path,networks,FIGURE_PATH,FEATURE_PATH,FEATURE_FILE,level,percentNodes)
 
+	elif args.makejs:
+		print "\nMaking node and edge file in .js format for following ecozones with "+edgetype+" type of edges:"
+		print ", ".join(networks), '\n'
+		for n in networks:
+			for t in TREATMENTS:
+				make_js_files(net_path,n,t,FEATURE_PATH,FEATURE_FILE,edgetype)
 
 	elif args.bcplot:
 		percentNodes = float(args.percentnodes)
