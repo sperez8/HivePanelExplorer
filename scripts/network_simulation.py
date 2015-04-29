@@ -297,18 +297,22 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 				label=str(t),
 				color=colors[t])
 
-			# import powerlaw
-			# data = degrees
-			# results = powerlaw.Fit(data)
-			# k = results.power_law.alpha
-			# xmin = results.power_law.xmin
-			# xmax = results.power_law.xmax
-			# sigma = results.power_law.sigma
-			# print k, xmin, sigma
-			# R, p = results.distribution_compare('power_law', 'stretched_exponential')
-			# print R, p
+			import powerlaw
+			data = degrees
+			results = powerlaw.Fit(data,discrete=True,xmin=1)
+			k = results.power_law.alpha
+			xmin = results.power_law.xmin
+			xmax = results.power_law.xmax
+			sigma = results.power_law.sigma
+			#print k, xmin, sigma
+			results_exp = results.stretched_exponential
+			beta,Lambda = results_exp.beta, results_exp.Lambda
+			results_exp.plot_pdf(ax=ax, color=colors[t])
+			#ax.plot(ds,[math.pow(d*Lambda,beta-1)*math.exp(-math.pow(d*Lambda,beta)) for d in ds],color=colors[t])
+			R, p = results.distribution_compare('stretched_exponential','power_law')
+			print R, p
 
-			# ax.plot(ds,[math.exp(-xmin/k)*math.exp(-d/k) for d in ds],color=colors[t])
+			#ax.plot(ds,[math.pow(d,-k) for d in ds],color=colors[t])
 	
 	ax.set_ylim([min_y,1])
 
