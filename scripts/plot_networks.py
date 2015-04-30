@@ -42,6 +42,7 @@ TAX_LEVEL = 'phylum'
 
 #TREATMENTS = ['OM3'] #use when testing
 TREATMENTS = ['OM0','OM1','OM2','OM3']
+#TREATMENTS = ['OM2','OM3']
 
 PROP_TO_REMOVE = 1 #only removing this percent of nodes
 MAX_Y_AXIS = None
@@ -74,13 +75,14 @@ def main(*argv):
 	parser.add_argument('-percentnodes', help='Select the proportion of high bc nodes to plot', default = PERCENT_BC_NODES)
 	parser.add_argument('-vennplot', help='Makes a venn diagram of high BC otu per ecozone', action = 'store_true')
 	parser.add_argument('-makejs', help='Makes node and edges files in .js', action = 'store_true')
+	parser.add_argument('-scatterplot', help='Makes scatter plot of BC nodes', action = 'store_true')
 	args = parser.parse_args()
 	
 	#check that one of the options is true
 	choices = [args.simulate,args.distribution,args.calculate,
 				args.assess,args.maketable,args.boxplot,
 				args.modules,args.bcplot,args.vennplot,
-				args.makejs]
+				args.makejs, args.scatterplot]
 	if sum([1 for c in choices if c])>1 or sum([1 for c in choices if c])==0:
 		print "\n***You must specify one of the three options to calculate porperties of, run simulations on or plot networks.***\n"
 		parser.print_help()
@@ -158,9 +160,19 @@ def main(*argv):
 		if level not in TAXONOMY:
 			print level, "is not a taxonomic level"
 			sys.exit()
-		print "\nPlotting "+level+" venn diagrma of central OTUs per ecozone with "+edgetype+" type of edges:"
+		print "\nPlotting "+level+" venn diagram of central OTUs per ecozone with "+edgetype+" type of edges:"
 		print ", ".join(networks), '\n'
-		plot_venn_diagram(net_path,networks,FIGURE_PATH,FEATURE_PATH,FEATURE_FILE,level,percentNodes)
+		if level == "species":
+			plot_venn_otus_diagram(net_path,networks,FIGURE_PATH,FEATURE_PATH,FEATURE_FILE,percentNodes)
+		else:	
+			plot_venn_diagram(net_path,networks,FIGURE_PATH,FEATURE_PATH,FEATURE_FILE,level,percentNodes)
+
+	elif args.scatterplot:
+		percentNodes = float(args.percentnodes)
+		print "\nPlotting scatterplot to compare central OTUs per ecozone with "+edgetype+" type of edges:"
+		print ", ".join(networks), '\n'
+		plot_scatter_bc(net_path,networks,FIGURE_PATH,FEATURE_PATH,FEATURE_FILE,percentNodes)
+
 
 	elif args.makejs:
 		print "\nMaking node and edge file in .js format for following ecozones with "+edgetype+" type of edges:"

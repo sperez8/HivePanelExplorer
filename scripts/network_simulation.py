@@ -430,11 +430,67 @@ def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFi
 	figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=20)
 
 	fig.set_size_inches(15,5*len(taxonomy))
-	figureFile = os.path.join(net_path,figurePath,'Venn_diagram_plot_'+','.join(networkNames.keys())+'_'+str(percentNodes)+'.png')
+	figureFile = os.path.join(net_path,figurePath,'Venn_diagram_plot_'+'_'.join([k.split('_')[1] for k in networkNames.keys()])+'_'+str(percentNodes)+'.png')
 	fig.savefig(figureFile, dpi=DPI,bbox_inches='tight')
 	print "Saving the figure file: ", figureFile
 
 	return None
+
+
+def plot_venn_otus_diagram(net_path, networkNames, figurePath, featurePath, featureFile, percentNodes):
+	edgetype = 'pos'
+	networks,treatments = get_network_fullnames(networkNames)
+	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
+	colName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
+
+	fig, ax = plt.subplots(1)
+
+	otuSeen = {}
+	for location,treatments in networkNames.iteritems():
+		otuSeen[location] = []
+		#centralities = {}
+		for t in treatments:
+			G = graphs[location+'_'+t]
+			featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t))
+			featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
+			centcol = np.where(featureTable[0,:]==colName)[0][0]
+			taxcol = 0
+			bcvalues = featureTable[1:,centcol]
+			bcvalues = bcvalues[np.where(bcvalues!=NOT_A_NODE_VALUE)]
+			bcvalues= list([float(k) for k in bcvalues])
+			bcvalues.sort(reverse=True)
+			cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
+			for n in G.nodes():
+				row = nm.findRow(n,featureTable)
+				taxonlevel = featureTable[row][taxcol]
+				value = float(featureTable[row][centcol])
+				if value != NOT_A_NODE_VALUE and value >= cutoff:
+					otuSeen[location].append(taxonlevel)
+					#centralities[t][taxonomies.index(taxonlevel)].append(value)
+		otuSeen[location] = set(otuSeen[location])
+
+	print otuSeen
+
+	total = sum([len(taxa) for taxa in otuSeen.values()])
+	circleLabels = [k.split('_')[1] for k in otuSeen.keys()]
+	if total == 0:
+		circleLabels=[]
+	if len(networkNames)==3:
+		v = venn3(subsets=otuSeen.values(), set_labels = circleLabels, set_colors=('b','r','g'), alpha=0.3, ax=ax)
+	else:
+		v = venn2(subsets=otuSeen.values(), ax = ax)
+		
+	title = "Venn diagram of econoze's central OTUs"
+	figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=20)
+
+	fig.set_size_inches(5,5)
+	figureFile = os.path.join(net_path,figurePath,'Venn_diagram_plot_OTUs_'+'_'.join(networkNames.keys())+'_'+str(percentNodes)+'.png')
+	fig.savefig(figureFile, dpi=DPI,bbox_inches='tight')
+	print "Saving the figure file: ", figureFile
+
+	return None
+
+
 
 def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile, tax_level, percentNodes):
 	networks,treatments = get_network_fullnames(networkNames)
@@ -559,6 +615,71 @@ def keystone_quantitative_feature_plot(net_path, networkNames, figurePath, featu
 		fig.savefig(figureFile, dpi=DPI,bbox_inches='tight')
 		print "Saving the figure file: ", figureFile
 	return None
+
+
+def plot_scatter_bc(net_path, networkNames, figurePath, featurePath, featureFile, percentNodes):
+	edgetype = 'pos'
+	networks,treatments = get_network_fullnames(networkNames)
+	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
+	bcColName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
+	hzColName = "SoilHorizon avg"
+	abColName = "Abundance"
+
+	attributes = [bcColName,hzColName,abColName]
+	locations = networkNames.keys()
+
+	for t in treatments:
+		fig, axes = plt.subplots(len(attributes),len(locations))
+		iterable = []
+		for i,r in enumerate(attributes):
+			for j,c in enumerate(locations):
+				if len(attributes)>1:
+					iterable.append((axes[i][j],r,c))
+				else:
+					iterable.append((axes[j],r,c))
+		for ax,attribute,location in iterable:
+			G = graphs[location+'_'+t]
+			featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t))
+			featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
+			notBC = []
+			BC = []
+
+			atCol = np.where(featureTable[0,:]==attribute)[0][0]
+			centcol = np.where(featureTable[0,:]==bcColName)[0][0]
+			bcvalues = featureTable[1:,centcol]
+			bcvalues = bcvalues[np.where(bcvalues!=NOT_A_NODE_VALUE)]
+			bcvalues= list([float(k) for k in bcvalues])
+			bcvalues.sort(reverse=True)
+			cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
+			for n in G.nodes():
+				row = nm.findRow(n,featureTable)
+				value = float(featureTable[row][centcol])
+				if value == NOT_A_NODE_VALUE:
+					print "UH oh"
+				if value >= cutoff:
+					BC.append(float(featureTable[row][atCol]))
+				else:
+					notBC.append(float(featureTable[row][atCol]))
+
+			binwidth=(max(notBC)-min(notBC))/12.0
+			ppl.hist(ax,notBC,color='black',grid='y', bins =np.arange(min(notBC), max(notBC) + binwidth, binwidth))
+			ppl.hist(ax,BC,color='purple',grid='y', bins =np.arange(min(notBC), max(notBC) + binwidth, binwidth))
+
+			if attribute== abColName or attribute == bcColName:
+				ax.set_yscale('log')
+			ax.set_xlabel(location)
+			ax.set_ylabel(attribute)
+
+		title = "Distribution of OTUs properties in all ecozones for treatment "+t
+		figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=20)
+
+		fig.set_size_inches(5*len(attributes),5*len(locations))
+		figureFile = os.path.join(net_path,figurePath,'scatter_BC_otus_'+t+'_'+'_'.join([l.split('_')[1] for l in locations])+'_'+edgetype+'_'+str(percentNodes)+'.png')
+		fig.savefig(figureFile, dpi=DPI,bbox_inches='tight')
+		print "Saving the figure file: ", figureFile
+
+	return None
+
 
 
 
