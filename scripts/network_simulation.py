@@ -298,18 +298,22 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 				label=str(t),
 				color=colors[t])
 
-			# import powerlaw
-			# data = degrees
-			# results = powerlaw.Fit(data)
-			# k = results.power_law.alpha
-			# xmin = results.power_law.xmin
-			# xmax = results.power_law.xmax
-			# sigma = results.power_law.sigma
-			# print k, xmin, sigma
-			# R, p = results.distribution_compare('power_law', 'stretched_exponential')
-			# print R, p
+			import powerlaw
+			data = degrees
+			results = powerlaw.Fit(data,discrete=True,xmin=1)
+			k = results.power_law.alpha
+			xmin = results.power_law.xmin
+			xmax = results.power_law.xmax
+			sigma = results.power_law.sigma
+			#print k, xmin, sigma
+			results_exp = results.stretched_exponential
+			beta,Lambda = results_exp.beta, results_exp.Lambda
+			results_exp.plot_pdf(ax=ax, color=colors[t])
+			#ax.plot(ds,[math.pow(d*Lambda,beta-1)*math.exp(-math.pow(d*Lambda,beta)) for d in ds],color=colors[t])
+			R, p = results.distribution_compare('stretched_exponential','power_law')
+			print R, p
 
-			# ax.plot(ds,[math.exp(-xmin/k)*math.exp(-d/k) for d in ds],color=colors[t])
+			#ax.plot(ds,[math.pow(d,-k) for d in ds],color=colors[t])
 	
 	ax.set_ylim([min_y,1])
 
@@ -971,7 +975,7 @@ def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,m
 	print "Saving the figure file: ", figureFile
 	return None
 
-def make_js_files(netpath, ecozone, treatment, featurePath, featureFile,edgetype):
+def make_js_files(netpath, newnetpath, ecozone, treatment, featurePath, featureFile, edgetype):
     '''make a network in js format'''
     hive = Hive.Hive(debug=False)
 
@@ -984,10 +988,12 @@ def make_js_files(netpath, ecozone, treatment, featurePath, featureFile,edgetype
     
     sources, targets, nodes, nodeProperties, edgeProperties = hive.sources, hive.targets, hive.nodes, hive.nodeProperties, hive.edgeProperties
 
-    newnodeFile = os.path.join(netpath,"panel_files", "{0}_{1}_nodes.js".format(ecozone,treatment))
-    newedgeFile = os.path.join(netpath,"panel_files", "{0}_{1}_edges.js".format(ecozone,treatment))
+    newnodeFile = os.path.join(newnetpath,"{0}_{1}_{2}_nodes.js".format(ecozone,treatment,edgetype))
+    newedgeFile = os.path.join(newnetpath,"{0}_{1}_{2}_edges.js".format(ecozone,treatment,edgetype))
 
     f = open(newnodeFile, 'w')
+    networkType = {'pos':'copresences ','neg':'mutual exclusions ','both':''}
+    f.write('var SVGTitle = "Ecozone {0} treatment {1} {2}Hive Panel"\n'.format(ecozone.split('_')[1],treatment,networkType[edgetype]))
     f.write('var nodes = [\n')
     for i,node in enumerate(nodes):
 		if 'Otu' in node:
@@ -1007,11 +1013,18 @@ def make_js_files(netpath, ecozone, treatment, featurePath, featureFile,edgetype
     	s = s.replace('OTU-','')
     	t = t.replace('OTU-','')
     	if 'Otu' in s and 'Otu' in t:
-	    	line = '  {source: nodes['+str(nodes.index(s))+'], target: nodes['+str(nodes.index(t))+']'
-	        for p,v in edgeProperties.iteritems():
-	            line  += ', '+p+': \'' + str(v[i]) + '\''
-        	line += '},\n'
-        	f.write(line)
+    		if edgetype != 'both' and (s not in nodes or t not in nodes):
+    			continue
+    		if edgetype == 'pos' and edgeProperties['interactionType'][i]!='[copresence, copresence]':
+    			continue
+    		elif edgetype == 'neg' and edgeProperties['interactionType'][i]!='[mutualExclusion, mutualExclusion]':
+    			continue
+    		else:
+		    	line = '  {source: nodes['+str(nodes.index(s))+'], target: nodes['+str(nodes.index(t))+']'
+		        for p,v in edgeProperties.iteritems():
+		            line  += ', '+p+': \'' + str(v[i]) + '\''
+	        	line += '},\n'
+	        	f.write(line)
         else: pass
     f.write('];')
     f.close()

@@ -36,6 +36,8 @@ MEASURES = [nx.betweenness_centrality,
 			 ]
 PERCENT_BC_NODES = 0.1
 
+FOLDER_NEW_NETWORKS = os.path.join(PATH,'panels','data')
+
 TAX_LEVEL = 'phylum'
 
 #TREATMENTS = ['OM3'] #use when testing
@@ -165,7 +167,7 @@ def main(*argv):
 		print ", ".join(networks), '\n'
 		for n in networks:
 			for t in TREATMENTS:
-				make_js_files(net_path,n,t,FEATURE_PATH,FEATURE_FILE,edgetype)
+				make_js_files(net_path,FOLDER_NEW_NETWORKS,n,t,FEATURE_PATH,FEATURE_FILE,edgetype)
 
 	elif args.bcplot:
 		percentNodes = float(args.percentnodes)
