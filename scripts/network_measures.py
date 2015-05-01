@@ -24,7 +24,7 @@ import networkx as nx
 from make_network import *
 
 DECIMALS = 3 #for rounding measures
-FACTOR = 2
+FACTOR = 1.5
 
 SOILHORIZON_FEAT_NAME = 'SoilHorizon avg'
 

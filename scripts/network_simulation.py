@@ -37,6 +37,7 @@ RAND_NAME = 'random_network_size_of_'
 SCALE_NAME = 'scalefree_network_size_of_'
 FILTER_NON_OTUS = True
 MARKER_SIZE = 200
+NUM_BINS = 15.0
 
 NOT_A_NODE_VALUE = 'NA'
 
@@ -117,6 +118,7 @@ def get_multiple_graphs(networks, path, edgetype, add_random, add_scalefree, LC=
 		G = make_graph(nodeFile,edgeFile,edgetype)
 		if LC:
 			G = nx.connected_component_subgraphs(G)[0]
+			print "keeping only connected component"
 		graphs[netName] = G
 		print 'Made the networkx graph {0} with N = {1}, E = {2}.'.format(netName,G.number_of_nodes(),G.number_of_edges())
 		
@@ -179,7 +181,7 @@ def get_ind(table, otu):
 		print 'not found:',otu
 	return ind
 
-def make_OTU_feature_table(net_path, networkNames, inputFolder, inputFileEnd, indvalFolder, indvalFileEnd, samplesFile, features, path, featureFile,edgetype):
+def make_OTU_feature_table(net_path, networkNames, inputFolder, inputFileEnd, indvalFolder, indvalFileEnd, samplesFile, features, path, featureFile,edgetype, factor):
 	'''makes an OTU table with avg depth and othe features per OTU'''
 
 	networks,treatments = get_network_fullnames(networkNames)
@@ -238,7 +240,10 @@ def make_OTU_feature_table(net_path, networkNames, inputFolder, inputFileEnd, in
 				print "For input table from zone {0} treatment {1} calculating measure {2}".format(location,t,m.__name__)
 				col = i+column_bias
 				G = graphs[location+'_'+t]
-				values = m(G)
+				if "modul" in m.__name__:
+					values = m(G,factor=factor)
+				else:
+					values = m(G)
 				for r,row in enumerate(abundances[1:-1,]):
 					otu = row[0]
 					measureValue = 0
@@ -250,7 +255,7 @@ def make_OTU_feature_table(net_path, networkNames, inputFolder, inputFileEnd, in
 						measureValue = NOT_A_NODE_VALUE				
 					featureTable[r+1][col]=measureValue
 
-			fileName = featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t)
+			fileName = featureFile+'_{0}_{1}_{2}_factor{3}.txt'.format(edgetype,location,t,factor)
 			tableFile = os.path.join(path,fileName)
 			print "Saving table: ",tableFile
 
@@ -370,18 +375,25 @@ def get_taxonomic_levels(featurePath,featureFile,location,treatments,tax_level,n
 
 
 
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+#############                                                        #########
+#################                                                 ############
+####################                                    ######################
+############################                       ###########################
+#################################             ################################
+###################################         ##################################
+#######################################   ####################################
+##############################################################################
 
 
 
 
-
-
-
-
-
-
-
-def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFile, tax_level, percentNodes):
+def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFile, tax_level, percentNodes, bcMinValue):
 	edgetype = 'pos'
 	networks,treatments = get_network_fullnames(networkNames)
 	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
@@ -391,7 +403,7 @@ def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFi
 	fig, axes = plt.subplots(len(taxonomy))
 	totaltax = {tax:0 for tax in taxonomy}
 	unclassified = {tax:0 for tax in taxonomy}
-	print totaltax, unclassified
+	#print totaltax, unclassified
 
 	for ax,tax_level in zip(axes, taxonomy):
 		taxaSeen = {}
@@ -410,7 +422,10 @@ def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFi
 				bcvalues = bcvalues[np.where(bcvalues!=NOT_A_NODE_VALUE)]
 				bcvalues= list([float(k) for k in bcvalues])
 				bcvalues.sort(reverse=True)
-				cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
+				if percentNodes<1:
+					cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
+				else:
+					cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
 				for n in G.nodes():
 					row = nm.findRow(n,featureTable)
 					taxonlevel = featureTable[row][taxcol]
@@ -420,7 +435,7 @@ def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFi
 						centralities[t][taxonomies.index(taxonlevel)].append(value)
 			unclassified[tax_level] += taxaSeen[location].count("unclassified")
 			unclassified[tax_level] += taxaSeen[location].count("uncultured")
-			print unclassified, len(taxaSeen[location]),taxaSeen[location], totaltax[tax_level]
+			#print unclassified, len(taxaSeen[location]),taxaSeen[location], totaltax[tax_level]
 			totaltax[tax_level] = totaltax[tax_level] + len(taxaSeen[location])
 
 			taxaSeen[location] = set(taxaSeen[location])
@@ -442,24 +457,28 @@ def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFi
 		else:
 			v = venn2(subsets=taxaSeen.values(), ax = ax)
 	
-	f = open(os.path.join(net_path,figurePath,"prop_unclassifed_OTUs_venn.txt"),'w')
+	#save number of unclassified in a a table
+	f = open(os.path.join(net_path,figurePath,"prop_unclassifed_OTUs_venn_{0}_{1}.txt".format(percentNodes,bcMinValue )),'w')
+	f.write('\t'.join(['Taxonomic level','Number of unclassified OTUs','Total number of OTUs','Proportion of unclassified']))
+	f.write('\n')
 	for t in taxonomy:
 		f.write('\t'.join([str(x) for x in [t, unclassified[t], totaltax[t], unclassified[t]/float(totaltax[t])]]))
 		f.write('\n')
 	f.close()
 
+
 	title = "Venn diagram of econoze's central OTUs classified by taxonomic level"
 	figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=TITLE_FONT)
 
 	fig.set_size_inches(15,5*len(taxonomy))
-	figureFile = os.path.join(net_path,figurePath,'Venn_diagram_plot_'+'_'.join([k.split('_')[1] for k in networkNames.keys()])+'_'+str(percentNodes)+'.png')
+	figureFile = os.path.join(net_path,figurePath,'Venn_diagram_plot_'+'_'.join([k.split('_')[1] for k in networkNames.keys()])+'_'+edgetype+'_'+str(percentNodes)+'_'+str(bcMinValue)+'.png')
 	fig.savefig(figureFile, dpi=DPI,bbox_inches='tight')
 	print "Saving the figure file: ", figureFile
 
 	return None
 
 
-def plot_venn_otus_diagram(net_path, networkNames, figurePath, featurePath, featureFile, percentNodes):
+def plot_venn_otus_diagram(net_path, networkNames, figurePath, featurePath, featureFile, percentNodes, bcMinValue):
 	edgetype = 'pos'
 	networks,treatments = get_network_fullnames(networkNames)
 	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
@@ -481,17 +500,20 @@ def plot_venn_otus_diagram(net_path, networkNames, figurePath, featurePath, feat
 			bcvalues = bcvalues[np.where(bcvalues!=NOT_A_NODE_VALUE)]
 			bcvalues= list([float(k) for k in bcvalues])
 			bcvalues.sort(reverse=True)
-			cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
+			if percentNodes<1:
+				cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
+			else:
+				cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
 			for n in G.nodes():
 				row = nm.findRow(n,featureTable)
 				taxonlevel = featureTable[row][taxcol]
 				value = float(featureTable[row][centcol])
 				if value != NOT_A_NODE_VALUE and value >= cutoff:
 					otuSeen[location].append(taxonlevel)
-					#centralities[t][taxonomies.index(taxonlevel)].append(value)
+
 		otuSeen[location] = set(otuSeen[location])
 
-	print otuSeen
+	#print otuSeen
 
 	total = sum([len(taxa) for taxa in otuSeen.values()])
 	circleLabels = [k.split('_')[1] for k in otuSeen.keys()]
@@ -506,7 +528,7 @@ def plot_venn_otus_diagram(net_path, networkNames, figurePath, featurePath, feat
 	figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=TITLE_FONT)
 
 	fig.set_size_inches(5,5)
-	figureFile = os.path.join(net_path,figurePath,'Venn_diagram_plot_OTUs_'+'_'.join(networkNames.keys())+'_'+str(percentNodes)+'.png')
+	figureFile = os.path.join(net_path,figurePath,'Venn_diagram_plot_OTUs_'+'_'.join(networkNames.keys())+'_'+edgetype+'_'+str(percentNodes)+'_'+str(bcMinValue)+'.png')
 	fig.savefig(figureFile, dpi=DPI,bbox_inches='tight')
 	print "Saving the figure file: ", figureFile
 
@@ -514,7 +536,7 @@ def plot_venn_otus_diagram(net_path, networkNames, figurePath, featurePath, feat
 
 
 
-def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile, tax_level, percentNodes):
+def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile, tax_level, percentNodes, bcMinValue):
 	networks,treatments = get_network_fullnames(networkNames)
 	edgetype = 'pos'
 	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
@@ -543,7 +565,7 @@ def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile
 			bcvalues = bcvalues[np.where(bcvalues!=NOT_A_NODE_VALUE)]
 			bcvalues= list([float(k) for k in bcvalues])
 			bcvalues.sort(reverse=True)
-			cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
+			cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
 			for n in G.nodes():
 				row = nm.findRow(n,featureTable)
 				taxonlevel = featureTable[row][taxcol]
@@ -577,7 +599,7 @@ def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile
 		figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=TITLE_FONT)
 
 		fig.set_size_inches(2.5*len(taxonomies),6*len(treatments))
-		figureFile = os.path.join(net_path,figurePath,'centrality_plot_'+location+'_'+str(percentNodes)+'.png')
+		figureFile = os.path.join(net_path,figurePath,'centrality_plot_'+location+'_'+edgetype+'_'+str(percentNodes)+'_'+str(bcMinValue)+'.png')
 		fig.savefig(figureFile, dpi=DPI,bbox_inches='tight')
 		print "Saving the figure file: ", figureFile
 	return None
@@ -585,7 +607,7 @@ def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile
 
 
 
-def keystone_quantitative_feature_plot(net_path, networkNames, figurePath, featurePath, featureFile, features, percentNodes):
+def keystone_quantitative_feature_plot(net_path, networkNames, figurePath, featurePath, featureFile, features, percentNodes, bcMinValue):
 	networks,treatments = get_network_fullnames(networkNames)
 	edgetype = 'pos'
 	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
@@ -610,7 +632,7 @@ def keystone_quantitative_feature_plot(net_path, networkNames, figurePath, featu
 				bcvalues = bcvalues[np.where(bcvalues!=NOT_A_NODE_VALUE)]
 				bcvalues= list([float(k) for k in bcvalues])
 				bcvalues.sort(reverse=True)
-				cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
+				cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
 				for n in G.nodes():
 					row = nm.findRow(n,featureTable)
 					bc = float(featureTable[row][centcol])
@@ -633,13 +655,39 @@ def keystone_quantitative_feature_plot(net_path, networkNames, figurePath, featu
 		figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=TITLE_FONT)
 
 		fig.set_size_inches(2.5*len(treatments),6*len(features))
-		figureFile = os.path.join(net_path,figurePath,'high_bc_feature_plot_'+location+'_'+str(percentNodes)+'.png')
+		figureFile = os.path.join(net_path,figurePath,'high_bc_feature_plot_'+location+'_'+edgetype+'_'+str(percentNodes)+'_'+str(bcMinValue)+'.png')
 		fig.savefig(figureFile, dpi=DPI,bbox_inches='tight')
 		print "Saving the figure file: ", figureFile
 	return None
 
 
-def plot_scatter_bc(net_path, networkNames, figurePath, featurePath, featureFile, percentNodes):
+
+
+
+
+
+
+
+
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+#############                                                        #########
+#################                                                 ############
+####################                                    ######################
+############################                       ###########################
+#################################             ################################
+###################################         ##################################
+#######################################   ####################################
+##############################################################################
+
+
+
+
+def plot_scatter_bc(net_path, networkNames, figurePath, featurePath, featureFile, percentNodes, bcMinValue):
 	edgetype = 'pos'
 	networks,treatments = get_network_fullnames(networkNames)
 	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
@@ -650,6 +698,8 @@ def plot_scatter_bc(net_path, networkNames, figurePath, featurePath, featureFile
 	attributes = [bcColName,hzColName,abColName]
 	locations = networkNames.keys()
 	locations.sort(reverse=True)
+
+	numSuperconnectors = []
 
 	for t in treatments:
 		ytitles = list(locations)
@@ -677,7 +727,7 @@ def plot_scatter_bc(net_path, networkNames, figurePath, featurePath, featureFile
 			bcvalues = bcvalues[np.where(bcvalues!=NOT_A_NODE_VALUE)]
 			bcvalues= list([float(k) for k in bcvalues])
 			bcvalues.sort(reverse=True)
-			cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
+			cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
 			for n in G.nodes():
 				row = nm.findRow(n,featureTable)
 				value = float(featureTable[row][centcol])
@@ -687,18 +737,30 @@ def plot_scatter_bc(net_path, networkNames, figurePath, featurePath, featureFile
 					BC.append(float(featureTable[row][atCol]))
 				else:
 					notBC.append(float(featureTable[row][atCol]))
-			minvalue = min(min(notBC),min(BC))
-			maxvalue = max(max(notBC),max(BC))
-			binwidth=(maxvalue-minvalue)/12.0
+			if BC:
+				minvalue = min(min(notBC),min(BC))
+				maxvalue = max(max(notBC),max(BC))
+			else:
+				minvalue = min(notBC)
+				maxvalue = max(notBC)
+			binwidth=(maxvalue-minvalue)/NUM_BINS
+			if attribute==bcColName:
+				if len(BC)>0:
+					numSuperconnectors.append([t, location.split('_')[1], len(BC), round(min(BC),4),round(max(BC),4)])
+				else:
+					numSuperconnectors.append([t, location.split('_')[1], 0, None, None])
+
 			notBC.extend(BC) # want to plot histogram of whole data and color the BC ones on top
 			if binwidth == 0:
 				bindwitdh = 1
 				ppl.hist(ax, notBC, color='black', grid='y')
-				ppl.hist(ax, BC, color='purple', grid='y')
+				if len(BC)>0:
+					ppl.hist(ax, BC, color='purple', grid='y')
 			else:
 				bins = np.arange(minvalue, maxvalue + binwidth, binwidth)
-				ppl.hist(ax, notBC, color='black', grid='y', bins = bins)
-				ppl.hist(ax, BC, color='purple', grid='y', bins = bins)
+				ppl.hist(ax, notBC, color='black', grid='y', bins = bins, label = 'All OTUs')
+				if len(BC)>0:
+					ppl.hist(ax, BC, color='purple', grid='y', bins = bins, label = "Superconnectors")
 
 			ax.locator_params(axis = "x",nbins=4)
 
@@ -721,45 +783,29 @@ def plot_scatter_bc(net_path, networkNames, figurePath, featurePath, featureFile
 		# 	ax.set_xlim(xlims[attribute][0],xlims[attribute][1])
 
 
+		#save number of superconnectors in a a table
+		f = open(os.path.join(net_path,figurePath,"superconnectors_OTUs_{0}_{1}.txt".format(percentNodes,bcMinValue )),'w')
+		f.write('\t'.join(['Treatment','Ecozone','Number of superconnectors','lowest BC value','highest BC value']))
+		f.write('\n')
+		for num in numSuperconnectors:
+			f.write('\t'.join([str(x) for x in num]))
+			f.write('\n')
+		f.close()
+
+		lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
+
 		title = "Distribution of OTUs properties in all ecozones for treatment "+t
 		figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=TITLE_FONT)
 
 		fig.set_size_inches(BIG_FIG_WIDTH,BIG_FIG_HEIGHT)
-		figureFile = os.path.join(net_path,figurePath,'scatter_BC_otus_'+t+'_'+'_'.join([l.split('_')[1] for l in locations])+'_'+edgetype+'_'+str(percentNodes)+'.png')
-		fig.savefig(figureFile, dpi=DPI,bbox_inches='tight')
+		figureFile = os.path.join(net_path,figurePath,'scatter_BC_otus_'+t+'_'+'_'.join([l.split('_')[1] for l in locations])+'_'+edgetype+'_'+str(percentNodes)+'_'+str(bcMinValue)+'.png')
+		fig.savefig(figureFile, dpi=DPI, bbox_extra_artists=(lgd,figureTitle),bbox_inches='tight')
 		print "Saving the figure file: ", figureFile
 
 	return None
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#####################################################################################
-
-#####################################################################################
-
-#####################################################################################
-
-
-def module_structure(net_path, networkNames, filePath, edgetype, inputFolder, inputFileEnd,featurePath, featureFile):
+def module_structure(net_path, networkNames, filePath, edgetype, inputFolder, inputFileEnd,featurePath, featureFile, factor):
 	networks,treatments = get_network_fullnames(networkNames)
 	print networks, treatments
 	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
@@ -768,7 +814,7 @@ def module_structure(net_path, networkNames, filePath, edgetype, inputFolder, in
 	number_modules = {}
 	for n in networks:
 		otuTable[n] = np.loadtxt(os.path.join(inputFolder,n.replace('BAC_','')+inputFileEnd), dtype='S1000')
-		mods = nm.get_module_graphs(graphs[n])
+		mods = nm.get_module_graphs(graphs[n],factor=factor)
 		modules[n] = mods
 		number_modules[n] = len(mods)
 	print number_modules
@@ -865,7 +911,8 @@ def network_structure(net_path, networkNames, filePath, edgetype, inputFolder, i
 	np.savetxt(filePath, table, delimiter="\t", fmt='%s')
 	return None
 
-def plot_multiple(net_path, networkNames, measures, plotby, fraction, figurePath, edgetype, add_random, add_scalefree, max_y):
+def plot_multiple(net_path, networkNames, measures, plotby, fraction, figurePath, figureName, edgetype, add_random, add_scalefree, max_y):
+
 	networks,treatments = get_network_fullnames(networkNames)
 	graphs = get_multiple_graphs(networks,net_path,edgetype, add_random, add_scalefree, LC=True)
 	data = {}
@@ -883,9 +930,9 @@ def plot_multiple(net_path, networkNames, measures, plotby, fraction, figurePath
 	if add_scalefree:
 		networkNamesPlot.extend([SCALE_NAME+n for n in networkNames.keys()])
 	if plotby == 'by_treatment':
-		multi_plot_robustness_by_treatment(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path, title, max_y)
+		multi_plot_robustness_by_treatment(data, figurePath, figureName, networkNamesPlot, treatments, measures, fraction, net_path, title, max_y)
 	elif plotby == 'by_measure':
-		multi_plot_robustness_by_measure(data, figurePath, networkNamesPlot, treatments, measures, fraction, net_path, title, max_y)
+		multi_plot_robustness_by_measure(data, figurePath, figureName, networkNamesPlot, treatments, measures, fraction, net_path, title, max_y)
 	return None
 
 
@@ -983,7 +1030,7 @@ def plot_individual(path,networkNames,fraction):
 		plot_robustness(data, netName)
 	return None
 
-def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels, measures, fraction, net_path, title, max_y):
+def multi_plot_robustness_by_treatment(multidata,figurePath,figureFile,rowLabels,colLabels, measures, fraction, net_path, title, max_y):
 	'''plots the simulations in a multiplot: each row is a location and each column is a treatment'''
 
 	# plotting locations in rows and treatments in columns
@@ -1061,13 +1108,35 @@ def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels,
 
 	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
 
-	figureFile = os.path.join(net_path,figurePath)
+	figureFile = os.path.join(net_path,figurePath,figureFile)
 	fig.set_size_inches(10*len(colLabels),7*len(rowLabels))
 	fig.savefig(figureFile, dpi=DPI,  bbox_extra_artists=(lgd,figureTitle), bbox_inches='tight')
 	print "Saving the figure file: ", figureFile
 	return None
 
-def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,measures,fraction, net_path, title, max_y):
+
+
+
+
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+#############                                                        #########
+#################                                                 ############
+####################                                    ######################
+############################                       ###########################
+#################################             ################################
+###################################         ##################################
+#######################################   ####################################
+##############################################################################
+
+
+
+
+def multi_plot_robustness_by_measure(multidata,figurePath,figureFile,rowLabels,treatments,measures,fraction, net_path, title, max_y):
 	'''plots the simulations in a multiplot: each row is a location and each column is a centrality measure'''
 
 	# plotting locations in rows and centralities in columns
@@ -1077,6 +1146,10 @@ def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,m
 
 	colors = {treatment: ppl.colors.set1[i] for i,treatment in enumerate(treatments)}
 	#print netNames, measures, len(rowLabels),len(colLabels), len(axes), colLabels*len(rowLabels)
+
+	vulnerability = np.zeros(shape=(len(treatments)+1,len(measures)+1), dtype='S1000')
+	vulnerability[1:,0]=np.array(treatments)
+	vulnerability[0,1:]=np.array(measures)
 
 	iterable = []
 	for i,r in enumerate(rowLabels):
@@ -1096,8 +1169,10 @@ def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,m
 
 	min_yvalue = 1
 	max_yvalue = 1
+	i,j=0,0
 	for ax,net,measure in iterable:
-
+		j+=1
+		i=0
 		for t in treatments:
 			lc_values = multidata[net+'_'+t][measure][0]
 			sc_values = multidata[net+'_'+t][measure][1]
@@ -1117,6 +1192,12 @@ def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,m
 				color=colors[t],
 				linestyle='--')
 
+			#Output robustness and vulnerability
+			i+=1
+			print i,j,t,net
+			R = 1.0/len(lc_values)*sum(lc_values)
+			vulnerability[i,j]=str(round(R,3))
+
 		if measure not in measure_label_done:
 			ax.set_title(measure)
 			measure_label_done.append(measure)
@@ -1127,6 +1208,13 @@ def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,m
 		if not x_axis_label_done:
 			x_axis_label_done = True
 			ax.set_xlabel('fraction of removed nodes')
+
+
+	#save vulnerability in a table
+	f = open(os.path.join(net_path,figurePath,"vulnerability_by_measure_{0}.txt".format(net)),'w')
+	np.savetxt(f, vulnerability, delimiter="\t", fmt='%s')
+	f.close()
+
 
 	for ax in axes:
 		ax.set_autoscaley_on(False)
@@ -1140,7 +1228,7 @@ def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,m
 
 	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
 
-	figureFile = os.path.join(net_path, figurePath)
+	figureFile = os.path.join(net_path,figurePath,figureFile)
 	#fig.tight_layout()
 	fig.set_size_inches(9*len(treatments),9*len(rowLabels))
 	fig.savefig(figureFile, dpi=DPI, bbox_extra_artists=(lgd,figureTitle), bbox_inches='tight')
