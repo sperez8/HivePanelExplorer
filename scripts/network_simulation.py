@@ -44,6 +44,14 @@ TAXONOMY = ["kingdom","phylum","class","order","family","genus","species","subsp
 INDVAL_P_CUTOFF = 0.01
 INDVAL_CUTOFF = 0.6
 
+BIG_FIG_WIDTH = 12
+BIG_FIG_HEIGHT = 16
+
+SMALL_FIG_WIDTH = 5
+SMALL_FIG_HEIGHT = 5
+
+TITLE_FONT = 20
+
 STRUCTURE_METRICS = [nm.number_of_nodes, 
 					nm.number_of_edges,
 					nm.number_of_components,
@@ -370,6 +378,21 @@ def get_taxonomic_levels(featurePath,featureFile,location,treatments,tax_level,n
 	return taxonomies
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFile, tax_level, percentNodes):
 	edgetype = 'pos'
 	networks,treatments = get_network_fullnames(networkNames)
@@ -378,9 +401,9 @@ def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFi
 	taxonomy = TAXONOMY
 	taxonomy.pop(0)
 	fig, axes = plt.subplots(len(taxonomy))
-
-	# if tax_level not in taxonomy:
-	# 	tax_level = taxonomy[1] #phylum
+	totaltax = {tax:0 for tax in taxonomy}
+	unclassified = {tax:0 for tax in taxonomy}
+	print totaltax, unclassified
 
 	for ax,tax_level in zip(axes, taxonomy):
 		taxaSeen = {}
@@ -407,14 +430,19 @@ def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFi
 					if value != NOT_A_NODE_VALUE and value >= cutoff:
 						taxaSeen[location].append(taxonlevel)
 						centralities[t][taxonomies.index(taxonlevel)].append(value)
+			unclassified[tax_level] += taxaSeen[location].count("unclassified")
+			unclassified[tax_level] += taxaSeen[location].count("uncultured")
+			print unclassified, len(taxaSeen[location]),taxaSeen[location], totaltax[tax_level]
+			totaltax[tax_level] = totaltax[tax_level] + len(taxaSeen[location])
+
 			taxaSeen[location] = set(taxaSeen[location])
 			if "unclassified" in taxaSeen[location]:
 				taxaSeen[location].remove("unclassified")	
 			if "uncultured" in taxaSeen[location]:
 				taxaSeen[location].remove("uncultured")
 
-		print tax_level
-		print taxaSeen
+		#print tax_level
+		#print taxaSeen
 		#ax.set_ylabel(tax_level)
 
 		total = sum([len(taxa) for taxa in taxaSeen.values()])
@@ -425,9 +453,15 @@ def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFi
 			v = venn3(subsets=taxaSeen.values(), set_labels = circleLabels, set_colors=('b','r','g'), alpha=0.3, ax=ax, axlabel = tax_level)
 		else:
 			v = venn2(subsets=taxaSeen.values(), ax = ax)
-		
+	
+	f = open(os.path.join(net_path,figurePath,"prop_unclassifed_OTUs_venn.txt"),'w')
+	for t in taxonomy:
+		f.write('\t'.join([str(x) for x in [t, unclassified[t], totaltax[t], unclassified[t]/float(totaltax[t])]]))
+		f.write('\n')
+	f.close()
+
 	title = "Venn diagram of econoze's central OTUs classified by taxonomic level"
-	figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=20)
+	figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=TITLE_FONT)
 
 	fig.set_size_inches(15,5*len(taxonomy))
 	figureFile = os.path.join(net_path,figurePath,'Venn_diagram_plot_'+'_'.join([k.split('_')[1] for k in networkNames.keys()])+'_'+str(percentNodes)+'.png')
@@ -481,7 +515,7 @@ def plot_venn_otus_diagram(net_path, networkNames, figurePath, featurePath, feat
 		v = venn2(subsets=otuSeen.values(), ax = ax)
 		
 	title = "Venn diagram of econoze's central OTUs"
-	figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=20)
+	figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=TITLE_FONT)
 
 	fig.set_size_inches(5,5)
 	figureFile = os.path.join(net_path,figurePath,'Venn_diagram_plot_OTUs_'+'_'.join(networkNames.keys())+'_'+str(percentNodes)+'.png')
@@ -552,7 +586,7 @@ def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile
 			ax.grid()
 
 		title = "Centrality of taxonomic level '{0}' present in network {1}".format(tax_level,location,t)
-		figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=20)
+		figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=TITLE_FONT)
 
 		fig.set_size_inches(2.5*len(taxonomies),6*len(treatments))
 		figureFile = os.path.join(net_path,figurePath,'centrality_plot_'+location+'_'+str(percentNodes)+'.png')
@@ -608,7 +642,7 @@ def keystone_quantitative_feature_plot(net_path, networkNames, figurePath, featu
 			ax.grid()
 
 		title = "Properties of high betweenness centrality OTUs present in network {0}".format(location)
-		figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=20)
+		figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=TITLE_FONT)
 
 		fig.set_size_inches(2.5*len(treatments),6*len(features))
 		figureFile = os.path.join(net_path,figurePath,'high_bc_feature_plot_'+location+'_'+str(percentNodes)+'.png')
@@ -627,8 +661,11 @@ def plot_scatter_bc(net_path, networkNames, figurePath, featurePath, featureFile
 
 	attributes = [bcColName,hzColName,abColName]
 	locations = networkNames.keys()
+	locations.sort(reverse=True)
 
 	for t in treatments:
+		ytitles = list(locations)
+		xtitles = list(attributes)
 		fig, axes = plt.subplots(len(attributes),len(locations))
 		iterable = []
 		for i,r in enumerate(attributes):
@@ -637,6 +674,8 @@ def plot_scatter_bc(net_path, networkNames, figurePath, featurePath, featureFile
 					iterable.append((axes[i][j],r,c))
 				else:
 					iterable.append((axes[j],r,c))
+		#ylim = {attribute:0 for attribute in attributes}
+		#xlims = {attribute:(1,0) for attribute in attributes}
 		for ax,attribute,location in iterable:
 			G = graphs[location+'_'+t]
 			featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t))
@@ -660,20 +699,44 @@ def plot_scatter_bc(net_path, networkNames, figurePath, featurePath, featureFile
 					BC.append(float(featureTable[row][atCol]))
 				else:
 					notBC.append(float(featureTable[row][atCol]))
+			minvalue = min(min(notBC),min(BC))
+			maxvalue = max(max(notBC),max(BC))
+			binwidth=(maxvalue-minvalue)/12.0
+			notBC.extend(BC) # want to plot histogram of whole data and color the BC ones on top
+			if binwidth == 0:
+				bindwitdh = 1
+				ppl.hist(ax, notBC, color='black', grid='y')
+				ppl.hist(ax, BC, color='purple', grid='y')
+			else:
+				bins = np.arange(minvalue, maxvalue + binwidth, binwidth)
+				ppl.hist(ax, notBC, color='black', grid='y', bins = bins)
+				ppl.hist(ax, BC, color='purple', grid='y', bins = bins)
 
-			binwidth=(max(notBC)-min(notBC))/12.0
-			ppl.hist(ax,notBC,color='black',grid='y', bins =np.arange(min(notBC), max(notBC) + binwidth, binwidth))
-			ppl.hist(ax,BC,color='purple',grid='y', bins =np.arange(min(notBC), max(notBC) + binwidth, binwidth))
+			ax.locator_params(axis = "x",nbins=4)
 
-			if attribute== abColName or attribute == bcColName:
-				ax.set_yscale('log')
-			ax.set_xlabel(location)
-			ax.set_ylabel(attribute)
+			if attribute == abColName or attribute == bcColName:
+				ax.set_yscale('symlog')
+			if location in ytitles:
+				ytitles.remove(location)
+				print location
+				ax.set_title(location.split('_')[1])
+			if attribute in xtitles:
+				xtitles.remove(attribute)
+				ax.set_xlabel(attribute + ' histogram')
+
+		# 	print ylim
+		# 	ylim[attribute] = max(ax.get_ylim()[1],ylim[attribute])
+		# 	xlims[attribute] = (min(minvalue,xlims[attribute][0]), max(maxvalue,xlims[attribute][1]))
+			
+		# for ax,attribute,location in iterable:
+		# 	ax.set_ylim(0,ylim[attribute])
+		# 	ax.set_xlim(xlims[attribute][0],xlims[attribute][1])
+
 
 		title = "Distribution of OTUs properties in all ecozones for treatment "+t
-		figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=20)
+		figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=TITLE_FONT)
 
-		fig.set_size_inches(5*len(attributes),5*len(locations))
+		fig.set_size_inches(BIG_FIG_WIDTH,BIG_FIG_HEIGHT)
 		figureFile = os.path.join(net_path,figurePath,'scatter_BC_otus_'+t+'_'+'_'.join([l.split('_')[1] for l in locations])+'_'+edgetype+'_'+str(percentNodes)+'.png')
 		fig.savefig(figureFile, dpi=DPI,bbox_inches='tight')
 		print "Saving the figure file: ", figureFile
@@ -1006,7 +1069,7 @@ def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels,
 
 	figureTitle = fig.suptitle(title,
          horizontalalignment='center',
-         fontsize=20) 
+         fontsize=TITLE_FONT) 
 
 	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
 
@@ -1085,7 +1148,7 @@ def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,m
 
 	figureTitle = fig.suptitle(title,
          horizontalalignment='center',
-         fontsize=20)
+         fontsize=TITLE_FONT)
 
 	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
 

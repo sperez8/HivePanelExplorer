@@ -40,9 +40,8 @@ FOLDER_NEW_NETWORKS = os.path.join(PATH,'panels','data')
 
 TAX_LEVEL = 'phylum'
 
-#TREATMENTS = ['OM3'] #use when testing
+TREATMENTS = ['OM3'] #use when testing
 TREATMENTS = ['OM0','OM1','OM2','OM3']
-#TREATMENTS = ['OM2','OM3']
 
 PROP_TO_REMOVE = 1 #only removing this percent of nodes
 MAX_Y_AXIS = None
