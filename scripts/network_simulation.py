@@ -13,6 +13,7 @@ import argparse
 import numpy as np
 import prettyplotlib as ppl
 import math
+import powerlaw
 
 # prettyplotlib imports 
 import matplotlib.pyplot as plt
@@ -260,74 +261,61 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 	networks,treatments = get_network_fullnames(networkNames)
 	graphs = get_multiple_graphs(networks, net_path, edgetype, False, False)
 	data = {}
-	network = networkNames.keys()[0].split('_')
-	network = network[1]
+	locations = networkNames.keys()
+	locations.sort(reverse=True)
+	print locations, treatments
 
-	# plotting locations in rows and treatments in columns
-	#fig, axes = plt.subplots(len(treatments))
-	fig, ax = plt.subplots(1)
+	fig, axes = plt.subplots(len(locations),len(treatments))
+	iterable = []
+	for i,r in enumerate(locations):
+		for j,c in enumerate(treatments):
+			if len(locations)>1:
+				iterable.append((axes[i][j],r,c))
+			else:
+				iterable.append((axes[j],r,c))
 
 	colors = {treatment: ppl.colors.set1[i] for i,treatment in enumerate(treatments)}
-	min_y = 1
-	for t,net in zip(treatments,networks):
-		G = graphs[net]
-		if plot_sequence:
-			ax.set_title('Degree histogram of '+network+' network with '+edgetype+' type of edges')
-			ax.set_xlabel('nodes ranked by degree')
-			ax.set_ylabel('degree')
-			
-			#to plot histogram
-			degree_sequence = sorted(nx.degree(G).values(),reverse=True)
-			
-			ppl.plot(degree_sequence,
-				marker='.',
-				linestyle='-',
-				label=str(t),
-				color=colors[t])
-		else:
-			ax.set_title('Degree distribution of '+network+' network with '+edgetype+' type of edges')
-			ax.set_xlabel('degree')
-			ax.set_ylabel('frequency of degree')
-			ax.set_yscale('log')
-			N = G.number_of_nodes()
-			ds = [] #each degree
-			fds = [] #each degree's frequency
-			degrees = sorted(nx.degree(G).values(),reverse=True)
-			for d in set(degrees):
-				ds.append(d)
-				fds.append(float(degrees.count(d))/N)
-			min_y = min(min(fds),min_y)
+	for ax,location,t in iterable:
+		min_y = 1
+		G = graphs[location+'_'+t]
+		ax.set_title(t)
+		ax.set_xlabel('degree')
+		ax.set_ylabel(location)
+		ax.set_yscale('log')
+		#ax.set_xscale('log')
+		N = G.number_of_nodes()
+		ds = [] #each degree
+		fds = [] #each degree's frequency
+		degrees = sorted(nx.degree(G).values(),reverse=True)
+		# for d in set(degrees):
+		# 	ds.append(d)
+		# 	fds.append(float(degrees.count(d))/N)
+		# min_y = min(min(fds),min_y)
 
-			ax.scatter(ds,
-				fds,
-				marker='.',
-				s=MARKER_SIZE,
-				#linestyle='-',
-				label=str(t),
-				color=colors[t])
+		# ax.scatter(ds,
+		# 	fds,
+		# 	marker='.',
+		# 	s=MARKER_SIZE,
+		# 	#linestyle='-',
+		# 	label=str(t),
+		# 	color=colors[t])
 
-			import powerlaw
-			data = degrees
-			results = powerlaw.Fit(data,discrete=True,xmin=1)
-			k = results.power_law.alpha
-			xmin = results.power_law.xmin
-			xmax = results.power_law.xmax
-			sigma = results.power_law.sigma
-			#print k, xmin, sigma
-			results_exp = results.stretched_exponential
-			beta,Lambda = results_exp.beta, results_exp.Lambda
-			results_exp.plot_pdf(ax=ax, color=colors[t])
-			#ax.plot(ds,[math.pow(d*Lambda,beta-1)*math.exp(-math.pow(d*Lambda,beta)) for d in ds],color=colors[t])
-			R, p = results.distribution_compare('stretched_exponential','power_law')
-			print R, p
+		data = degrees
+		fit = powerlaw.Fit(data,discrete=True,xmin=1)
+		fit.plot_pdf(ax=ax,color=colors[t],label=str(t))
+		fit_exp = fit.stretched_exponential
+		beta,Lambda = fit.stretched_exponential.beta, fit.stretched_exponential.Lambda
+		fit.stretched_exponential.plot_pdf(ax=ax, color=colors[t],linestyle='--')
+		R, p = fit.distribution_compare('stretched_exponential','power_law')
+		print R, p
 
-			#ax.plot(ds,[math.pow(d,-k) for d in ds],color=colors[t])
-	
+				#ax.plot(ds,[math.pow(d,-k) for d in ds],color=colors[t])
 	ax.set_ylim([min_y,1])
-
+	title = 'Degree distribution of '+' '.join(location)+' network with '+edgetype+' type of edges'
+	figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=TITLE_FONT)
 	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
 
-	fig.set_size_inches(10,9)
+	fig.set_size_inches(BIG_FIG_HEIGHT,BIG_FIG_WIDTH)
 	fig.savefig(figurePath, dpi=DPI, bbox_extra_artists=(lgd,), bbox_inches='tight')
 	print "Saving the figure file: ", figurePath
 	return None
