@@ -33,6 +33,8 @@ FEATURES = ['SoilHorizon']
 BC_FEATURES = ['Betweenness centrality','SoilHorizon avg','SoilHorizon std','Abundance']
 MEASURES = [nx.betweenness_centrality, 
 			nx.degree_centrality,
+			nx.closeness_centrality,
+			nx.eigenvector_centrality_numpy,
 			 ]
 PERCENT_BC_NODES = 0.1
 BC_MIN_VALUE = 0.0

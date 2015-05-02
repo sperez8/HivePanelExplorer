@@ -37,7 +37,7 @@ RAND_NAME = 'random_network_size_of_'
 SCALE_NAME = 'scalefree_network_size_of_'
 FILTER_NON_OTUS = True
 MARKER_SIZE = 200
-NUM_BINS = 15.0
+NUM_BINS = 30.0
 
 NOT_A_NODE_VALUE = 'NA'
 
@@ -1149,7 +1149,7 @@ def multi_plot_robustness_by_measure(multidata,figurePath,figureFile,rowLabels,t
 
 	vulnerability = np.zeros(shape=(len(treatments)+1,len(measures)+1), dtype='S1000')
 	vulnerability[1:,0]=np.array(treatments)
-	vulnerability[0,1:]=np.array(measures)
+	vulnerability[0,1:]=np.array([m.replace('_',' ').capitalize() for m in measures])
 
 	iterable = []
 	for i,r in enumerate(rowLabels):
@@ -1194,9 +1194,9 @@ def multi_plot_robustness_by_measure(multidata,figurePath,figureFile,rowLabels,t
 
 			#Output robustness and vulnerability
 			i+=1
-			print i,j,t,net
+			lc_values.pop(0) #remove '1' added for plotting purposes
 			R = 1.0/len(lc_values)*sum(lc_values)
-			vulnerability[i,j]=str(round(R,3))
+			vulnerability[i,j]=str(round(0.5-R,3))
 
 		if measure not in measure_label_done:
 			ax.set_title(measure)
