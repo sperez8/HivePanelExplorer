@@ -33,8 +33,11 @@ FEATURES = ['SoilHorizon']
 BC_FEATURES = ['Betweenness centrality','SoilHorizon avg','SoilHorizon std','Abundance']
 MEASURES = [nx.betweenness_centrality, 
 			nx.degree_centrality,
+			nx.closeness_centrality,
+			nx.eigenvector_centrality_numpy,
 			 ]
 PERCENT_BC_NODES = 0.1
+BC_MIN_VALUE = 0.0
 
 FOLDER_NEW_NETWORKS = os.path.join(PATH,'panels','data')
 
@@ -47,6 +50,8 @@ PROP_TO_REMOVE = 1 #only removing this percent of nodes
 MAX_Y_AXIS = 5.5
 DEGREE_SEQUENCE = False
 
+FACTOR = 2
+
 def main(*argv):
 	'''handles user input and runs plsa'''
 	parser = argparse.ArgumentParser(description='This scripts analyzes co-occurrence networks')
@@ -56,6 +61,7 @@ def main(*argv):
 	parser.add_argument('-simulate', help='Simulates node removal', action = 'store_true')
 	parser.add_argument('-calculate', help='Calculates networks properties', action = 'store_true')
 	parser.add_argument('-modules', help='Calculates module properties', action = 'store_true')
+	parser.add_argument('-factor', help='Sets in-out degree factor for modularity', default = FACTOR)
 	parser.add_argument('-distribution', help='Plots degree distribution', action = 'store_true')
 	parser.add_argument('-assess', help='Assess ecological properties', action = 'store_true')
 	parser.add_argument('-maketable', help='Make OTU table with eclogical measures', action = 'store_true')
@@ -72,6 +78,7 @@ def main(*argv):
 	parser.add_argument('-level', help='Selects taxonomic level at which to make the boxplot', default = TAX_LEVEL)
 	parser.add_argument('-bcplot', help='Makes a boxplot per treatment high BC otu features', action = 'store_true')
 	parser.add_argument('-percentnodes', help='Select the proportion of high bc nodes to plot', default = PERCENT_BC_NODES)
+	parser.add_argument('-bcmin', help='Cutoff for BC values', default = BC_MIN_VALUE)
 	parser.add_argument('-vennplot', help='Makes a venn diagram of high BC otu per ecozone', action = 'store_true')
 	parser.add_argument('-makejs', help='Makes node and edges files in .js', action = 'store_true')
 	parser.add_argument('-scatterplot', help='Makes scatter plot of BC nodes', action = 'store_true')
@@ -106,7 +113,7 @@ def main(*argv):
 	else:
 		networks = {('BAC_'+n if 'BAC_' not in n else n):treatments for n in args.networks}
 
-
+	factor = float(args.factor)
 	###depending on option specified, choose different things
 	if args.calculate:
 		print "\nCalculating structural properties on "+edgetype+" type of edges of networks:"
@@ -118,9 +125,9 @@ def main(*argv):
 	elif args.modules:
 		print "\nCalculating structural properties on "+edgetype+" type of edges of modules in networks:"
 		print ", ".join(networks), '\n'
-		filePath = os.path.join(FIGURE_PATH,'table_of_module_measures_'+'_'.join(args.networks)+'_'+edgetype+'.txt')
+		filePath = os.path.join(FIGURE_PATH,'table_of_module_measures_'+'_'.join(args.networks)+'_'+edgetype+'_'+str(factor)+'.txt')
 		print filePath
-		module_structure(net_path,networks,filePath,edgetype, os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END, FEATURE_PATH, FEATURE_FILE)
+		module_structure(net_path,networks,filePath,edgetype, os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END, FEATURE_PATH, FEATURE_FILE, factor)
 
 	elif args.assess:
 		print "\nCalculating ecological metrics of sample collection for the following networks:"
@@ -131,7 +138,7 @@ def main(*argv):
 	elif args.maketable:
 		print "\nMaking OTU table with ecological metrics for the following networks:"
 		print ", ".join(networks), '\n'
-		make_OTU_feature_table(net_path, networks, os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END,os.path.join(PATH,INDVAL_FOLDER),INDVAL_FILE_END, SAMPLES_FILE, FEATURES, FEATURE_PATH, FEATURE_FILE,edgetype)
+		make_OTU_feature_table(net_path, networks, os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END,os.path.join(PATH,INDVAL_FOLDER),INDVAL_FILE_END, SAMPLES_FILE, FEATURES, FEATURE_PATH, FEATURE_FILE,edgetype,factor)
 
 	elif args.distribution:
 		for net in networks.keys():
@@ -145,16 +152,18 @@ def main(*argv):
 
 	elif args.boxplot:
 		percentNodes = float(args.percentnodes)
+		bcMinValue = float(args.bcmin)
 		level = args.level
 		if level not in TAXONOMY:
 			print level, "is not a taxonomic level"
 			sys.exit()
 		print "\nPlotting "+level+" centrality for OTUs in the following networks with "+edgetype+" type of edges:"
 		print ", ".join(networks), '\n'
-		centrality_plot(net_path,networks,FIGURE_PATH,FEATURE_PATH,FEATURE_FILE,level,percentNodes)
+		centrality_plot(net_path,networks,FIGURE_PATH,FEATURE_PATH,FEATURE_FILE,level,percentNodes,bcMinValue)
 
 	elif args.vennplot:
 		percentNodes = float(args.percentnodes)
+		bcMinValue = float(args.bcmin)
 		level = args.level
 		if level not in TAXONOMY:
 			print level, "is not a taxonomic level"
@@ -162,15 +171,16 @@ def main(*argv):
 		print "\nPlotting "+level+" venn diagram of central OTUs per ecozone with "+edgetype+" type of edges:"
 		print ", ".join(networks), '\n'
 		if level == "species":
-			plot_venn_otus_diagram(net_path,networks,FIGURE_PATH,FEATURE_PATH,FEATURE_FILE,percentNodes)
+			plot_venn_otus_diagram(net_path,networks,FIGURE_PATH,FEATURE_PATH,FEATURE_FILE,percentNodes,bcMinValue)
 		else:	
-			plot_venn_diagram(net_path,networks,FIGURE_PATH,FEATURE_PATH,FEATURE_FILE,level,percentNodes)
+			plot_venn_diagram(net_path,networks,FIGURE_PATH,FEATURE_PATH,FEATURE_FILE,level,percentNodes,bcMinValue)
 
 	elif args.scatterplot:
 		percentNodes = float(args.percentnodes)
+		bcMinValue = float(args.bcmin)
 		print "\nPlotting scatterplot to compare central OTUs per ecozone with "+edgetype+" type of edges:"
 		print ", ".join(networks), '\n'
-		plot_scatter_bc(net_path,networks,FIGURE_PATH,FEATURE_PATH,FEATURE_FILE,percentNodes)
+		plot_scatter_bc(net_path,networks,FIGURE_PATH,FEATURE_PATH,FEATURE_FILE,percentNodes,bcMinValue)
 
 
 	elif args.makejs:
@@ -182,9 +192,10 @@ def main(*argv):
 
 	elif args.bcplot:
 		percentNodes = float(args.percentnodes)
+		bcMinValue = float(args.bcmin)
 		print "\nPlotting different features of high betweenness centrality OTUs in the following networks with "+edgetype+" type of edges:"
 		print ", ".join(networks), '\n'
-		keystone_quantitative_feature_plot(net_path,networks,FIGURE_PATH,FEATURE_PATH, FEATURE_FILE, BC_FEATURES, percentNodes)
+		keystone_quantitative_feature_plot(net_path,networks,FIGURE_PATH,FEATURE_PATH, FEATURE_FILE, BC_FEATURES, percentNodes,bcMinValue)
 
 
 	elif args.simulate:
@@ -210,7 +221,6 @@ def main(*argv):
 
 		fraction = float(args.fraction)
 		figureName = 'plot_'+'_'.join(args.networks)+'_'+edgetype+'_'+ plot_by +'_prop='+str(fraction)+'_maxy='+str(max_y)+'.png'
-		figurePath = os.path.join(FIGURE_PATH,figureName)
 		measures = MEASURES
 
 		print "\nSimulating and plotting the robustness on "+edgetype+" type of edges of networks:"
@@ -218,7 +228,7 @@ def main(*argv):
 		print "and plotting "+str(fraction)+" fraction of nodes "+plot_by+" and with following measures:"
 		print ", ".join([m.__name__ for m in measures])
 		print "\n"
-		plot_multiple(net_path, networks, measures, plot_by, fraction, figurePath, edgetype, add_random, add_scalefree, max_y)
+		plot_multiple(net_path, networks, measures, plot_by, fraction, FIGURE_PATH, figureName, edgetype, add_random, add_scalefree, max_y)
 	
 if __name__ == "__main__":
 	main(*sys.argv[1:])
