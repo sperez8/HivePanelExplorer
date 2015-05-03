@@ -53,6 +53,11 @@ SMALL_FIG_HEIGHT = 5
 
 TITLE_FONT = 20
 
+OM_COLORS = {"OM0":"#238b45",
+			"OM1":"#fc4e2a",
+			"OM2":"#e31a1c",
+			"OM3":"#800026"}
+
 STRUCTURE_METRICS = [nm.number_of_nodes, 
 					nm.number_of_edges,
 					nm.number_of_components,
@@ -64,8 +69,8 @@ STRUCTURE_METRICS = [nm.number_of_nodes,
 					nm.connectance, 
 					nm.global_clustering_coefficient,
 					nm.fraction_of_possible_triangles,
-					#nm.size_of_largest_clique,
-					#nm.average_path_on_largest_connected_component,
+					nm.size_of_largest_clique,
+					nm.average_path_on_largest_connected_component,
 					nm.degree_assortativity,
 					nm.correlation_of_degree_and_betweenness_centrality,
 					]
@@ -73,9 +78,9 @@ STRUCTURE_METRICS = [nm.number_of_nodes,
 INPUT_METRICS = [nm.richness,
 				nm.shannon_diversity,
 				]
-OTU_METRICS = [nm.correlation_of_degree_and_depth,
-				nm.correlation_of_edge_depth,
-				nm.compute_modularity_horizon,
+OTU_METRICS = [#nm.correlation_of_degree_and_depth,
+			#	nm.correlation_of_edge_depth,
+			#	nm.compute_modularity_horizon,
 				]
 MEASURES = [nm.node_degrees,
 			nx.betweenness_centrality, 
@@ -274,7 +279,7 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 			else:
 				iterable.append((axes[j],r,c))
 
-	colors = {treatment: ppl.colors.set1[i] for i,treatment in enumerate(treatments)}
+	colors = {treatment: OM_COLORS[treatment] for i,treatment in enumerate(treatments)}
 	for ax,location,t in iterable:
 		min_y = 1
 		G = graphs[location+'_'+t]
@@ -305,7 +310,7 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 		fit.plot_pdf(ax=ax,color=colors[t],label=str(t))
 		fit_exp = fit.stretched_exponential
 		beta,Lambda = fit.stretched_exponential.beta, fit.stretched_exponential.Lambda
-		fit.stretched_exponential.plot_pdf(ax=ax, color=colors[t],linestyle='--')
+		fit.stretched_exponential.plot_pdf(ax=ax, color=colors[t],linestyle='--',linewidth=2)
 		R, p = fit.distribution_compare('stretched_exponential','power_law')
 		print R, p
 
@@ -992,7 +997,7 @@ def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels,
 
 	measures = ['random'] + [m.__name__ for m in measures]
 
-	colors = {measure: ppl.colors.set1[i] for i,measure in enumerate(measures)}
+	colors = {measure: OM_COLORS[treatment] for i,measure in enumerate(measures)}
 	#print netNames, measures, len(rowLabels),len(colLabels), len(axes), colLabels*len(rowLabels)
 
 	iterable = []
@@ -1010,7 +1015,7 @@ def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels,
 
 	#to add to legend
 	ppl.plot([], [], color='black', linestyle='-', label='relative size of LCC')
-	ppl.plot([], [], color='black', linestyle='--', label='avg size of other CC')
+	ppl.plot([], [], color='black', linestyle='--',linewidth=2, label='avg size of other CC')
 
 	min_yvalue = 1
 	max_yvalue = 1
@@ -1033,7 +1038,7 @@ def multi_plot_robustness_by_treatment(multidata,figurePath,rowLabels,colLabels,
 				x, 
 				sc_values,
 				color=colors[measure],
-				linestyle='--')
+				linestyle='--',linewidth=2)
 			
 		if treatment not in treatment_label_done:
 			ax.set_title(treatment)
@@ -1075,7 +1080,7 @@ def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,m
 	fig, axes = plt.subplots(len(rowLabels),len(measures))
 	netNames = rowLabels
 
-	colors = {treatment: ppl.colors.set1[i] for i,treatment in enumerate(treatments)}
+	colors = {treatment: OM_COLORS[treatment] for i,treatment in enumerate(treatments)}
 	#print netNames, measures, len(rowLabels),len(colLabels), len(axes), colLabels*len(rowLabels)
 
 	iterable = []
@@ -1092,7 +1097,7 @@ def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,m
 
 	#to add to legend
 	ppl.plot([], [], color='black', marker= '.', linestyle='-', label='relative size of LCC')
-	ppl.plot([], [], color='black', linestyle='--', label='avg size of other CC')
+	ppl.plot([], [], color='black', linestyle='--',linewidth=2, label='avg size of other CC')
 
 	min_yvalue = 1
 	max_yvalue = 1
@@ -1115,7 +1120,7 @@ def multi_plot_robustness_by_measure(multidata,figurePath,rowLabels,treatments,m
 				x, 
 				sc_values,
 				color=colors[t],
-				linestyle='--')
+				linestyle='--',linewidth=2)
 
 		if measure not in measure_label_done:
 			ax.set_title(measure)

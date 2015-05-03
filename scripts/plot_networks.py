@@ -44,7 +44,7 @@ TAX_LEVEL = 'phylum'
 TREATMENTS = ['OM0','OM1','OM2','OM3']
 
 PROP_TO_REMOVE = 1 #only removing this percent of nodes
-MAX_Y_AXIS = None
+MAX_Y_AXIS = 5.5
 DEGREE_SEQUENCE = False
 
 def main(*argv):
