@@ -26,8 +26,8 @@ from hive_utilities import *
 _root_dir = os.path.dirname(_root_dir)
 
 TITLE = 'friends'
-NODES = os.path.join(_root_dir, 'tests', 'test_nodes_friends.txt')
-EDGES = os.path.join(_root_dir, 'tests', 'test_edges_friends.txt')
+NODES = os.path.join(_root_dir, 'scripts', 'tests', 'test_nodes_friends.txt')
+EDGES = os.path.join(_root_dir, 'scripts', 'tests', 'test_edges_friends.txt')
 
 class HiveGui(Tk):
     def __init__(self, *args, **kwargs):
