@@ -37,7 +37,7 @@ MEASURES = [nx.betweenness_centrality,
 			nx.eigenvector_centrality_numpy,
 			 ]
 PERCENT_BC_NODES = 0.1
-BC_MIN_VALUE = 0.0
+BC_MIN_VALUE = 0.01
 
 FOLDER_NEW_NETWORKS = os.path.join(PATH,'panels','data')
 

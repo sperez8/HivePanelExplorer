@@ -55,7 +55,7 @@ SMALL_FIG_HEIGHT = 5
 TITLE_FONT = 20
 
 OM_COLORS = {"OM0":"#238b45",
-			"OM1":"#fc4e2a",
+			"OM1":"#fd8d3c",
 			"OM2":"#e31a1c",
 			"OM3":"#800026"}
 
@@ -401,7 +401,6 @@ def get_taxonomic_levels(featurePath,featureFile,location,treatments,tax_level,n
 def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFile, tax_level, percentNodes, bcMinValue):
 	edgetype = 'pos'
 	networks,treatments = get_network_fullnames(networkNames)
-	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
 	colName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
 	taxonomy = TAXONOMY
 	taxonomy.pop(0)
@@ -416,11 +415,11 @@ def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFi
 			taxaSeen[location] = []
 			centralities = {}
 			for t in treatments:
-				G = graphs[location+'_'+t]
 				featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t))
 				featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
 				centcol = np.where(featureTable[0,:]==colName)[0][0]
 				taxcol = np.where(featureTable[0,:]==tax_level)[0][0]
+				nodes = featureTable[np.where(featureTable[:,centcol]!=NOT_A_NODE_VALUE)][1:,0]
 				taxonomies = get_taxonomic_levels(featurePath,featureFile,location, treatments, tax_level, centcol)
 				centralities[t] = [[] for tax in taxonomies]
 				bcvalues = featureTable[1:,centcol]
@@ -431,7 +430,7 @@ def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFi
 					cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
 				else:
 					cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
-				for n in G.nodes():
+				for n in nodes:
 					row = nm.findRow(n,featureTable)
 					taxonlevel = featureTable[row][taxcol]
 					value = float(featureTable[row][centcol])
@@ -486,7 +485,6 @@ def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFi
 def plot_venn_otus_diagram(net_path, networkNames, figurePath, featurePath, featureFile, percentNodes, bcMinValue):
 	edgetype = 'pos'
 	networks,treatments = get_network_fullnames(networkNames)
-	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
 	colName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
 
 	fig, ax = plt.subplots(1)
@@ -496,10 +494,10 @@ def plot_venn_otus_diagram(net_path, networkNames, figurePath, featurePath, feat
 		otuSeen[location] = []
 		#centralities = {}
 		for t in treatments:
-			G = graphs[location+'_'+t]
 			featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t))
 			featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
 			centcol = np.where(featureTable[0,:]==colName)[0][0]
+			nodes = featureTable[np.where(featureTable[:,centcol]!=NOT_A_NODE_VALUE)][1:,0]
 			taxcol = 0
 			bcvalues = featureTable[1:,centcol]
 			bcvalues = bcvalues[np.where(bcvalues!=NOT_A_NODE_VALUE)]
@@ -509,7 +507,7 @@ def plot_venn_otus_diagram(net_path, networkNames, figurePath, featurePath, feat
 				cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
 			else:
 				cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
-			for n in G.nodes():
+			for n in nodes:
 				row = nm.findRow(n,featureTable)
 				taxonlevel = featureTable[row][taxcol]
 				value = float(featureTable[row][centcol])
@@ -1044,7 +1042,7 @@ def multi_plot_robustness_by_treatment(multidata,figurePath,figureFile,rowLabels
 
 	measures = ['random'] + [m.__name__ for m in measures]
 
-	colors = {measure: OM_COLORS[treatment] for i,measure in enumerate(measures)}
+	colors = {measure: ppl.colors.set1[i] for i,measure in enumerate(measures)}
 	#print netNames, measures, len(rowLabels),len(colLabels), len(axes), colLabels*len(rowLabels)
 
 	iterable = []
@@ -1200,8 +1198,18 @@ def multi_plot_robustness_by_measure(multidata,figurePath,figureFile,rowLabels,t
 			#Output robustness and vulnerability
 			i+=1
 			lc_values.pop(0) #remove '1' added for plotting purposes
-			R = 1.0/len(lc_values)*sum(lc_values)
-			vulnerability[i,j]=str(round(0.5-R,3))
+			x = 0
+			for k,l in enumerate(lc_values):
+				if l<=0.5:
+					x = k
+					break
+
+			print lc_values
+			print x
+
+			#R = np.mean(lc_values)
+			#vulnerability[i,j]=str(round(0.5-R,3))
+			vulnerability[i,j]=str(round(float(x)/len(lc_values),2))
 
 		if measure not in measure_label_done:
 			ax.set_title(measure)
