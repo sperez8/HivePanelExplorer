@@ -50,13 +50,17 @@ def main(*argv):
 	parser = argparse.ArgumentParser(description='This scripts analyzes co-occurrence networks')
 	parser.add_argument('-path', help='Path where the networks are', default = PATH)
 	parser.add_argument('-folder', help='Folder in path where the networks are', default = FOLDER)
+	parser.add_argument('-tabfile', help='File to convert to latex')
 	parser.add_argument('-networks', nargs='*', help='Which network to use: SBS, IDF, etc.')
 	parser.add_argument('-sequence', help='Makes table of samples and sequences', action = 'store_true')
+	parser.add_argument('-convert', help='Convert file in tab format to latex table', action = 'store_true')
+	parser.add_argument('-header', help='Add header?', action = 'store_true')
+	parser.add_argument('-rowheader', help='Add rowheader?', action = 'store_true')
 	parser.add_argument('-edgetype', help='Specify which types edges to use', default = 'both')
 	args = parser.parse_args()
 
 	#check that one of the options is true
-	choices = [args.sequence]
+	choices = [args.sequence,args.convert]
 	if sum([1 for c in choices if c])>1 or sum([1 for c in choices if c])==0:
 		print "\n***You must specify one of the three options to calculate porperties of, run simulations on or plot networks.***\n"
 		parser.print_help()
@@ -69,20 +73,23 @@ def main(*argv):
 
 	treatments = TREATMENTS
 
-	edgetype = args.edgetype
-	net_path = os.path.join(args.path,args.folder)
-	print net_path
-	if args.folder == 'by_zone':
-		networks = {('BAC_'+n if 'BAC_' not in n else n):[] for n in args.networks}
-	else:
-		networks = {('BAC_'+n if 'BAC_' not in n else n):treatments for n in args.networks}
-
-
 	###depending on option specified, choose different things
 	if args.sequence:
+
+		edgetype = args.edgetype
+		net_path = os.path.join(args.path,args.folder)
+		print net_path
+		if args.folder == 'by_zone':
+			networks = {('BAC_'+n if 'BAC_' not in n else n):[] for n in args.networks}
+		else:
+			networks = {('BAC_'+n if 'BAC_' not in n else n):treatments for n in args.networks}
+
 		print "\nMaking sample sequence table"
 		print ", ".join(networks), '\n'
 		sample_sequence(net_path, networks, os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END)
+
+	if args.convert:
+		convert(args.tabfile,header=args.header,rows=args.rowheader)
 
 if __name__ == "__main__":
 	main(*sys.argv[1:])

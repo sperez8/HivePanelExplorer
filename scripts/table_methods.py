@@ -4,8 +4,16 @@ import sys
 import os
 import argparse
 import numpy as np
+from tabulate import tabulate
 
 from network_simulation import get_network_fullnames
+
+BEGINNING = '''\\begin{table}
+\caption[]{}
+\label{tab:label}
+\centering'''
+
+END = '''\end{table}'''
 
 def sample_sequence(net_path, networkNames, inputFolder, inputFileEnd):
 	'''makes an OTU table with avg depth and othe features per OTU'''
@@ -38,4 +46,17 @@ def sample_sequence(net_path, networkNames, inputFolder, inputFileEnd):
 	# print "Saving table: ",tableFile
 
 	# np.savetxt(tableFile, featureTable, delimiter="\t", fmt='%s')
+	return None
+
+
+def convert(fileName, header=False, rows=False):
+	table = np.loadtxt(fileName, delimiter='\t', dtype='S1000')
+	if header:
+		headerNames = list(table[0,:])
+		print headerNames
+		table = table[1:,:]
+		print table
+	print BEGINNING
+	print tabulate(table, headers=headerNames, tablefmt="latex")
+	print END
 	return None

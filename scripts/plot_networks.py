@@ -74,6 +74,7 @@ def main(*argv):
 	parser.add_argument('-measure', help='Makes a plot for each centrality measure', action = 'store_true')
 	parser.add_argument('-showcomponents', help='Average size of large component fragments to show', default = MAX_Y_AXIS)
 	parser.add_argument('-wholenetwork', help='Makes a plot for whole network, not per treatments', action = 'store_true')
+	#arguments and plots for central OTUs
 	parser.add_argument('-boxplot', help='Makes a boxplot per taxonomic level of otu centrality', action = 'store_true')
 	parser.add_argument('-level', help='Selects taxonomic level at which to make the boxplot', default = TAX_LEVEL)
 	parser.add_argument('-bcplot', help='Makes a boxplot per treatment high BC otu features', action = 'store_true')
@@ -82,13 +83,14 @@ def main(*argv):
 	parser.add_argument('-vennplot', help='Makes a venn diagram of high BC otu per ecozone', action = 'store_true')
 	parser.add_argument('-makejs', help='Makes node and edges files in .js', action = 'store_true')
 	parser.add_argument('-scatterplot', help='Makes scatter plot of BC nodes', action = 'store_true')
+	parser.add_argument('-taxarep', help='Calculates representation of phylum in central OTUs', action = 'store_true')
 	args = parser.parse_args()
 	
 	#check that one of the options is true
 	choices = [args.simulate,args.distribution,args.calculate,
 				args.assess,args.maketable,args.boxplot,
 				args.modules,args.bcplot,args.vennplot,
-				args.makejs, args.scatterplot]
+				args.makejs, args.scatterplot, args.taxarep]
 	if sum([1 for c in choices if c])>1 or sum([1 for c in choices if c])==0:
 		print "\n***You must specify one of the three options to calculate porperties of, run simulations on or plot networks.***\n"
 		parser.print_help()
@@ -151,6 +153,7 @@ def main(*argv):
 			plot_degree_distribution_per_treatment(net_path, {net: networks[net]}, figurePath, DEGREE_SEQUENCE, edgetype)
 
 	elif args.boxplot:
+		edgetype = 'pos'
 		percentNodes = float(args.percentnodes)
 		bcMinValue = float(args.bcmin)
 		level = args.level
@@ -162,6 +165,7 @@ def main(*argv):
 		centrality_plot(net_path,networks,FIGURE_PATH,FEATURE_PATH,FEATURE_FILE,level,percentNodes,bcMinValue)
 
 	elif args.vennplot:
+		edgetype = 'pos'
 		percentNodes = float(args.percentnodes)
 		bcMinValue = float(args.bcmin)
 		level = args.level
@@ -175,7 +179,20 @@ def main(*argv):
 		else:	
 			plot_venn_diagram(net_path,networks,FIGURE_PATH,FEATURE_PATH,FEATURE_FILE,level,percentNodes,bcMinValue)
 
+	elif args.taxarep:
+		edgetype = 'pos'
+		percentNodes = float(args.percentnodes)
+		bcMinValue = float(args.bcmin)
+		level = args.level
+		if level not in TAXONOMY:
+			print level, "is not a taxonomic level"
+			sys.exit()
+		print "\nCalculating representation of "+level+" in central OTUs per ecozone"
+		print ", ".join(networks), '\n'
+		calculate_taxonomic_representation(net_path,networks,FIGURE_PATH,FEATURE_PATH,FEATURE_FILE,level,percentNodes,bcMinValue)
+
 	elif args.scatterplot:
+		edgetype = 'pos'
 		percentNodes = float(args.percentnodes)
 		bcMinValue = float(args.bcmin)
 		print "\nPlotting scatterplot to compare central OTUs per ecozone with "+edgetype+" type of edges:"
@@ -191,6 +208,7 @@ def main(*argv):
 				make_js_files(net_path,FOLDER_NEW_NETWORKS,n,t,FEATURE_PATH,FEATURE_FILE,edgetype)
 
 	elif args.bcplot:
+		edgetype = 'pos'
 		percentNodes = float(args.percentnodes)
 		bcMinValue = float(args.bcmin)
 		print "\nPlotting different features of high betweenness centrality OTUs in the following networks with "+edgetype+" type of edges:"

@@ -3,7 +3,7 @@ created  01/17/2014
 
 by sperez
 
-Runs attack/extinction simulations on networks
+Runs attack/ex tinction simulations on networks
 '''
 
 #library imports
@@ -395,8 +395,99 @@ def get_taxonomic_levels(featurePath,featureFile,location,treatments,tax_level,n
 #######################################   ####################################
 ##############################################################################
 
+def calculate_taxonomic_representation(net_path, networkNames, figurePath, featurePath, featureFile, tax_level, percentNodes, bcMinValue):
+	edgetype = 'pos'
+	colName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
+	BCtaxa = {}
+	notBCtaxa ={}
 
+	for location,treatments in networkNames.iteritems():
+		BCtaxa = {}
+		alltaxa = {}
+		for t in treatments:
+			featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t))
+			featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
+			centcol = np.where(featureTable[0,:]==colName)[0][0]
+			taxcol = np.where(featureTable[0,:]==tax_level)[0][0]
+			print featureTable.shape
+			nodes = featureTable[np.where(featureTable[:,centcol]!=NOT_A_NODE_VALUE)]
+			print nodes.shape
+			nodes = nodes[np.where(nodes[:,taxcol]!="unclassified")]
+			nodes = nodes[np.where(nodes[:,taxcol]!="uncultured")]
+			nodes = nodes[1:,0]
+			bcvalues = featureTable[1:,centcol]
+			bcvalues = bcvalues[np.where(bcvalues!=NOT_A_NODE_VALUE)]
+			bcvalues= list([float(k) for k in bcvalues])
+			bcvalues.sort(reverse=True)
+			if percentNodes<1:
+				cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
+			else:
+				cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
 
+			for n in nodes:
+				row = nm.findRow(n,featureTable)
+				taxonlevel = featureTable[row][taxcol]
+				value = float(featureTable[row][centcol])
+				if value != NOT_A_NODE_VALUE and value >= cutoff:
+					if taxonlevel in BCtaxa.keys():
+						BCtaxa[taxonlevel].append(n)
+					else:
+						BCtaxa[taxonlevel] = [n]
+
+				if taxonlevel in alltaxa.keys():
+					alltaxa[taxonlevel].append(n)
+				else:
+					alltaxa[taxonlevel] = [n]
+
+		taxonomies = alltaxa.keys()
+		taxonomies.sort()
+
+		Prob_all_seen_greater_1 = 1
+		representation = np.zeros(shape=(len(taxonomies)+1,2), dtype='S1000')
+		representation[1:,0]=np.array(taxonomies)
+		representation[0,:]=np.array([tax_level.capitalize(),"Probability of represention"])
+		print representation
+		m = sum([len(v) for v in alltaxa.values()]) #total number of OTUs
+		n = sum([len(v) for v in BCtaxa.values()]) #total number of central OTUs
+		
+		for i,taxonomy in enumerate(taxonomies):
+			print taxonomy
+			mi = len(alltaxa[taxonomy]) #number of OTUs with that taxonomy
+			if taxonomy in BCtaxa.keys():
+				yi = len(BCtaxa[taxonomy]) #number of central OTUs with that taxonomy
+			else:
+				yi = 0
+			print m, n, mi, yi
+			representation[i+1,0]=taxonomy
+			if yi>0:
+				prob = prob_hypergeometric(m,n,mi,yi)
+				representation[i+1,1]=round(prob,2)
+				Prob_all_seen_greater_1 *= prob_hypergeometric(m,n,mi,yi,atleastone=True)
+			else:
+				representation[i+1,1]="None"
+
+		print Prob_all_seen_greater_1
+		#save representation in a table
+		f = open(os.path.join(net_path,figurePath,"representation_{0}_{1}.txt".format(location.split('_')[1],tax_level)),'w')
+		np.savetxt(f, representation, delimiter="\t", fmt='%s')
+		f.close()
+
+	return None
+
+def prob_hypergeometric(m,n,mi,yi,atleastone=False):
+	p = 0
+	if atleastone:
+		for j in range(1,min(n,mi)+1):
+			p += nCk(mi,j)*nCk(m-mi,n-j)/float(nCk(m,n))
+	else:
+		for j in range(yi,yi+1):
+			p += nCk(mi,j)*nCk(m-mi,n-j)/float(nCk(m,n))
+	return p
+
+#n choose k
+def nCk(n,k):
+    f = math.factorial
+    return f(n) / f(k) / f(n-k)
 
 def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFile, tax_level, percentNodes, bcMinValue):
 	edgetype = 'pos'
@@ -413,15 +504,12 @@ def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFi
 		taxaSeen = {}
 		for location,treatments in networkNames.iteritems():
 			taxaSeen[location] = []
-			centralities = {}
 			for t in treatments:
 				featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t))
 				featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
 				centcol = np.where(featureTable[0,:]==colName)[0][0]
 				taxcol = np.where(featureTable[0,:]==tax_level)[0][0]
 				nodes = featureTable[np.where(featureTable[:,centcol]!=NOT_A_NODE_VALUE)][1:,0]
-				taxonomies = get_taxonomic_levels(featurePath,featureFile,location, treatments, tax_level, centcol)
-				centralities[t] = [[] for tax in taxonomies]
 				bcvalues = featureTable[1:,centcol]
 				bcvalues = bcvalues[np.where(bcvalues!=NOT_A_NODE_VALUE)]
 				bcvalues= list([float(k) for k in bcvalues])
@@ -436,7 +524,6 @@ def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFi
 					value = float(featureTable[row][centcol])
 					if value != NOT_A_NODE_VALUE and value >= cutoff:
 						taxaSeen[location].append(taxonlevel)
-						centralities[t][taxonomies.index(taxonlevel)].append(value)
 			unclassified[tax_level] += taxaSeen[location].count("unclassified")
 			unclassified[tax_level] += taxaSeen[location].count("uncultured")
 			#print unclassified, len(taxaSeen[location]),taxaSeen[location], totaltax[tax_level]
@@ -542,7 +629,6 @@ def plot_venn_otus_diagram(net_path, networkNames, figurePath, featurePath, feat
 def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile, tax_level, percentNodes, bcMinValue):
 	networks,treatments = get_network_fullnames(networkNames)
 	edgetype = 'pos'
-	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
 	colName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
 
 	if tax_level not in TAXONOMY:
@@ -557,11 +643,11 @@ def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile
 		taxaSeen = []
 		centralities = {}
 		for t in treatments:
-			G = graphs[location+'_'+t]
 			featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t))
 			featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
 			centcol = np.where(featureTable[0,:]==colName)[0][0]
 			taxcol = np.where(featureTable[0,:]==tax_level)[0][0]
+			nodes = featureTable[np.where(featureTable[:,centcol]!=NOT_A_NODE_VALUE)][1:,0]
 			taxonomies = get_taxonomic_levels(featurePath,featureFile,location, treatments, tax_level, centcol)
 			centralities[t] = [[] for tax in taxonomies]
 			bcvalues = featureTable[1:,centcol]
@@ -569,7 +655,7 @@ def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile
 			bcvalues= list([float(k) for k in bcvalues])
 			bcvalues.sort(reverse=True)
 			cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
-			for n in G.nodes():
+			for n in nodes:
 				row = nm.findRow(n,featureTable)
 				taxonlevel = featureTable[row][taxcol]
 				value = float(featureTable[row][centcol])
@@ -613,7 +699,6 @@ def centrality_plot(net_path, networkNames, figurePath, featurePath, featureFile
 def keystone_quantitative_feature_plot(net_path, networkNames, figurePath, featurePath, featureFile, features, percentNodes, bcMinValue):
 	networks,treatments = get_network_fullnames(networkNames)
 	edgetype = 'pos'
-	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
 	colName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
 	#modName = nm.node_modularity.__name__.replace('_',' ').capitalize()
 
@@ -625,10 +710,10 @@ def keystone_quantitative_feature_plot(net_path, networkNames, figurePath, featu
 			featureValues = []
 			for i,t in enumerate(treatments):
 				featureValues.append([])
-				G = graphs[location+'_'+t]
 				featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t))
 				featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
 				centcol = np.where(featureTable[0,:]==colName)[0][0]
+				nodes = featureTable[np.where(featureTable[:,centcol]!=NOT_A_NODE_VALUE)][1:,0]
 				featcol = np.where(featureTable[0,:]==f)[0][0]
 				#modcol =  np.where(featureTable[0,:]==modName)[0][0]
 				bcvalues = featureTable[1:,centcol]
@@ -636,7 +721,7 @@ def keystone_quantitative_feature_plot(net_path, networkNames, figurePath, featu
 				bcvalues= list([float(k) for k in bcvalues])
 				bcvalues.sort(reverse=True)
 				cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
-				for n in G.nodes():
+				for n in nodes:
 					row = nm.findRow(n,featureTable)
 					bc = float(featureTable[row][centcol])
 					#mod = int(featureTable[row][modcol])
@@ -693,7 +778,6 @@ def keystone_quantitative_feature_plot(net_path, networkNames, figurePath, featu
 def plot_scatter_bc(net_path, networkNames, figurePath, featurePath, featureFile, percentNodes, bcMinValue):
 	edgetype = 'pos'
 	networks,treatments = get_network_fullnames(networkNames)
-	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
 	bcColName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
 	hzColName = "SoilHorizon avg"
 	abColName = "Abundance"
@@ -718,7 +802,6 @@ def plot_scatter_bc(net_path, networkNames, figurePath, featurePath, featureFile
 		#ylim = {attribute:0 for attribute in attributes}
 		#xlims = {attribute:(1,0) for attribute in attributes}
 		for ax,attribute,location in iterable:
-			G = graphs[location+'_'+t]
 			featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t))
 			featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
 			notBC = []
@@ -726,12 +809,13 @@ def plot_scatter_bc(net_path, networkNames, figurePath, featurePath, featureFile
 
 			atCol = np.where(featureTable[0,:]==attribute)[0][0]
 			centcol = np.where(featureTable[0,:]==bcColName)[0][0]
+			nodes = featureTable[np.where(featureTable[:,centcol]!=NOT_A_NODE_VALUE)][1:,0]
 			bcvalues = featureTable[1:,centcol]
 			bcvalues = bcvalues[np.where(bcvalues!=NOT_A_NODE_VALUE)]
 			bcvalues= list([float(k) for k in bcvalues])
 			bcvalues.sort(reverse=True)
 			cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
-			for n in G.nodes():
+			for n in nodes:
 				row = nm.findRow(n,featureTable)
 				value = float(featureTable[row][centcol])
 				if value == NOT_A_NODE_VALUE:
@@ -1153,6 +1237,7 @@ def multi_plot_robustness_by_measure(multidata,figurePath,figureFile,rowLabels,t
 	vulnerability = np.zeros(shape=(len(treatments)+1,len(measures)+1), dtype='S1000')
 	vulnerability[1:,0]=np.array(treatments)
 	vulnerability[0,1:]=np.array([m.replace('_',' ').capitalize() for m in measures])
+
 
 	iterable = []
 	for i,r in enumerate(rowLabels):
