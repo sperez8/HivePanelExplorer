@@ -56,7 +56,14 @@ def convert(fileName, header=False, rows=False):
 		print headerNames
 		table = table[1:,:]
 		print table
-	print BEGINNING
-	print tabulate(table, headers=headerNames, tablefmt="latex")
-	print END
+	tableText = tabulate(table, headers=headerNames, tablefmt="latex")
+	finalText = collect_pieces(tableText)
+	f = open("C:\Users\Sarah\Desktop\LTSPnetworks\dump.txt",'w')
+	f.write(finalText)
 	return None
+
+def collect_pieces(table):
+	text = BEGINNING
+	text += table
+	text += END
+	return text
