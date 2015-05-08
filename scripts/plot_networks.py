@@ -37,14 +37,15 @@ MEASURES = [nx.betweenness_centrality,
 			nx.eigenvector_centrality_numpy,
 			 ]
 PERCENT_BC_NODES = 0.1
-BC_MIN_VALUE = 0.01
+BC_MIN_VALUE = 0.005
 
 FOLDER_NEW_NETWORKS = os.path.join(PATH,'panels','data')
 
 TAX_LEVEL = 'phylum'
 
-#TREATMENTS = ['OM3'] #use when testing
+#TREATMENTS = ['OM3','OM2'] #use when testing
 TREATMENTS = ['OM0','OM1','OM2','OM3']
+TREATMENTS.sort()
 
 PROP_TO_REMOVE = 1 #only removing this percent of nodes
 MAX_Y_AXIS = 5.5
@@ -83,6 +84,7 @@ def main(*argv):
 	parser.add_argument('-vennplot', help='Makes a venn diagram of high BC otu per ecozone', action = 'store_true')
 	parser.add_argument('-makejs', help='Makes node and edges files in .js', action = 'store_true')
 	parser.add_argument('-scatterplot', help='Makes scatter plot of BC nodes', action = 'store_true')
+	parser.add_argument('-plotcentralities', help='Makes scatter plot different centralities', action = 'store_true')
 	parser.add_argument('-taxarep', help='Calculates representation of phylum in central OTUs', action = 'store_true')
 	args = parser.parse_args()
 	
@@ -90,7 +92,8 @@ def main(*argv):
 	choices = [args.simulate,args.distribution,args.calculate,
 				args.assess,args.maketable,args.boxplot,
 				args.modules,args.bcplot,args.vennplot,
-				args.makejs, args.scatterplot, args.taxarep]
+				args.makejs, args.scatterplot, args.taxarep,
+				args.plotcentralities]
 	if sum([1 for c in choices if c])>1 or sum([1 for c in choices if c])==0:
 		print "\n***You must specify one of the three options to calculate porperties of, run simulations on or plot networks.***\n"
 		parser.print_help()
@@ -143,14 +146,13 @@ def main(*argv):
 		make_OTU_feature_table(net_path, networks, os.path.join(PATH,INPUT_FOLDER),INPUT_FILE_END,os.path.join(PATH,INDVAL_FOLDER),INDVAL_FILE_END, SAMPLES_FILE, FEATURES, FEATURE_PATH, FEATURE_FILE,edgetype,factor)
 
 	elif args.distribution:
-		for net in networks.keys():
-			if DEGREE_SEQUENCE:
-				figureName = 'plot_distribution_'+net+'_'+edgetype+'_sequence'+'.png'
-			else:
-				figureName = 'plot_distribution_'+net+'_'+edgetype+'.png'
-			figurePath = os.path.join(FIGURE_PATH,figureName)
-			print "\nPlotting the degree distribution on "+edgetype+" type of edges of network ", net
-			plot_degree_distribution_per_treatment(net_path, {net: networks[net]}, figurePath, DEGREE_SEQUENCE, edgetype)
+		if DEGREE_SEQUENCE:
+			figureName = 'plot_distribution_'+'_'.join(args.networks)+'_'+edgetype+'_sequence'+'.png'
+		else:
+			figureName = 'plot_distribution_'+'_'.join(args.networks)+'_'+edgetype+'.png'
+		figurePath = os.path.join(FIGURE_PATH,figureName)
+		print "\nPlotting the degree distribution on "+edgetype+" type of edges for networks ", ','.join(args.networks)
+		plot_degree_distribution_per_treatment(net_path, networks, figurePath, DEGREE_SEQUENCE, edgetype)
 
 	elif args.boxplot:
 		edgetype = 'pos'
@@ -199,6 +201,13 @@ def main(*argv):
 		print ", ".join(networks), '\n'
 		plot_scatter_bc(net_path,networks,FIGURE_PATH,FEATURE_PATH,FEATURE_FILE,percentNodes,bcMinValue)
 
+	elif args.plotcentralities:
+		edgetype = 'pos'
+		percentNodes = 0.5 #float(args.percentnodes)
+		print "\nPlotting centrality measures per ecozone with "+edgetype+" type of edges:"
+		print ", ".join(networks), '\n'
+		measures = MEASURES
+		plot_diff_centralities(net_path,networks,FIGURE_PATH,FEATURE_PATH,FEATURE_FILE,percentNodes,measures)
 
 	elif args.makejs:
 		print "\nMaking node and edge file in .js format for following ecozones with "+edgetype+" type of edges:"
@@ -238,7 +247,10 @@ def main(*argv):
 			max_y = float(max_y)
 
 		fraction = float(args.fraction)
-		figureName = 'plot_'+'_'.join(args.networks)+'_'+edgetype+'_'+ plot_by +'_prop='+str(fraction)+'_maxy='+str(max_y)+'.png'
+		if len(networks)>1:
+			figureName = 'plot_'+'_'.join(args.networks)+'_'+edgetype+'_'+ plot_by+'.png'
+		else:
+			figureName = 'plot_'+'_'.join(args.networks)+'_'+edgetype+'_'+ plot_by +'_prop='+str(fraction)+'_maxy='+str(max_y)+'.png'
 		measures = MEASURES
 
 		print "\nSimulating and plotting the robustness on "+edgetype+" type of edges of networks:"
