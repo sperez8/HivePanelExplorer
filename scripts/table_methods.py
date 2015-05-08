@@ -51,6 +51,7 @@ def sample_sequence(net_path, networkNames, inputFolder, inputFileEnd):
 
 def convert(fileName, header=False, rows=False):
 	table = np.loadtxt(fileName, delimiter='\t', dtype='S1000')
+	print table
 	if header:
 		headerNames = list(table[0,:])
 		print headerNames

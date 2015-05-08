@@ -267,6 +267,25 @@ def make_OTU_feature_table(net_path, networkNames, inputFolder, inputFileEnd, in
 			np.savetxt(tableFile, featureTable, delimiter="\t", fmt='%s')
 	return None
 
+
+
+
+
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+#############                                                        #########
+#################                                                 ############
+####################                                    ######################
+############################                       ###########################
+#################################             ################################
+###################################         ##################################
+#######################################   ####################################
+##############################################################################
+
 def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, plot_sequence, edgetype):
 	networks,treatments = get_network_fullnames(networkNames)
 	graphs = get_multiple_graphs(networks, net_path, edgetype, False, False)
@@ -274,6 +293,9 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 	locations = networkNames.keys()
 	locations.sort(reverse=True)
 	print locations, treatments
+
+	mins = []
+	maxs = []
 
 	fig, axes = plt.subplots(len(locations),len(treatments))
 	iterable = []
@@ -286,41 +308,58 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 
 	colors = {treatment: OM_COLORS[treatment] for i,treatment in enumerate(treatments)}
 	for ax,location,t in iterable:
-		min_y = 1
 		G = graphs[location+'_'+t]
-		ax.set_title(t)
-		ax.set_xlabel('degree')
-		ax.set_ylabel(location)
+		if locations.index(location) == 0:
+			ax.set_title(t)
+		if treatments.index(t) == 0:
+			ax.set_ylabel(location.split('_')[1])
+		if locations.index(location) == 0 and treatments.index(t) == 0:
+			ax.set_xlabel('Node degree')
 		ax.set_yscale('log')
-		#ax.set_xscale('log')
-		N = G.number_of_nodes()
-		ds = [] #each degree
-		fds = [] #each degree's frequency
+		ax.set_xscale('log')
+		# N = G.number_of_nodes()
+		# ds = [] #each degree
+		# fds = [] #each degree's frequency
+		# degrees = sorted(nx.degree(G).values(),reverse=True)
+		# # for d in set(degrees):
+		# # 	ds.append(d)
+		# # 	fds.append(float(degrees.count(d))/N)
+		# # min_y = min(min(fds),min_y)
+
 		degrees = sorted(nx.degree(G).values(),reverse=True)
-		# for d in set(degrees):
-		# 	ds.append(d)
-		# 	fds.append(float(degrees.count(d))/N)
-		# min_y = min(min(fds),min_y)
-
-		# ax.scatter(ds,
-		# 	fds,
-		# 	marker='.',
-		# 	s=MARKER_SIZE,
-		# 	#linestyle='-',
-		# 	label=str(t),
-		# 	color=colors[t])
-
+		
 		data = degrees
-		fit = powerlaw.Fit(data,discrete=True,xmin=1)
-		fit.plot_pdf(ax=ax,color=colors[t],label=str(t))
-		fit_exp = fit.stretched_exponential
-		beta,Lambda = fit.stretched_exponential.beta, fit.stretched_exponential.Lambda
-		fit.stretched_exponential.plot_pdf(ax=ax, color=colors[t],linestyle='--',linewidth=2)
-		R, p = fit.distribution_compare('stretched_exponential','power_law')
-		print R, p
+		if max(degrees)>2:
+			fit = powerlaw.Fit(data,discrete=True,xmin=1)
+			fit.plot_pdf(ax=ax,color=colors[t])
+			print location, t
+			#print 's',fit.power_law.sigma
+			fit_exp = fit.stretched_exponential
+			beta,Lambda = fit.stretched_exponential.beta, fit.stretched_exponential.Lambda
+			fit.stretched_exponential.plot_pdf(ax=ax, color=colors[t],linestyle='--',linewidth=2)
+			print 'beta,lambda', beta, Lambda
+			R, p = fit.distribution_compare('stretched_exponential','power_law')
+			print R, p
+			def getAttrs(object):
+  				return filter(lambda m: callable(getattr(object, m)), dir(object))
 
-				#ax.plot(ds,[math.pow(d,-k) for d in ds],color=colors[t])
-	ax.set_ylim([min_y,1])
+			print getAttrs(fit_exp)
+			#print fit_exp.sigma
+			i,j = ax.get_ylim()
+			mins.append(i)
+			maxs.append(i)
+
+		#ax.plot(ds,[math.pow(d,-k) for d in ds],color=colors[t])
+	# for ax in axes:
+	# 	ax.set_ylim(min(mins),max(maxs))
+
+	
+	#add legend manually
+	for t in treatments:
+		ax.plot([], [], linestyle='-',label=str(t),color=colors[t])
+
+
+	#ax.set_ylim([min_y,1])
 	title = 'Degree distribution of '+' '.join(location)+' network with '+edgetype+' type of edges'
 	figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=TITLE_FONT)
 	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
@@ -376,25 +415,6 @@ def get_taxonomic_levels(featurePath,featureFile,location,treatments,tax_level,n
 	return taxonomies
 
 
-
-
-
-
-##############################                     ###########################
-##############################                     ###########################
-##############################                     ###########################
-##############################                     ###########################
-##############################                     ###########################
-##############################                     ###########################
-#############                                                        #########
-#################                                                 ############
-####################                                    ######################
-############################                       ###########################
-#################################             ################################
-###################################         ##################################
-#######################################   ####################################
-##############################################################################
-
 def calculate_taxonomic_representation(net_path, networkNames, figurePath, featurePath, featureFile, tax_level, percentNodes, bcMinValue):
 	edgetype = 'pos'
 	colName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
@@ -420,7 +440,8 @@ def calculate_taxonomic_representation(net_path, networkNames, figurePath, featu
 			bcvalues= list([float(k) for k in bcvalues])
 			bcvalues.sort(reverse=True)
 			if percentNodes<1:
-				cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
+				#cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
+ 				cutoff = max(float(percentNodes*max(bcvalues)), bcMinValue)
 			else:
 				cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
 
@@ -443,9 +464,9 @@ def calculate_taxonomic_representation(net_path, networkNames, figurePath, featu
 		taxonomies.sort()
 
 		Prob_all_seen_greater_1 = 1
-		representation = np.zeros(shape=(len(taxonomies)+1,2), dtype='S1000')
+		representation = np.zeros(shape=(len(taxonomies)+1,4), dtype='S1000')
 		representation[1:,0]=np.array(taxonomies)
-		representation[0,:]=np.array([tax_level.capitalize(),"Probability of represention"])
+		representation[0,:]=np.array([tax_level.capitalize(),"Count in all OTUs","Count in central OTUs","Probability of represention"])
 		print representation
 		m = sum([len(v) for v in alltaxa.values()]) #total number of OTUs
 		n = sum([len(v) for v in BCtaxa.values()]) #total number of central OTUs
@@ -459,14 +480,16 @@ def calculate_taxonomic_representation(net_path, networkNames, figurePath, featu
 				yi = 0
 			print m, n, mi, yi
 			representation[i+1,0]=taxonomy
+			representation[i+1,1]=mi
+			representation[i+1,2]=yi
 			if yi>0:
 				prob = prob_hypergeometric(m,n,mi,yi)
-				representation[i+1,1]=round(prob,2)
-				Prob_all_seen_greater_1 *= prob_hypergeometric(m,n,mi,yi,atleastone=True)
+				representation[i+1,3]=round(prob,2)
+				#Prob_all_seen_greater_1 *= prob_hypergeometric(m,n,mi,yi,atleastone=True)
 			else:
-				representation[i+1,1]="None"
+				representation[i+1,3]="None"
 
-		print Prob_all_seen_greater_1
+		#print Prob_all_seen_greater_1
 		#save representation in a table
 		f = open(os.path.join(net_path,figurePath,"representation_{0}_{1}.txt".format(location.split('_')[1],tax_level)),'w')
 		np.savetxt(f, representation, delimiter="\t", fmt='%s')
@@ -480,7 +503,7 @@ def prob_hypergeometric(m,n,mi,yi,atleastone=False):
 		for j in range(1,min(n,mi)+1):
 			p += nCk(mi,j)*nCk(m-mi,n-j)/float(nCk(m,n))
 	else:
-		for j in range(yi,yi+1):
+		for j in range(yi,min(n,mi)):
 			p += nCk(mi,j)*nCk(m-mi,n-j)/float(nCk(m,n))
 	return p
 
@@ -515,7 +538,8 @@ def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFi
 				bcvalues= list([float(k) for k in bcvalues])
 				bcvalues.sort(reverse=True)
 				if percentNodes<1:
-					cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
+ 					#cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
+ 					cutoff = max(float(percentNodes*max(bcvalues)), bcMinValue)
 				else:
 					cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
 				for n in nodes:
@@ -544,7 +568,7 @@ def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFi
 		if total == 0:
 			circleLabels=[]
 		if len(networkNames)==3:
-			v = venn3(subsets=taxaSeen.values(), set_labels = circleLabels, set_colors=('b','r','g'), alpha=0.3, ax=ax, axlabel = tax_level)
+			v = venn3(subsets=taxaSeen.values(), set_labels = circleLabels, set_colors=('b','r','g'), alpha=0.3, ax=ax)#axlabel = tax_level)
 		else:
 			v = venn2(subsets=taxaSeen.values(), ax = ax)
 	
@@ -569,6 +593,22 @@ def plot_venn_diagram(net_path, networkNames, figurePath, featurePath, featureFi
 	return None
 
 
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+##############################                     ###########################
+#############                                                        #########
+#################                                                 ############
+####################                                    ######################
+############################                       ###########################
+#################################             ################################
+###################################         ##################################
+#######################################   ####################################
+##############################################################################
+
+
 def plot_venn_otus_diagram(net_path, networkNames, figurePath, featurePath, featureFile, percentNodes, bcMinValue):
 	edgetype = 'pos'
 	networks,treatments = get_network_fullnames(networkNames)
@@ -591,7 +631,8 @@ def plot_venn_otus_diagram(net_path, networkNames, figurePath, featurePath, feat
 			bcvalues= list([float(k) for k in bcvalues])
 			bcvalues.sort(reverse=True)
 			if percentNodes<1:
-				cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
+				#cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
+				cutoff = max(float(percentNodes*max(bcvalues)), bcMinValue)
 			else:
 				cutoff = float(bcvalues[int(percentNodes*float(len(bcvalues)))-1])
 			for n in nodes:
@@ -748,12 +789,71 @@ def keystone_quantitative_feature_plot(net_path, networkNames, figurePath, featu
 		print "Saving the figure file: ", figureFile
 	return None
 
+def plot_diff_centralities(net_path, networkNames, figurePath, featurePath, featureFile, percentNodes, measures):
+	edgetype = 'pos'
+	networks,treatments = get_network_fullnames(networkNames)
+	graphs = get_multiple_graphs(networks,net_path,edgetype, False, False)
 
+	locations = networkNames.keys()
+	locations.sort(reverse=True)
 
+	measureNames = [m.__name__ for m in measures]
+	measureAcronym = {m:m.split('_')[0].capitalize()[0]+m.split('_')[1].capitalize()[0] for m in measureNames}
+	measurePrettyName = {m:m.replace('numpy','').replace('_',' ').capitalize() for m in measureNames}
+#.__name__.replace('_',' ').replace('numpy','').capitalize()
 
+	#for each network, we collect all BC, DC, CC, EC values and plot them together
+	for location in locations:
+		fig, axes = plt.subplots(len(measures),len(measures))
+		iterable = []
+		#first collect all the values
+		centralities = {m.__name__:[] for m in measures}
+		for t in treatments:
+			G = graphs[location+'_'+t]
+			for m in measures:
+				measure = m.__name__
+				values = [(n,v) for n,v in m(G).iteritems()]
+				#sort by node name so that all centrality value line up
+				values = sorted(values, key = lambda item: item[0])
+				centralities[measure].extend(zip(*values)[1])
 
+		for i,mx in enumerate(measureNames):
+			for j,my in enumerate(measureNames):
+				iterable.append((axes[i][j],mx,my))
+		for ax,mx,my in iterable:
+			if mx==my:
+				ppl.hist(ax,centralities[my],grid='y',color='blue')
+			else:
+				ppl.scatter(ax,centralities[my],centralities[mx])
+			#ax.tick_params(axis='x', which='both', labelbottom='off')
+			#ax.tick_params(axis='y', which='both', labelleft='off')
+			ax.tick_params(axis='both', which='major', labelsize=8)
+			ax.tick_params(axis='both', which='minor', labelsize=8)
+			ax.set_ylim(0,ax.get_ylim()[1])
+			ax.set_xlim(0,ax.get_xlim()[1])
+			ax.locator_params(nbins=5)
 
+			if measureNames.index(mx)==0:
+				ax.set_title(measurePrettyName[my],fontsize=12)
+			else:
+				pass
+				#ax.tick_params(axis='y', which='both', labelleft='on')
+			if measureNames.index(my)==0:
+				ax.set_ylabel(measurePrettyName[mx],fontsize=12)
+			else:
+				pass
+				#ax.tick_params(axis='x', which='both', labelbottom='on')
+		#plt.show()
 
+		#title = "Distribution of OTUs properties in all ecozones for treatment "+t
+		#figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=TITLE_FONT)
+
+		fig.set_size_inches(BIG_FIG_WIDTH,BIG_FIG_WIDTH)
+		figureFile = os.path.join(net_path,figurePath,'compare_centralities_'+location+'_'+edgetype+'.png')
+		fig.savefig(figureFile, dpi=DPI, bbox_inches='tight')
+		print "Saving the figure file: ", figureFile
+
+	return None
 
 
 
@@ -772,9 +872,6 @@ def keystone_quantitative_feature_plot(net_path, networkNames, figurePath, featu
 #######################################   ####################################
 ##############################################################################
 
-
-
-
 def plot_scatter_bc(net_path, networkNames, figurePath, featurePath, featureFile, percentNodes, bcMinValue):
 	edgetype = 'pos'
 	networks,treatments = get_network_fullnames(networkNames)
@@ -782,31 +879,25 @@ def plot_scatter_bc(net_path, networkNames, figurePath, featurePath, featureFile
 	hzColName = "SoilHorizon avg"
 	abColName = "Abundance"
 
-	attributes = [bcColName,hzColName,abColName]
+	attributes = [hzColName]#abColName]
+	atributeValues = {a:[] for a in attributes}
 	locations = networkNames.keys()
 	locations.sort(reverse=True)
 
-	numSuperconnectors = []
-
-	for t in treatments:
-		ytitles = list(locations)
-		xtitles = list(attributes)
-		fig, axes = plt.subplots(len(attributes),len(locations))
-		iterable = []
-		for i,r in enumerate(attributes):
-			for j,c in enumerate(locations):
-				if len(attributes)>1:
+	for attribute in attributes:
+		fig, axes = plt.subplots(len(locations),len(treatments))
+	 	iterable = []
+		for i,r in enumerate(locations):
+			for j,c in enumerate(treatments):
+				if len(locations)>1:
 					iterable.append((axes[i][j],r,c))
 				else:
 					iterable.append((axes[j],r,c))
-		#ylim = {attribute:0 for attribute in attributes}
-		#xlims = {attribute:(1,0) for attribute in attributes}
-		for ax,attribute,location in iterable:
+		for ax,location,t in iterable:
 			featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t))
 			featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
 			notBC = []
 			BC = []
-
 			atCol = np.where(featureTable[0,:]==attribute)[0][0]
 			centcol = np.where(featureTable[0,:]==bcColName)[0][0]
 			nodes = featureTable[np.where(featureTable[:,centcol]!=NOT_A_NODE_VALUE)][1:,0]
@@ -814,7 +905,8 @@ def plot_scatter_bc(net_path, networkNames, figurePath, featurePath, featureFile
 			bcvalues = bcvalues[np.where(bcvalues!=NOT_A_NODE_VALUE)]
 			bcvalues= list([float(k) for k in bcvalues])
 			bcvalues.sort(reverse=True)
-			cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
+# 			#cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
+ 			cutoff = max(float(percentNodes*max(bcvalues)), bcMinValue)
 			for n in nodes:
 				row = nm.findRow(n,featureTable)
 				value = float(featureTable[row][centcol])
@@ -830,66 +922,169 @@ def plot_scatter_bc(net_path, networkNames, figurePath, featurePath, featureFile
 			else:
 				minvalue = min(notBC)
 				maxvalue = max(notBC)
+
 			binwidth=(maxvalue-minvalue)/NUM_BINS
-			if attribute==bcColName:
-				if len(BC)>0:
-					numSuperconnectors.append([t, location.split('_')[1], len(BC), round(min(BC),4),round(max(BC),4)])
-				else:
-					numSuperconnectors.append([t, location.split('_')[1], 0, None, None])
 
 			notBC.extend(BC) # want to plot histogram of whole data and color the BC ones on top
+			print location,t
 			if binwidth == 0:
-				bindwitdh = 1
-				ppl.hist(ax, notBC, color='black', grid='y')
+				binwidth = float(1.0)/float(NUM_BINS)
+				bins = np.arange(minvalue, maxvalue + binwidth*2, binwidth)
+				ppl.hist(ax, notBC, color='black', grid='y', bins=bins, label = 'All OTUs')
 				if len(BC)>0:
-					ppl.hist(ax, BC, color='purple', grid='y')
+					ppl.hist(ax, BC, color='purple', grid='y', bins=bins, label = 'High BC OTUs')
+				elif location != 'BAC_JP' and t != 'OM3':
+					ppl.hist(ax,[0,0], color='purple', grid='y', label = "High BC OTUs")
 			else:
+				if attribute == hzColName:
+					binwidth = float(1.0)/float(NUM_BINS)
 				bins = np.arange(minvalue, maxvalue + binwidth, binwidth)
 				ppl.hist(ax, notBC, color='black', grid='y', bins = bins, label = 'All OTUs')
 				if len(BC)>0:
-					ppl.hist(ax, BC, color='purple', grid='y', bins = bins, label = "Superconnectors")
+					ppl.hist(ax, BC, color='purple', grid='y', bins = bins, label = "High BC OTUs")
+				elif location != 'BAC_JP' and t != 'OM3':
+					ppl.hist(ax,[-1], color='purple', grid='y', label = "High BC OTUs")
+				else: #HUGE HACK I KNOW
+					ppl.hist(ax, notBC, color='purple', grid='y', bins = bins, label = 'High BC OTUs')
+					ppl.hist(ax, notBC, color='black', grid='y', bins = bins)
+
 
 			ax.locator_params(axis = "x",nbins=4)
 
 			if attribute == abColName or attribute == bcColName:
 				ax.set_yscale('symlog')
-			if location in ytitles:
-				ytitles.remove(location)
-				print location
-				ax.set_title(location.split('_')[1])
-			if attribute in xtitles:
-				xtitles.remove(attribute)
-				ax.set_xlabel(attribute + ' histogram')
-
-		# 	print ylim
-		# 	ylim[attribute] = max(ax.get_ylim()[1],ylim[attribute])
-		# 	xlims[attribute] = (min(minvalue,xlims[attribute][0]), max(maxvalue,xlims[attribute][1]))
-			
-		# for ax,attribute,location in iterable:
-		# 	ax.set_ylim(0,ylim[attribute])
-		# 	ax.set_xlim(xlims[attribute][0],xlims[attribute][1])
-
-
-		#save number of superconnectors in a a table
-		f = open(os.path.join(net_path,figurePath,"superconnectors_OTUs_{0}_{1}.txt".format(percentNodes,bcMinValue )),'w')
-		f.write('\t'.join(['Treatment','Ecozone','Number of superconnectors','lowest BC value','highest BC value']))
-		f.write('\n')
-		for num in numSuperconnectors:
-			f.write('\t'.join([str(x) for x in num]))
-			f.write('\n')
-		f.close()
+			if treatments.index(t)==0:
+				ax.set_ylabel(location.split('_')[1])
+			if locations.index(location)==0:
+				ax.set_title(t)
+			if attribute==hzColName:
+				ax.set_xlim(1-binwidth,2+binwidth)
 
 		lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
-
-		title = "Distribution of OTUs properties in all ecozones for treatment "+t
-		figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=TITLE_FONT)
-
-		fig.set_size_inches(BIG_FIG_WIDTH,BIG_FIG_HEIGHT)
-		figureFile = os.path.join(net_path,figurePath,'scatter_BC_otus_'+t+'_'+'_'.join([l.split('_')[1] for l in locations])+'_'+edgetype+'_'+str(percentNodes)+'_'+str(bcMinValue)+'.png')
-		fig.savefig(figureFile, dpi=DPI, bbox_extra_artists=(lgd,figureTitle),bbox_inches='tight')
+		
+		fig.set_size_inches(BIG_FIG_HEIGHT,BIG_FIG_HEIGHT)
+		figureFile = os.path.join(net_path,figurePath,'hist_BC_otus_'+attribute+'_'+'_'.join([l.split('_')[1] for l in locations])+'_'+edgetype+'_'+str(percentNodes)+'_'+str(bcMinValue)+'.png')
+		fig.savefig(figureFile, dpi=DPI, bbox_extra_artists=([lgd]),bbox_inches='tight')
 		print "Saving the figure file: ", figureFile
 
 	return None
+
+# def plot_scatter_bc(net_path, networkNames, figurePath, featurePath, featureFile, percentNodes, bcMinValue):
+# 	edgetype = 'pos'
+# 	networks,treatments = get_network_fullnames(networkNames)
+# 	bcColName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
+# 	hzColName = "SoilHorizon avg"
+# 	abColName = "Abundance"
+
+# 	attributes = [bcColName,hzColName,abColName]
+# 	locations = networkNames.keys()
+# 	locations.sort(reverse=True)
+
+# 	numSuperconnectors = []
+
+# 	for t in treatments:
+# 		ytitles = list(locations)
+# 		xtitles = list(attributes)
+# 		fig, axes = plt.subplots(len(attributes),len(locations))
+# 		iterable = []
+# 		for i,r in enumerate(attributes):
+# 			for j,c in enumerate(locations):
+# 				if len(attributes)>1:
+# 					iterable.append((axes[i][j],r,c))
+# 				else:
+# 					iterable.append((axes[j],r,c))
+# 		#ylim = {attribute:0 for attribute in attributes}
+# 		#xlims = {attribute:(1,0) for attribute in attributes}
+# 		for ax,attribute,location in iterable:
+# 			featureTableFile = os.path.join(featurePath,featureFile+'_{0}_{1}_{2}.txt'.format(edgetype,location,t))
+# 			featureTable = np.loadtxt(featureTableFile,delimiter='\t', dtype='S1000')
+# 			notBC = []
+# 			BC = []
+
+# 			atCol = np.where(featureTable[0,:]==attribute)[0][0]
+# 			centcol = np.where(featureTable[0,:]==bcColName)[0][0]
+# 			nodes = featureTable[np.where(featureTable[:,centcol]!=NOT_A_NODE_VALUE)][1:,0]
+# 			bcvalues = featureTable[1:,centcol]
+# 			bcvalues = bcvalues[np.where(bcvalues!=NOT_A_NODE_VALUE)]
+# 			bcvalues= list([float(k) for k in bcvalues])
+# 			bcvalues.sort(reverse=True)
+# 			#cutoff = max(float(bcvalues[int(percentNodes*float(len(bcvalues)))-1]), bcMinValue)
+# 			cutoff = max(float(percentNodes*max(bcvalues)), bcMinValue)
+# 			for n in nodes:
+# 				row = nm.findRow(n,featureTable)
+# 				value = float(featureTable[row][centcol])
+# 				if value == NOT_A_NODE_VALUE:
+# 					print "UH oh"
+# 				if value >= cutoff:
+# 					BC.append(float(featureTable[row][atCol]))
+# 				else:
+# 					notBC.append(float(featureTable[row][atCol]))
+# 			if BC:
+# 				minvalue = min(min(notBC),min(BC))
+# 				maxvalue = max(max(notBC),max(BC))
+# 			else:
+# 				minvalue = min(notBC)
+# 				maxvalue = max(notBC)
+# 			binwidth=(maxvalue-minvalue)/NUM_BINS
+# 			if attribute==bcColName:
+# 				if len(BC)>0:
+# 					numSuperconnectors.append([t, location.split('_')[1], len(BC), round(min(BC),4),round(max(BC),4)])
+# 				else:
+# 					numSuperconnectors.append([t, location.split('_')[1], 0, None, None])
+
+# 			notBC.extend(BC) # want to plot histogram of whole data and color the BC ones on top
+# 			if binwidth == 0:
+# 				bindwidth = 1
+# 				ppl.hist(ax, notBC, color='black', grid='y')
+# 				if len(BC)>0:
+# 					ppl.hist(ax, BC, color='purple', grid='y')
+# 			else:
+# 				bins = np.arange(minvalue, maxvalue + binwidth, binwidth)
+# 				ppl.hist(ax, notBC, color='black', grid='y', bins = bins, label = 'All OTUs')
+# 				if len(BC)>0:
+# 					ppl.hist(ax, BC, color='purple', grid='y', bins = bins, label = "Superconnectors")
+
+# 			ax.locator_params(axis = "x",nbins=4)
+
+# 			if attribute == abColName or attribute == bcColName:
+# 				ax.set_yscale('symlog')
+# 			if location in ytitles:
+# 				ytitles.remove(location)
+# 				print location
+# 				ax.set_title(location.split('_')[1])
+# 			if attribute in xtitles:
+# 				xtitles.remove(attribute)
+# 				ax.set_xlabel(attribute + ' histogram')
+
+# 		# 	print ylim
+# 		# 	ylim[attribute] = max(ax.get_ylim()[1],ylim[attribute])
+# 		# 	xlims[attribute] = (min(minvalue,xlims[attribute][0]), max(maxvalue,xlims[attribute][1]))
+			
+# 		# for ax,attribute,location in iterable:
+# 		# 	ax.set_ylim(0,ylim[attribute])
+# 		# 	ax.set_xlim(xlims[attribute][0],xlims[attribute][1])
+
+
+# 		#save number of superconnectors in a a table
+# 		f = open(os.path.join(net_path,figurePath,"superconnectors_OTUs_{0}_{1}.txt".format(percentNodes,bcMinValue )),'w')
+# 		f.write('\t'.join(['Treatment','Ecozone','Number of superconnectors','lowest BC value','highest BC value']))
+# 		f.write('\n')
+# 		for num in numSuperconnectors:
+# 			f.write('\t'.join([str(x) for x in num]))
+# 			f.write('\n')
+# 		f.close()
+
+# 		lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
+
+# 		title = "Distribution of OTUs properties in all ecozones for treatment "+t
+# 		figureTitle = fig.suptitle(title, horizontalalignment='center', fontsize=TITLE_FONT)
+
+# 		fig.set_size_inches(BIG_FIG_WIDTH,BIG_FIG_HEIGHT)
+# 		figureFile = os.path.join(net_path,figurePath,'scatter_BC_otus_'+t+'_'+'_'.join([l.split('_')[1] for l in locations])+'_'+edgetype+'_'+str(percentNodes)+'_'+str(bcMinValue)+'.png')
+# 		fig.savefig(figureFile, dpi=DPI, bbox_extra_artists=(lgd,figureTitle),bbox_inches='tight')
+# 		print "Saving the figure file: ", figureFile
+
+# 	return None
 
 
 def module_structure(net_path, networkNames, filePath, edgetype, inputFolder, inputFileEnd,featurePath, featureFile, factor):
@@ -1066,7 +1261,7 @@ def target_attack(G, measure,fraction):
 
 	values = sorted(values, key = lambda item: item[1], reverse = True)
 
-	removal=int(len(values)*fraction)-1 #can't remove last node, otherwise there is nothing to measure!
+	removal=int(len(values)*fraction)-1 #can't remove last node in simulation, otherwise there is nothing to measure!
 
 	for n in zip(*values)[0][:removal]:
 		H.remove_node(n)
@@ -1226,6 +1421,7 @@ def multi_plot_robustness_by_treatment(multidata,figurePath,figureFile,rowLabels
 def multi_plot_robustness_by_measure(multidata,figurePath,figureFile,rowLabels,treatments,measures,fraction, net_path, title, max_y):
 	'''plots the simulations in a multiplot: each row is a location and each column is a centrality measure'''
 
+	rowLabels.sort(reverse=True)
 	# plotting locations in rows and centralities in columns
 	measures = ['random'] + [m.__name__ for m in measures]
 	fig, axes = plt.subplots(len(rowLabels),len(measures))
@@ -1252,8 +1448,9 @@ def multi_plot_robustness_by_measure(multidata,figurePath,figureFile,rowLabels,t
 	x_axis_label_done = False
 
 	#to add to legend
-	ppl.plot([], [], color='black', marker= '.', linestyle='-', label='relative size of LCC')
-	ppl.plot([], [], color='black', linestyle='--',linewidth=2, label='avg size of other CC')
+	if len(rowLabels)==1:
+		ppl.plot([], [], color='black', marker= '.', linestyle='-', label='relative size of LCC')
+		ppl.plot([], [], color='black', linestyle='--',linewidth=2, label='avg size of other CC')
 
 	min_yvalue = 1
 	max_yvalue = 1
@@ -1267,70 +1464,94 @@ def multi_plot_robustness_by_measure(multidata,figurePath,figureFile,rowLabels,t
 			min_yvalue = min(min_yvalue ,min(lc_values))
 			max_yvalue = max(max_yvalue ,max(sc_values))
 			x = [float(r)/len(lc_values)*fraction for r in range(len(lc_values))]
-			ppl.plot(ax,
-				x, 
-				lc_values,
-				marker='.',
-				linestyle='-',
-				label=str(t),
-				color=colors[t])
-			ppl.plot(ax,
-				x, 
-				sc_values,
-				color=colors[t],
-				linestyle='--',linewidth=2)
+			if len(lc_values)>3:
+				ppl.plot(ax,
+					x, 
+					lc_values,
+					marker='.',
+					linestyle='-',
+					label=str(t),
+					color=colors[t])
+			else:
+				ppl.plot(ax,
+					[], 
+					[],
+					marker='.',
+					linestyle='-',
+					label=str(t),
+					color=colors[t])
+			if len(rowLabels)==1:
+				ppl.plot(ax,
+					x, 
+					sc_values,
+					color=colors[t],
+					linestyle='--',linewidth=2)
 
 			#Output robustness and vulnerability
-			i+=1
-			lc_values.pop(0) #remove '1' added for plotting purposes
-			x = 0
-			for k,l in enumerate(lc_values):
-				if l<=0.5:
-					x = k
-					break
+			# i+=1
+			# lc_values.pop(0) #remove '1' added for plotting purposes
+			# x = 0
+			# for k,l in enumerate(lc_values):
+			# 	if l<=0.5:
+			# 		x = k
+			# 		break
 
-			print lc_values
-			print x
+			#print lc_values
+			#print x
 
 			#R = np.mean(lc_values)
 			#vulnerability[i,j]=str(round(0.5-R,3))
-			vulnerability[i,j]=str(round(float(x)/len(lc_values),2))
+			#vulnerability[i,j]=str(round(float(x)/len(lc_values),2))
 
+
+		ax.locator_params(nbins=5)
+		ax.tick_params(axis='both', which='major', labelsize=8)
+		ax.tick_params(axis='both', which='minor', labelsize=8)
+		# if rowLabels.index(net)!=0 and measures.index(measure)!=0:
+		# 	ax.tick_params(axis='both', which='major', labelsize=0)
+		# 	ax.tick_params(axis='both', which='minor', labelsize=0)
+		# else:
+		# 	ax.tick_params(axis='both', which='major', labelsize=8)
+		# 	ax.tick_params(axis='both', which='minor', labelsize=8)
 		if measure not in measure_label_done:
-			ax.set_title(measure)
+			ax.set_title(measure.replace('numpy','').replace('_',' ').capitalize())
 			measure_label_done.append(measure)
 		if net not in net_label_done:
-			ax.set_ylabel(net)
+			ax.set_ylabel("Relative size of LCC of {0} networks".format(net.split('_')[1]))
 			net_label_done.append(net)
 
 		if not x_axis_label_done:
 			x_axis_label_done = True
-			ax.set_xlabel('fraction of removed nodes')
+			ax.set_xlabel('fraction of nodes removed')
+		if len(rowLabels)>1:
+			ax.set_ylim(0,1)
 
 
-	#save vulnerability in a table
-	f = open(os.path.join(net_path,figurePath,"vulnerability_by_measure_{0}.txt".format(net)),'w')
-	np.savetxt(f, vulnerability, delimiter="\t", fmt='%s')
-	f.close()
+	# #save vulnerability in a table
+	# f = open(os.path.join(net_path,figurePath,"vulnerability_by_measure_{0}.txt".format(net)),'w')
+	# np.savetxt(f, vulnerability, delimiter="\t", fmt='%s')
+	# f.close()
 
+	if len(rowLabels)==1:
+		for ax in axes:
+			ax.set_autoscaley_on(False)
+			if max_y and max_yvalue > max_y:
+				max_yvalue = max_y
+			ax.set_ylim([min_yvalue,max_yvalue])
 
-	for ax in axes:
-		ax.set_autoscaley_on(False)
-		if max_y and max_yvalue > max_y:
-			max_yvalue = max_y
-		ax.set_ylim([min_yvalue,max_yvalue])
-
-	figureTitle = fig.suptitle(title,
-         horizontalalignment='center',
-         fontsize=TITLE_FONT)
+	# figureTitle = fig.suptitle(title,
+ #         horizontalalignment='center',
+ #         fontsize=TITLE_FONT)
 
 	lgd = ppl.legend(bbox_to_anchor=(1.05, 1), loc=2)
 
 	figureFile = os.path.join(net_path,figurePath,figureFile)
 	#fig.tight_layout()
-	fig.set_size_inches(9*len(treatments),9*len(rowLabels))
-	fig.savefig(figureFile, dpi=DPI, bbox_extra_artists=(lgd,figureTitle), bbox_inches='tight')
+	fig.set_size_inches(BIG_FIG_HEIGHT,BIG_FIG_WIDTH)
+	#fig.savefig(figureFile, dpi=DPI, bbox_extra_artists=(lgd,figureTitle), bbox_inches='tight')
+	fig.savefig(figureFile, dpi=DPI, bbox_extra_artists=([lgd]), bbox_inches='tight')
 	print "Saving the figure file: ", figureFile
+
 	return None
 
 def make_js_files(netpath, newnetpath, ecozone, treatment, featurePath, featureFile, edgetype):
