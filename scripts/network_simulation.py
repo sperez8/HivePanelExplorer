@@ -13,7 +13,8 @@ import argparse
 import numpy as np
 import prettyplotlib as ppl
 import math
-import powerlaw
+import powerlaw 
+from decimal import Decimal
 
 # prettyplotlib imports 
 import matplotlib.pyplot as plt
@@ -107,6 +108,7 @@ MODULE_OTU_METRICS = [nm.correlation_of_degree_and_depth,
 					#FIX MEEE
 					#nm.avg_depth,
 					]
+
 
 
 def make_graph(nodeFile, edgeFile,edgetype):
@@ -445,8 +447,8 @@ def calculate_taxonomic_representation(net_path, networkNames, figurePath, featu
 		Prob_all_seen_greater_1 = 1
 		representation = np.zeros(shape=(len(taxonomies)+1,2), dtype='S1000')
 		representation[1:,0]=np.array(taxonomies)
-		representation[0,:]=np.array([tax_level.capitalize(),"Probability of represention"])
-		print representation
+		representation[0,:]=np.array([tax_level.capitalize(),"Probability of representation"])
+		#print representation
 		m = sum([len(v) for v in alltaxa.values()]) #total number of OTUs
 		n = sum([len(v) for v in BCtaxa.values()]) #total number of central OTUs
 		
@@ -462,11 +464,11 @@ def calculate_taxonomic_representation(net_path, networkNames, figurePath, featu
 			if yi>0:
 				prob = prob_hypergeometric(m,n,mi,yi)
 				representation[i+1,1]=round(prob,2)
-				Prob_all_seen_greater_1 *= prob_hypergeometric(m,n,mi,yi,atleastone=True)
+				#Prob_all_seen_greater_1 *= prob_hypergeometric(m,n,mi,yi,atleastone=True)
 			else:
 				representation[i+1,1]="None"
 
-		print Prob_all_seen_greater_1
+		#print Prob_all_seen_greater_1
 		#save representation in a table
 		f = open(os.path.join(net_path,figurePath,"representation_{0}_{1}.txt".format(location.split('_')[1],tax_level)),'w')
 		np.savetxt(f, representation, delimiter="\t", fmt='%s')
@@ -478,10 +480,10 @@ def prob_hypergeometric(m,n,mi,yi,atleastone=False):
 	p = 0
 	if atleastone:
 		for j in range(1,min(n,mi)+1):
-			p += nCk(mi,j)*nCk(m-mi,n-j)/float(nCk(m,n))
+			p += nCk(mi,j)*nCk(m-mi,n-j)/Decimal(nCk(m,n))
 	else:
-		for j in range(yi,yi+1):
-			p += nCk(mi,j)*nCk(m-mi,n-j)/float(nCk(m,n))
+		for j in range(yi,min(n,mi)):
+			p += nCk(mi,j)*nCk(m-mi,n-j)/Decimal(nCk(m,n))
 	return p
 
 #n choose k

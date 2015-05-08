@@ -58,12 +58,13 @@ def convert(fileName, header=False, rows=False):
 		print table
 	tableText = tabulate(table, headers=headerNames, tablefmt="latex")
 	finalText = collect_pieces(tableText)
-	f = open("C:\Users\Sarah\Desktop\LTSPnetworks\dump.txt",'w')
-	f.write(finalText)
+	#f = open("C:\Users\Sarah\Desktop\LTSPnetworks\dump.txt",'w')
+	#f.write(finalText)
 	return None
 
 def collect_pieces(table):
 	text = BEGINNING
 	text += table
 	text += END
+	print text
 	return text
