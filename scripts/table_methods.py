@@ -11,9 +11,9 @@ from network_simulation import get_network_fullnames
 BEGINNING = '''\\begin{table}
 \caption[]{}
 \label{tab:label}
-\centering'''
+\centering\n'''
 
-END = '''\end{table}'''
+END = '''\n\end{table}'''
 
 def sample_sequence(net_path, networkNames, inputFolder, inputFileEnd):
 	'''makes an OTU table with avg depth and othe features per OTU'''
@@ -59,8 +59,10 @@ def convert(fileName, header=False, rows=False):
 		print table
 	tableText = tabulate(table, headers=headerNames, tablefmt="latex")
 	finalText = collect_pieces(tableText)
-	#f = open("C:\Users\Sarah\Desktop\LTSPnetworks\dump.txt",'w')
-	#f.write(finalText)
+	f = open('dump.txt','w')
+	f.write(finalText)
+	f.close()
+
 	return None
 
 def collect_pieces(table):

@@ -335,17 +335,17 @@ def plot_degree_distribution_per_treatment(net_path, networkNames, figurePath, p
 			fit = powerlaw.Fit(data,discrete=True,xmin=1)
 			fit.plot_pdf(ax=ax,color=colors[t])
 			print location, t
-			#print 's',fit.power_law.sigma
-			fit_exp = fit.stretched_exponential
-			beta,Lambda = fit.stretched_exponential.beta, fit.stretched_exponential.Lambda
-			fit.stretched_exponential.plot_pdf(ax=ax, color=colors[t],linestyle='--',linewidth=2)
-			print 'beta,lambda', beta, Lambda
-			R, p = fit.distribution_compare('stretched_exponential','power_law')
-			print R, p
-			def getAttrs(object):
-  				return filter(lambda m: callable(getattr(object, m)), dir(object))
+			print 's',fit.power_law.sigma, fit.power_law.alpha
+			# fit_exp = fit.stretched_exponential
+			# beta,Lambda = fit.stretched_exponential.beta, fit.stretched_exponential.Lambda
+			# fit.stretched_exponential.plot_pdf(ax=ax, color=colors[t],linestyle='--',linewidth=2)
+			# print 'beta,lambda', beta, Lambda
+			for dist in ['exponential','power_law','lognormal']:	#,'truncated_power_law']:
+				R, p = fit.distribution_compare(dist,'stretched_exponential')
+				print dist, R, p
 
-			print getAttrs(fit_exp)
+			#print fit_exp.KS()
+
 			#print fit_exp.sigma
 			i,j = ax.get_ylim()
 			mins.append(i)
@@ -467,8 +467,10 @@ def calculate_taxonomic_representation(net_path, networkNames, figurePath, featu
 
 		Prob_all_seen_greater_1 = 1
 		representation = np.zeros(shape=(len(taxonomies)+1,4), dtype='S1000')
+		#representation = np.zeros(shape=(len(taxonomies)+1,3), dtype='S1000')
 		representation[1:,0]=np.array(taxonomies)
-		representation[0,:]=np.array([tax_level.capitalize(),"Count in all OTUs","Count in central OTUs","Probability of represention"])
+		representation[0,:]=np.array([tax_level.capitalize(),"Number of taxa","Number of central taxa","Over-representation (p-value)"])
+		#representation[0,:]=np.array([tax_level.capitalize(),"Number of taxa","Number of central taxa"])
 		m = sum([len(v) for v in alltaxa.values()]) #total number of OTUs
 		n = sum([len(v) for v in BCtaxa.values()]) #total number of central OTUs
 		
@@ -504,6 +506,7 @@ def prob_hypergeometric(m,n,mi,yi,atleastone=False):
 		for j in range(1,min(n,mi)+1):
 			p += nCk(mi,j)*nCk(m-mi,n-j)/Decimal(nCk(m,n))
 	else:
+		if mi==yi:mi+=1
 		for j in range(yi,min(n,mi)):
 			p += nCk(mi,j)*nCk(m-mi,n-j)/Decimal(nCk(m,n))
 	return p
