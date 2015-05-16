@@ -6,8 +6,9 @@
 
 // ****************************************** //
 
-FONT = "Calibri"
-a1 = performance.now()
+var FONT = "Calibri"
+    bkgcolor="white"
+    linkfill = "none"
 
 //display title of panel and number of nodes and links
 d3.select("body").select("#title").select("#thetitle")
@@ -562,18 +563,18 @@ function plot(p){
             //.attr("id",function(d,i){return d.name}) //can be used to cirles for same nodes and color them at the same time.
             .attr("transform", function (d) { 
                 if (doubleAxes){ //plot nodes of even axes when h=0 then on odd axes when h=1
-                    return "rotate(" + ~~degrees(angles(asgScales[p.x](d[p.x])*2 + h)) + ")"  //Use  ~~ to round values
+                    return "rotate(" + degrees(angles(asgScales[p.x](d[p.x])*2 + h)) + ")"  //Use  ~~ to round values
                 } else {
-                    return "rotate(" + ~~degrees(angles(asgScales[p.x](d[p.x]))) + ")"
+                    return "rotate(" + degrees(angles(asgScales[p.x](d[p.x]))) + ")"
                }
             })
 
             .attr("cx", function (d) {
                 //console.log(d.name, p.y, d[p.y], posScales[p.y](d[p.y]))
                 if (rowTraitScales[p.y]=="rank"){
-                    return ~~radius(rankScale[nodes.indexOf(d)])
+                    return radius(rankScale[nodes.indexOf(d)])
                 } else {
-                    return ~~radius(posScales[p.y](d[p.y])) //pos
+                    return radius(posScales[p.y](d[p.y])) //pos
                 }
             })
             .attr("r", nodesize)
@@ -1130,10 +1131,7 @@ function make_coloring(ruleNumber) {
             console.log('Coloring' + ' ' + mark + 's' + ' with a ' + property + equality + value + ' ' + color)
             if (color != ''){
                 if (mark == "node"){
-                    b1 = performance.now()
                     color_marks("circle", "fill", property, value, color, equality)
-                    b2 = performance.now()
-                    alert(b2-b1)
                 } else if (mark == "link"){
                     color_marks("path", "stroke", property, value, color, equality)
                 }
@@ -1606,7 +1604,3 @@ function place_remove_icon(ruleNumber) {
     var div = document.getElementById("equality"+ruleNumber);
     insertAfter(div, icon);
 }
-
-a2 = performance.now()
-
-//alert(a2-a1)

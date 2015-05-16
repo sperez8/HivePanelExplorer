@@ -1,9 +1,21 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
+#Output files of friends hive panel
+friendsdata/friends_parameters.js
+friendsdata/friends_nodes.js
+friendsdata/friends_edges.js
+friendsdata/friends_panel.html
+friendsdata/panel_methods.js
+friendsdata/remove_icon.svg
+friendsdata/panel_style.css
+friendsdata/d3.v3.min.js
+friendsdata/d3.hive.v0.min.js
+
 
 #Mac OS folder metadata
 *.DS_Store
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
 
 # C extensions
 *.so
