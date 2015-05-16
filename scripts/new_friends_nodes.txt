@@ -1,0 +1,13 @@
+name,height, gender
+Alice,50, girl
+Vivian,43, girl
+Alexandra,45, girl
+Asma,47, girl
+Bob,53, boy
+Carlos,56, boy
+David,49, boy
+Isaac,55, boy
+Jack,57, alien
+Rob,52, alien
+George,61, alien
+Eric,60, alien

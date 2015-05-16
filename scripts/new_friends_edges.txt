@@ -1,0 +1,22 @@
+source, target, friendship
+Rob,Asma,friends
+Rob,Alice,friends
+Jack,Alice,friends
+Eric,Vivian,friends
+Alice,Vivian,friends
+Alice,Alexandra,friends
+Vivian,Alexandra,friends
+Jack,Rob,friends
+Jack,Eric,friends
+Jack,George,friends
+Jack,Bob,friends
+Jack,Carlos,enemies
+Jack,Isaac,enemies
+Rob,David,enemies
+Rob,Bob,friends
+George,Eric,friends
+George,Bob,friends
+David,Bob,enemies
+George,Carlos,friends
+Bob,Carlos,enemies
+Carlos,David,enemies

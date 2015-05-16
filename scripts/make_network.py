@@ -9,13 +9,16 @@ makes hive panel from user input
 import sys
 import os
 import argparse
+import shutil
 import networkx as nx
 import numpy as np
 import string
 from gexf import read_gexf
 from ntpath import basename, dirname
 from uttilities_panel import *
-from file_skeletons import parameters_file, html_file, methods_file
+from file_skeletons import parameters_file, html_file
+
+PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),'methodfiles')
 
 NODE_MEASURES = [nx.degree_centrality,
                 nx.clustering,
@@ -56,7 +59,8 @@ def make_js_files(G):
     f = open(newnodeFile, 'w')
     f.write('var SVGTitle = "{0} Hive Panel"\n'.format(graphName.replace('_',' ')))
     f.write('var nodes = [\n')
-    for node in G.nodes():
+    nodes = G.nodes()
+    for node in nodes:
         line = '    {name: \'' + str(node) +'\''
         for attribute in nodeAttributes:
             line  += ', '+attribute+': \'' + str(G.node[node][attribute]) + '\''
@@ -68,7 +72,7 @@ def make_js_files(G):
     f = open(newedgeFile,'w')
     f.write('var links = [\n')
     for (s,t) in G.edges():
-        line = '  {source: nodes['+str(s)+'], target: nodes['+str(t)+']'
+        line = '  {source: nodes['+str(nodes.index(s))+'], target: nodes['+str(nodes.index(t))+']'
         for attribute in edgeAttributes:
             line  += ', '+attribute+': \'' + str(G.edge[s][t][attribute]) + '\''
         line += '},\n'
@@ -81,7 +85,7 @@ def make_panel_parameters_file(G):
     fileName = os.path.join(G.graph['folder'],"{0}_parameters.js".format(G.graph['title']))
     f = open(fileName, 'w')
     newfile = parameters_file.format(G.graph['axes'],
-                    G.graph['double'],
+                    str(G.graph['double']).lower(),
                     '"'+G.graph['nodeAttributes'][0]+'"',
                     '"'+G.graph['nodeAttributes'][1]+'"',
                     '"'+G.graph['nodeAttributes'][0]+'":"linear"',
@@ -94,17 +98,23 @@ def make_panel_parameters_file(G):
 def make_html_file(G):
     fileName = os.path.join(G.graph['folder'],"{0}_panel.html".format(G.graph['title']))
     f = open(fileName, 'w')
-    newfile = html_file.format()
+    newfile = html_file.format(G.graph['title'])
     f.write(newfile)
     f.close()
     return None
 
 def make_panel_methods(G):
-    fileName = os.path.join(G.graph['folder'],"panel_methods.js")
-    f = open(fileName, 'w')
-    newfile = methods_file.format()
-    f.write(newfile)
-    f.close()
+    destination = G.graph['folder']
+    fileName = "panel_methods.js"
+    shutil.copy(os.path.join(PATH,fileName),destination)
+    fileName = "panel_style.css"
+    shutil.copy(os.path.join(PATH,fileName),destination)
+    fileName = "d3.v3.min.js"
+    shutil.copy(os.path.join(PATH,fileName),destination)
+    fileName = "d3.hive.v0.min.js"
+    shutil.copy(os.path.join(PATH,fileName),destination)
+    fileName = "remove_icon.svg"
+    shutil.copy(os.path.join(PATH,fileName),destination)
     return None
 
 def make_panel(G):
