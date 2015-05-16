@@ -1,0 +1,184 @@
+
+body {
+    margin: 10px 50px 50px 50px;
+}
+
+#container, div.tooltip {
+    font: normal 13px"Calibri";
+    height: 850px;
+    width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5px;
+}
+
+#title {
+    height: 5%;
+    width: 100%;
+    float: center;
+    border-bottom: 3px groove #D2CFE7;
+    padding-bottom: 20px;
+    padding-left: 32px;
+}
+
+#thetitle {
+    font: 300 34px"Calibri";
+}
+
+#info {
+    font: 100 20px"Calibri";
+}
+
+#panel {
+    width: 76%;
+    height: 95%;
+    float: left;
+    clear: right;
+    margin-top: 5px;
+}
+
+#search {
+    height: 5%;
+    margin-top: 10px;
+    text-align: center;
+    vertical-align: middle;
+}
+#revealwrapper {
+    height: 15%;
+    clear: right;
+    margin-top: 10px;
+    text-align: center;
+    vertical-align: middle;
+    padding-bottom: 5px;
+}
+
+#reveal {
+    height: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font: normal 15px"Calibri";
+}
+
+#controlpanel {
+    height: 70%;
+    clear: right;
+    margin-top: 10px;
+}
+
+#search, #revealwrapper, #controlpanel {
+    color: #3F3E45;
+    width: 23%;
+    float: right;
+    border-radius: 7px;
+    border-left: 2px groove #D2CFE7;
+}
+
+#search, #revealwrapper {
+    border-bottom: 3px groove #D2CFE7;
+}
+
+select, input, input[type="button"] {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 2px;
+    padding-right: 4px;
+    padding-left: 4px;
+    background: transparent;
+    height: 26px;
+    max-width:77px;
+    border: 1px solid #d4ccd4;
+    border-radius: 4px;
+    font: normal 13px"Calibri";
+    overflow: hidden;
+}
+
+#lostNode {
+    max-width:  140px !important;
+}
+.rules {
+    border-left: 6px solid #D2CFE7;
+    border-bottom: 2px solid #D2CFE7;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    padding-right: 1px;
+    padding-left: 1px;
+}
+
+.filter {
+    border-left: 6px solid #a9a3a9;
+    border-bottom: 2px solid #a9a3a9;
+    padding-bottom: 4px;
+}
+
+input{
+    max-width: 43px;
+}
+
+input[type="button"] {
+    border: 2px solid #B1AFC4;
+    height: 32px;
+    border-radius: 0px;
+    float: right;
+    margin-right: 0px;
+    min-width: 40px;
+    max-width: 105px;
+}
+
+input.filter{
+    border: 2px solid #a9a3a9;
+    margin-left: 10px;
+    vertical-align: bottom;
+    padding-left: 4px;
+}
+
+p {
+    display: inline-block;
+}
+
+.darktext {
+    color: #4E3D54;
+}
+
+input.addbutton{
+    border: 1px solid #B1AFC4;
+    border-radius: 4px;
+}
+
+.leftrule {
+    float: left;
+}
+
+
+div.tooltip {   
+  position: absolute;
+  text-align: center;
+  width: auto;
+  min-width: 20px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background: #B1AFC4;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+
+.icon {
+    width: 15px;
+    height: 15px;
+    padding-top: 3px;
+    padding-bottom: 10px;
+    padding-right: 2px;
+    display:inline-block;
+    float: right;
+}
+
+.viztext {
+    font: normal 14px"Calibri";
+}
+
+.legend {
+    font: normal 11px"Calibri";    
+}
