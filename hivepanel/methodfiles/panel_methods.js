@@ -6,7 +6,7 @@
 
 // ****************************************** //
 
-var FONT = "Calibri"
+var FONT = "Helvetica Neue"
     bkgcolor="white"
     linkfill = "none"
 

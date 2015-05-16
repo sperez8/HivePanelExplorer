@@ -83,12 +83,14 @@ def make_js_files(G):
 def make_panel_parameters_file(G):
     fileName = os.path.join(G.graph['folder'],"{0}_parameters.js".format(G.graph['title']))
     f = open(fileName, 'w')
+    asgtraits = [G.graph['nodeAttributes'][0],G.graph['nodeAttributes'][2]]
+    postraits = [G.graph['nodeAttributes'][1],G.graph['nodeAttributes'][3]]
     newfile = parameters_file.format(G.graph['axes'],
                     str(G.graph['double']).lower(),
-                    '"'+G.graph['nodeAttributes'][0]+'"',
-                    '"'+G.graph['nodeAttributes'][1]+'"',
-                    '"'+G.graph['nodeAttributes'][0]+'":"linear"',
-                    '"'+G.graph['nodeAttributes'][1]+'":"linear"',
+                    '"'    +   '","'.join(asgtraits)  +   '"',
+                    '"'    +   '","'.join(postraits)  +   '"',
+                    '"' +   '":"linear","'.join(asgtraits)    +  '":"linear"',
+                    '"' +   '":"linear","'.join(postraits)    +  '":"linear"',
                     )
     f.write(newfile)
     f.close()

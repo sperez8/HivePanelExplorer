@@ -1,9 +1,7 @@
 HivePanelExplorer
 ===========
 
------------------------------------------------------------
-**Update** Interactive hive panels can be easily built using different data formats. A wiki tutorial will be up in the next few days. Stay tuned!
------------------------------------------------------------
+**Update**: Interactive hive panels can be easily built using different data formats. A wiki tutorial will be up in the next few days. Stay tuned!
 
 A Python script that takes a network and creates a static HTML page with interactive SVG graphics in D3. The interactive features let users explore their network and discover patterns in their network.
 
@@ -33,7 +31,7 @@ Current input files accepted are:
 
 In the case of text files, the node file should look like the table below where all columns after the first column (arbitrarily called "Node" in this example) contain node properties. These properties can be categorical or quantitative and can be encoded as text or numbers. The first column must contain the names of the nodes to be used to identify edges in the edge file.
 
-| Node | Gender | Height | Property 3... |
+| Node | Gender | Height | Other property ... |
 |:----:|:----------:|:----------:|:----------:|
 | Alice | girl | 70 | ... |
 | Matt | boy | 72 | ... |
@@ -43,16 +41,16 @@ In the case of text files, the node file should look like the table below where 
 
 The edge file needs to specify the sources and targets (though the directionality of the edge won't change the way it looks in the hive plot) in the first two columns of the file. The edges input file should look like:
 
-|Source | Target | Relationship |  
-|:------:|:------:|:----------:|
-| Zans | Alice | enemies |
-| Matt | Zans | friends |
-| ... | ... | ... |
+|Source | Target | Relationship type | Other property ... |
+|:------:|:------:|:----------:|:---:|
+| Zans | Alice | enemies | ... |
+| Matt | Zans | friends | ... |
+| ... | ... | ... | ... |
 
 Again, the edge properties can be encoded as text or numbers.
 
 
-## The hive plot gui
+## The old hive plot gui
 An older version of this repository was advertised as a python gui for making hive plots. It is no loner being managed by it's contents can be found in the *hiveplot* folder.
 
 The graphical user interface (GUI) written using Tkinter in Python takes a network and writes the HTML and JavaScript files necessary to create single hive plots in D3. Check out the [wiki page](https://github.com/sperez8/HivePlotter/wiki) for a step-by-step example of how to make a hive plot.
@@ -60,10 +58,10 @@ The graphical user interface (GUI) written using Tkinter in Python takes a netwo
 ##An example running HyPE
 To create an interactive hive panel of the test Friends network illustrated above, simply run the following command in your local copy of the repository.
 
-'''
+```
 $ cd ~/.../git/HivePanelExplorer/hivepanel
 $ python create_panel.py -nodes ../friends/friends_nodes.txt -edges ../friends_edges.txt -format txt
-'''
+```
 
 Happy hive panel exploring!
 
