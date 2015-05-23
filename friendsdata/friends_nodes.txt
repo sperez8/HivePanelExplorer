@@ -1,0 +1,13 @@
+name,gender,height
+Alice,girl,70
+Vivian,girl,73
+Alex,girl,75
+Emma,girl,77
+Matt,boy,63
+Joe,boy,66
+David,boy,72
+Isaac,boy,65
+Zans,alien,57
+Zill,alien,52
+Zorb,alien,61
+Zed,alien,60
