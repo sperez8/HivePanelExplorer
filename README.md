@@ -1,59 +1,67 @@
 HivePanelExplorer
 ===========
 
---------------------------------------------------------------------------------
-**WARNING:** As you may have noticed, HivePlotter has changed to Hive Panel Explorer (or HyPE). This tool will soon be released online to help users create not just one hive plot but a a hive panel, and an interactive one at that. Stay tuned!
-------------------------------------------------------------
+**Update**: Interactive hive panels can be easily built using different data formats. A wiki tutorial will be up in the next few days. Stay tuned!
 
+A Python script that takes a network and creates a static HTML page with interactive SVG graphics in D3. The interactive features let users explore their network and discover patterns in their network.
 
-A graphical user interface (GUI) written using Tkinter in Python that takes a network and writes the HTML and JavaScript files necessary to create hive plots in D3. Check out the [wiki page](https://github.com/sperez8/HivePlotter/wiki) for a step-by-step example of how to make a hive plot.
-
-**Update** The GUI is now fully functional and contains all the basic features needed to plot a proper hive. Additional interactive and coloring features are on their way.
-
-Below is a screenshot of a hive plot made using the test dataset "Friends" described below.
-
-![example plot](http://i.imgur.com/vMl07N6.png)
+## Why visualize networks?
+Networks capture the structure of a system with relationships, wither its a social circle, a protein-protein interaction network, the World Wide Web, or other. These networks are composed of nodes (people, proteins, web pages) and edges (friendships, interactions, weblinks). These networks can get very big and visualizing them can help discover new connective patterns and properties, like social cliques, protein hubs, and modules of highly connected web pages.
 
 ## Why hive plots?
 Visualizing large networks is tricky; conventional graph layout such as force directed layouts are inconsistent, often resemble "hair balls" and can even suggest patterns which aren't actually there. Comes in Martin Krzywinski (Genome Science Center, Vancouver, BC) and develops [hive plots](http://www.hiveplot.net/), a coherent network layout algorithm that places nodes using predefined rules. Hive plots facilitate the visualization of structural patterns in a network and the comparison of networks.
 
-## Why HivePlotter?
-[D3](http://d3js.org/) is a JavaScript library used to produce beautiful and interactive graphics in HTML. [Mike Bostock]( http://bost.ocks.org/mike/hive/) developed a D3 library specifically for plotting beautiful hive plots. Unfortunately, writing in javascript code and D3 can be challenging, and often isn't part of a researcher's skill set. Yet many researchers' data is best analyzed and visualized using networks! From social networks to biological networks, all deserve beautiful visualizations. HivePlotter provides an easy to use interface to build hive plots.
+## Why HivePanelExplorer?
+Why make one hive plot when you can make many? Why create static viz when you can interact with the data?
+
+A hive panel is exactly what it sounds like: a layout of multiple hive plots, all representing your network in a different way. These multiple projections come in handy when you have "big data" : you can pick multiple properties of nodes (degree, clustering coefficient, gender in social networks, protein family in PPI networks etc.) to organize the nodes and layout the network differently on each plot. In this way, you can compare the positions and edges between nodes on different hive plots. Check out the wiki for examples of patterns (*coming soon!*).
+
+### How does it work?
+[D3](http://d3js.org/) is a JavaScript library used to produce beautiful and interactive graphics in HTML. [Mike Bostock]( http://bost.ocks.org/mike/hive/) developed a D3 library specifically for plotting beautiful hive plots. Unfortunately, writing in JavaScript code and D3 can be challenging, and often isn't part of a researcher's skill set. Yet many researchers' data is best analyzed and visualized using networks! From social networks to biological networks, all deserve beautiful visualizations. HivePanelExplorer (HyPE) provides an easy to use interface to build interactive hive panels. From a simple python script a static HTML page is created along with all the files necessary for you to customize, explore, and export your hive panel.
 
 ##Details
 
 ####Versions and Dependencies
-HivePlotter was developed using Python version 2.7. The [NumPy](http://www.numpy.org/) package is currently required to run HivePlotter. Most modern browsers support SVG and thus D3 features. See [http://caniuse.com/svg](http://caniuse.com/svg) for more details. 
+HyPE was developed using Python version 2.7. The [NumPy](http://www.numpy.org/) package is currently required. The *networkx* package is included as different versions aren't compatible with current implementations. Most modern browsers support SVG and thus D3 features. See [http://caniuse.com/svg](http://caniuse.com/svg) for more details. 
 
 ####Input
-The network should be stored in two csv input files: one storing nodes and one storing edges. The node file should look like the table below where all columns after the first column (arbitrarily called "Node" in this example) contain node properties. These properties can be encoded as text or numbers. The first column must contain the names of the nodes to be used to identify edges in the edge file.
+Current input files accepted are:
+* two text files (tab or comma separated), one for the nodes, one for the edges
+* a graphml file
 
-| Node | Gender | Height | Property 3... |
+In the case of text files, the node file should look like the table below where all columns after the first column (arbitrarily called "Node" in this example) contain node properties. These properties can be categorical or quantitative and can be encoded as text or numbers. The first column must contain the names of the nodes to be used to identify edges in the edge file.
+
+| Node | Gender | Height | Other property ... |
 |:----:|:----------:|:----------:|:----------:|
-| Alice | girl | 12 | ... |
-| Bob | boy | 11 | ... |
-| Cam | boy | 13 | ... |
+| Alice | girl | 70 | ... |
+| Matt | boy | 72 | ... |
+| Zans | alien | 57 | ... |
+| ... | ... | ... | ... |
 
 
-The edge file needs to specify the sources and targets (though the directionality of the edge won't change the way it looks in the hive plot - yet) in the first two columns of the file. The edges input file should look like:
+The edge file needs to specify the sources and targets (though the directionality of the edge won't change the way it looks in the hive plot) in the first two columns of the file. The edges input file should look like:
 
-|Source | Target | Relationship | Friendship Strength|
-|:------:|:------:|:----------:|:----------:|
-|Bob | Alice | friends | 6|
-Bob | Cam | enemies | 2|
-|Alice | Cam | friends | 11|
+|Source | Target | Relationship type | Other property ... |
+|:------:|:------:|:----------:|:---:|
+| Zans | Alice | enemies | ... |
+| Matt | Zans | friends | ... |
+| ... | ... | ... | ... |
 
 Again, the edge properties can be encoded as text or numbers.
 
-##An example using the GUI
-To run the user interface and make your own hive plots, simply run the following command in your local copy of the repository.
 
-'''
-$ cd ~/.../git/HivePlotter/scripts
-$ python gui.py
-'''
+## The old hive plot gui
+An older version of this repository was advertised as a python gui for making hive plots. It is no loner being managed by it's contents can be found in the *hiveplot* folder.
 
-See the [wiki page](https://github.com/sperez8/HivePlotter/wiki) for an example.
+The graphical user interface (GUI) written using Tkinter in Python takes a network and writes the HTML and JavaScript files necessary to create single hive plots in D3. Check out the [wiki page](https://github.com/sperez8/HivePlotter/wiki) for a step-by-step example of how to make a hive plot.
 
-Happy hive plot making!
+##An example running HyPE
+To create an interactive hive panel of the test Friends network illustrated above, simply run the following command in your local copy of the repository.
+
+```
+$ cd ~/.../git/HivePanelExplorer/hivepanel
+$ python create_panel.py -nodes ../friends/friends_nodes.txt -edges ../friends_edges.txt -format txt
+```
+
+Happy hive panel exploring!
 

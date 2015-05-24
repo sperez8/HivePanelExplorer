@@ -1,0 +1,2 @@
+python make_network.py -nodes /Users/sperez/Dropbox/1-Hive\ panels/New_friends/new_friends_nodes.txt -edges /Users/sperez/Dropbox/1-Hive\ panels/New_friends/new_friends_edges.txt -format txt -folder /Users/sperez/Desktop/testpanel/
+
