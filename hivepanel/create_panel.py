@@ -60,9 +60,9 @@ def make_js_files(G):
     f.write('var nodes = [\n')
     nodes = G.nodes()
     for node in nodes:
-        line = '    {name: \'' + str(node) +'\''
+        line = '    {name: "' + str(node) +'"'
         for attribute in nodeAttributes:
-            line  += ', '+attribute+': \'' + str(G.node[node][attribute]) + '\''
+            line  += ', '+attribute+': "' + str(G.node[node][attribute]) + '"'
         line += '},\n'
         f.write(line)
     f.write('];')
@@ -73,7 +73,7 @@ def make_js_files(G):
     for (s,t) in G.edges():
         line = '  {source: nodes['+str(nodes.index(s))+'], target: nodes['+str(nodes.index(t))+']'
         for attribute in edgeAttributes:
-            line  += ', '+attribute+': \'' + str(G.edge[s][t][attribute]) + '\''
+            line  += ', '+attribute+': "' + str(G.edge[s][t][attribute]) + '"'
         line += '},\n'
         f.write(line)
     f.write('];')

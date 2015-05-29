@@ -118,6 +118,7 @@ def convert_graph(G,fileName):
 def make_graph(sources, targets, nodes, filterEdges= True):
     '''Makes a graph using the networkx package Graph instance'''
     G = nx.Graph()
+    G.add_nodes_from(nodes) #add all nodes, even ones without edges...
     G.add_edges_from(zipper(sources,targets))
     if filterEdges:
         for n in G.nodes():
@@ -129,13 +130,13 @@ def make_graph(sources, targets, nodes, filterEdges= True):
 def get_nodes(inputFile,removeNA=None):
     '''gets nodes and their attribute from csv file'''
     
-    delimiter = get_delimiter(inputFile)
 
-    data = np.genfromtxt(inputFile, delimiter=delimiter, dtype='str', filling_values = 'None')
+    data = np.genfromtxt(inputFile, delimiter='\t', dtype='str', filling_values = 'None')
     
     #get attribute and format as strings
     attribute = data[0,1:]
     attribute = format_attribute(attribute)
+    print 'here',attribute
     
     if removeNA:
         colName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
@@ -167,8 +168,7 @@ def get_nodes(inputFile,removeNA=None):
 def get_edges(inputFile):
     '''gets edges and their attribute from csv file'''
     
-    delimiter = get_delimiter(inputFile)
-    data = np.genfromtxt(inputFile, delimiter=delimiter, dtype='str', filling_values = 'None')
+    data = np.genfromtxt(inputFile, delimiter='\t', dtype='str', filling_values = 'None')
     
     #get attribute and format as strings
     attribute = data[0,2:]
@@ -211,30 +211,30 @@ def convert_type(data):
     except ValueError:
         return data
 
-def get_delimiter(inputFile):
-    '''detect if input file is a tab or comma delimited file
-        and return delimiter.'''
+# def get_delimiter(inputFile):
+#     '''detect if input file is a tab or comma delimited file
+#         and return delimiter.'''
     
-    ext = os.path.splitext(basename(inputFile))[1]
+#     ext = os.path.splitext(basename(inputFile))[1]
     
-    if 'tab' in ext or 'tsv' in ext:
-        return '\t'
-    elif 'csv' in ext:
-        return ','
-    elif 'txt' in ext:
-        #detects delimiter by counting the number of tabs and commas in the first line
-        f = open(inputFile, 'r')
-        first = f.read()
-        if first.count(',') > first.count('\t'):
-            return ','
-        elif first.count(',') < first.count('\t'):
-            return '\t'
-        else:
-            print "Couldn't detect a valid file extension: ", inputFile
-            return ','
-    else:
-        print "Couldn't detect a valid file extension: ", inputFile
-        return ','
+#     if 'tab' in ext or 'tsv' in ext:
+#         return '\t'
+#     elif 'csv' in ext:
+#         return ','
+#     elif 'txt' in ext:
+#         #detects delimiter by counting the number of tabs and commas in the first line
+#         f = open(inputFile, 'r')
+#         first = f.read()
+#         if first.count(',') > first.count('\t'):
+#             return ','
+#         elif first.count(',') < first.count('\t'):
+#             return '\t'
+#         else:
+#             print "Couldn't detect a valid file extension: ", inputFile
+#             return ','
+#     else:
+#         print "Couldn't detect a valid file extension: ", inputFile
+#         return ','
 
 
 def format_attribute(attribute, debug = False):
@@ -245,8 +245,8 @@ def format_attribute(attribute, debug = False):
     def convert_word(word):
         '''remove punctuation and numbers from a word'''
         w = word
-        word = ''.join(word.split()) #removes all whitespace (tabs, newlines, spaces...)
-        for c in string.punctuation + string.digits:
+        word = '_'.join(word.split()) #removes all whitespace (tabs, newlines, spaces...)
+        for c in string.punctuation.replace('_','') + string.digits:
             word = word.replace(c,'')
         if w != word:
             if debug:
@@ -265,7 +265,6 @@ def format_attribute(attribute, debug = False):
             newAttributes.append(newProp + 'second')
         else:
             newAttributes.append(newProp)
-            
     return newAttributes
 
 def zipper(*args):
