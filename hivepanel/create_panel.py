@@ -19,7 +19,7 @@ from file_skeletons import parameters_file, html_file
 
 PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),'methodfiles')
 
-NODE_MEASURES = [nx.degree_centrality,
+NODE_MEASURES = [degree,
                 nx.clustering,
                 nx.betweenness_centrality, 
                 nx.closeness_centrality,
@@ -29,7 +29,6 @@ NODE_MEASURES = [nx.degree_centrality,
 EDGE_MEASURES = [nx.edge_betweenness_centrality]
 
 NUM_AXES = 3
-
 
 def get_all_attributes(G):
     '''iters through nodes and edges to get their attributes'''

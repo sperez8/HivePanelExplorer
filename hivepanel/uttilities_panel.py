@@ -14,6 +14,11 @@ import numpy as np
 import string
 from ntpath import basename, dirname
 
+ADDLONELYNODES = False
+
+def degree(G):
+    return G.degree()
+
 def component_membership(G):
     nodeComponents = {}
     #get connected components sorted by size
@@ -34,9 +39,12 @@ def import_graph(nodeFile, edgeFile, filterEdges = True):
     nodes, nodeAttributes = get_nodes(nodeFile)
     sources, targets, edgeAttributes = get_edges(edgeFile)
     
-    G = make_graph(sources, targets, nodes, filterEdges)
+    G = make_graph(sources, targets, nodes, filterEdges, ADDLONELYNODES)
+    allNodes = G.nodes()
     for i,n in enumerate(nodes):
         for p,v in nodeAttributes.iteritems():
+            if not ADDLONELYNODES and n not in allNodes:
+                continue
             G.node[n][p] = v[i]
 
     for i,e in enumerate(zip(sources, targets)):
@@ -115,15 +123,17 @@ def convert_graph(G,fileName):
     return None
 
 
-def make_graph(sources, targets, nodes, filterEdges= True):
+def make_graph(sources, targets, nodes, filterEdges= True, addLonelyNodes = False):
     '''Makes a graph using the networkx package Graph instance'''
     G = nx.Graph()
-    G.add_nodes_from(nodes) #add all nodes, even ones without edges...
+    if addLonelyNodes:
+        G.add_nodes_from(nodes) #add all nodes, even ones without edges...
     G.add_edges_from(zipper(sources,targets))
     if filterEdges:
         for n in G.nodes():
             if n not in nodes:
                 G.remove_node(n)
+
     return G
 
 
@@ -136,7 +146,6 @@ def get_nodes(inputFile,removeNA=None):
     #get attribute and format as strings
     attribute = data[0,1:]
     attribute = format_attribute(attribute)
-    print 'here',attribute
     
     if removeNA:
         colName = nx.betweenness_centrality.__name__.replace('_',' ').capitalize()
