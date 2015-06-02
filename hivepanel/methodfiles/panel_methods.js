@@ -9,6 +9,7 @@
 var FONT = "Helvetica Neue"
     bkgcolor="white"
     linkfill = "none"
+    hoverOverTime = 900
 
 //display title of panel and number of nodes and links
 d3.select("body").select("#title").select("#thetitle")
@@ -318,7 +319,7 @@ function formatAxisLegend(trait,axis){
         if (isNaN(range[0])){return min+'-'+ r1}
         else if (isNaN(range[1])){return r0+'-'+max}
         else {return r0+'-'+r1} 
-        }  	
+        }   
 }
 
 //build each hive plot
@@ -339,7 +340,7 @@ function plot(p){
         .attr("font-family", FONT)
         .attr("font-weight","lighter")
         .attr("font-size", "14px")
-        .text(capitalize(p.y+' ('+rowTraitScales[p.y]+')').replace('_',' ')) //add name of property used for node positionning, the rowtrait
+        .text(capitalize(p.y+' ('+rowTraitScales[p.y]+')').replace(/_/g,' ')) //add name of property used for node positionning, the rowtrait
         .attr("transform", function (d) { 
             return "rotate(-90)";
             })
@@ -354,7 +355,7 @@ function plot(p){
         .attr("font-family", FONT)
         .attr("font-weight","lighter")
         .attr("font-size", "14px")
-        .text(capitalize(p.x+' ('+columnTraitScales[p.x]+')').replace('_',' ')) //add name of property used for node assignment, the columntrait
+        .text(capitalize(p.x+' ('+columnTraitScales[p.x]+')').replace(/_/g,' ')) //add name of property used for node assignment, the columntrait
 
     }
 
@@ -647,9 +648,11 @@ var node_tooltip = function (cx, cy, d, px, py, x, y){
 
 var node_full_reveal = function (node,d) {
     revealNode(d, node.style("fill"))
+    console.log('here',d.name)
 
-    d3.selectAll(".node")
+    d3.selectAll("circle")
         .each(function (n){
+            console.log(n.name)
             if (n.name == d.name){
                 node = d3.select(this)
                 node.classed({"clicked":true})
@@ -665,7 +668,7 @@ var node_full_reveal = function (node,d) {
         .defer(revealNode, d, node.style("fill"))
 
     tasks = []
-    d3.selectAll(".node")
+    d3.selectAll("circle")
         .each(function (n){
             if (n.name == d.name){
                 node = d3.select(this)
@@ -694,7 +697,7 @@ var node_mouseout = function (node) {
                     return opnode
                 }})
     } else {
-        d3.selectAll(".node")
+        d3.selectAll("circle")
             .transition()
             .duration(hoverOverTime/2)
             .attr("r", nodesize)
@@ -732,13 +735,13 @@ var highlight_nodes = function (selection) {
 
 var link_full_reveal = function (link,d,source,target) {
     revealLink(d, link.style("stroke"));
-    d3.selectAll(".link")
+    d3.selectAll("path")
         .each(function (l){
             if (l.source.name == source && l.target.name == target){
                 d3.select(this).call(highlight_links)
             }
         })
-    d3.selectAll(".node")
+    d3.selectAll("circle")
         .each(function (n){
             if (n.name == source || n.name == target){
                 d3.select(this).call(highlight_nodes)
@@ -763,7 +766,7 @@ var link_mouseout = function (link) {
             .style("stroke-opacity", oplink)
             .style("stroke-width", linkwidth)
     } else {
-    d3.selectAll(".link")
+    d3.selectAll("path")
         .transition()
         .duration(hoverOverTime)
         .style("stroke-opacity", oplink)
@@ -1060,12 +1063,12 @@ function color_filter_or_undo(sel) {
 
     } else if (ruleState == 'Undo') {
         //reset all links and nodes to defaults
-        d3.selectAll(".link")
+        d3.selectAll("path")
             .style("stroke", edgeColor)
             .style("visibility", "visible")
             .style("stroke-opacity", oplink)
 
-        d3.selectAll(".node")
+        d3.selectAll("circle")
             .style("fill", nodeColor)
             .style("visibility", "visible")
             .style("fill-opacity", opnode)
@@ -1162,8 +1165,8 @@ function make_coloring(ruleNumber) {
 function reveal_count(mark, filter, color, count){
     if (filter == 'hide'){action = 'filtered out'
     } else if (filter == 'keep'){
-    	action = 'filtered out'
-    	count = N-count
+        action = 'filtered out'
+        count = N-count
     } else {action = 'colored'}
 
     if (count > 1 || count == 0){mark = mark + 's were'
@@ -1209,10 +1212,10 @@ function color_marks(mark, styling, property, value, color, equality) {
                     .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
                     .classed({"important":true})
                 if (styling == 'visibility' && mark == 'circle'){
-                	d3.selectAll("path")
+                    d3.selectAll("path")
                         .each(function (l){
-                        	// console.log(styling, color)
-                        	// console.log(d.name, l.source.name, l.target.name)
+                            // console.log(styling, color)
+                            // console.log(d.name, l.source.name, l.target.name)
                             if (l.source.name == d.name || l.target.name == d.name){
                                 d3.select(this).style(styling, color)
                             }
@@ -1223,20 +1226,20 @@ function color_marks(mark, styling, property, value, color, equality) {
     }
     else if (equality == '='){
 
-    	// data = nodes
-    	// ids = []
-    	// for (var i = data.length - 1; i >= 0; i--) {
+        // data = nodes
+        // ids = []
+        // for (var i = data.length - 1; i >= 0; i--) {
      //         if (data[i][property] == value) {ids.push("n"+String(i))}
      //     }
      //    for (var i = ids.length - 1; i >= 0; i--) {
-     //    	// console.log(ids[i])
-     //    	d3.selectAll("."+ids[i]).each(function (d) {
-     //    		d3.select(this)
-	    //     		.style(styling, color)
-	    //             .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
-	    //             .classed({"important":true})
-     //    		})
-     //   	};
+     //     // console.log(ids[i])
+     //     d3.selectAll("."+ids[i]).each(function (d) {
+     //         d3.select(this)
+        //          .style(styling, color)
+        //             .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
+        //             .classed({"important":true})
+     //         })
+     //     };
 
 
         d3.selectAll(mark).each(function (d){
