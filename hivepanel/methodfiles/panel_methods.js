@@ -381,10 +381,11 @@ function find_magnitude(min,max){
     minorder = Math.floor(Math.log(min) / Math.LN10 + 0.000000001); // because float math sucks like that
     minorder = Math.pow(10,-minorder)
     maxorder = Math.floor(Math.log(max) / Math.LN10 + 0.000000001); // because float math sucks like that
-    console.log(maxorder)
     maxorder = Math.pow(10,-maxorder)
-    console.log(min,max, minorder,maxorder)
-    return Math.min(maxorder, minorder)*10
+    difforder = Math.floor(Math.log(max-min) / Math.LN10 + 0.000000001); // because float math sucks like that
+    difforder = Math.pow(10,-difforder)
+    console.log('order',minorder,maxorder,difforder,max-min)
+    return Math.min(maxorder, minorder,difforder)*10
 }
 
 
