@@ -128,6 +128,32 @@ function make_rank_scale(trait){
 }
 
 
+function make_categorical_rank_scale(trait){
+    rankScale = [];
+    data = nodes.map(function (d) {return d[trait]})
+    total = data.length
+    
+    indices = Array.apply(null, Array(total)).map(function (_, i) {return i;});
+    both = zip([data,indices])
+
+    both.sort(function (a, b) {
+        a = a[0];
+        b = b[0];
+
+        return a < b ? -1 : (a > b ? 1 : 0);
+    });
+
+    console.log(both)
+    for (var i = 0; i < both.length; i++) {
+        var datum = both[i][0];
+        var ind = both[i][1];
+
+        rankScale[ind] = i/parseFloat(both.length-1)
+    }
+    return rankScale
+}
+
+
 // get the columntraits used for node assignment onto axes and build the desired linear, log 
 //or evenly distributed scales to use later when plotting nodes and links
 console.log('\nAssignment values for grouping of nodes on axes:')
@@ -179,13 +205,17 @@ console.log('\nScaled values for positioning of nodes onto axes:')
 for (var i in rowtraits) {
     trait = rowtraits[i];
     categorical = !check_quantitative([nodes[0][trait]])  //check if trait is a qualitative or categorical attribute
-    if (categorical){
+    if (categorical && rowTraitScales[trait]!="rank"){
         keys = get_categories(trait)
         posScales[trait] = d3.scale.ordinal()
             .domain(keys)
             .rangeBands([0, 1], 1.0/keys.length/3);
         console.log('Categorical trait', trait, 'has categories: ', keys)
         rowTraitScales[trait]=="categorical"
+    } else if (categorical && rowTraitScales[trait]=="rank"){
+            type = 'rank'            
+            rankScale = make_categorical_rank_scale(trait)
+            posScales[trait] = rankScale
     } else {
         max = d3.max(nodes, function (d) {
             return Number(d[trait])});
@@ -340,7 +370,7 @@ function plot(p){
         .attr("font-family", FONT)
         .attr("font-weight","lighter")
         .attr("font-size", "14px")
-        .text(capitalize(p.y+' ('+rowTraitScales[p.y]+')').replace(/_/g,' ')) //add name of property used for node positionning, the rowtrait
+        .text(capitalize(p.y+' ('+rowTraitScales[p.y]+')').replace('_',' ')) //add name of property used for node positionning, the rowtrait
         .attr("transform", function (d) { 
             return "rotate(-90)";
             })
@@ -355,7 +385,7 @@ function plot(p){
         .attr("font-family", FONT)
         .attr("font-weight","lighter")
         .attr("font-size", "14px")
-        .text(capitalize(p.x+' ('+columnTraitScales[p.x]+')').replace(/_/g,' ')) //add name of property used for node assignment, the columntrait
+        .text(capitalize(p.x+' ('+columnTraitScales[p.x]+')').replace('_',' ')) //add name of property used for node assignment, the columntrait
 
     }
 
