@@ -46,6 +46,7 @@ var angles = d3.scale.ordinal()
 var asgScales = {};
     posScales = {};
     minmax_scale = {};
+    trait_integers = {};
 
 //get witdh of the "panel" div and the number of traits to figure out the number of hive plots and their size in the panel
 var width = document.getElementById("panel").offsetWidth
@@ -82,6 +83,18 @@ function sortNumber(a,b) {
 function get_trait_values(trait){
     return nodes.map(function (d) {return Number(d[trait])})
 }
+
+function check_all_ints(trait){
+    data = get_trait_values(trait)
+    ints = true
+    for (var i = data.length - 1; i >= 0; i--) {
+        if (data[i] !== parseInt(data[i],10)) {
+            ints = false
+        }
+    };
+    return ints
+}
+
 
 //returns numerical thresholds to bin node assignment data into about equally sized bins.
 function even_thresholds(trait){
@@ -139,11 +152,9 @@ function make_categorical_rank_scale(trait){
     both.sort(function (a, b) {
         a = a[0];
         b = b[0];
-
         return a < b ? -1 : (a > b ? 1 : 0);
     });
 
-    console.log(both)
     for (var i = 0; i < both.length; i++) {
         var datum = both[i][0];
         var ind = both[i][1];
@@ -173,6 +184,7 @@ for (var i in columntraits) {
         min = d3.min(nodes, function (d) {
             return Number(d[trait])});
         minmax_scale[trait] = [min,max]
+        trait_integers[trait] = check_all_ints(trait)
         type = 'linear'
         if (columnTraitScales[trait]=="even"){
             t = even_thresholds(trait)
@@ -334,23 +346,47 @@ var cell = svg.selectAll(".cell")
   
 //format the labels for axes
 function formatAxisLegend(trait,axis){
-    values = asgScales[trait].domain()
     type = columnTraitScales[trait]
-    //console.log(values, type)
-
     if (type=="categorical"){
+        values = asgScales[trait].domain()
         return values[axis]
     } else {
         range = asgScales[trait].invertExtent(axis)
-        r0 = Math.round(range[0]*100)/100
-        r1 = Math.round(range[1]*100)/100
-        min = Math.round(minmax_scale[trait][0]*100/100)
-        max = Math.round(minmax_scale[trait][1]*100/100)
-        if (isNaN(range[0])){return min+'-'+ r1}
-        else if (isNaN(range[1])){return r0+'-'+max}
-        else {return r0+'-'+r1} 
+        r0 = range[0]
+        r1 = range[1]
+        min = minmax_scale[trait][0]
+        max = minmax_scale[trait][1]
+        mag = find_magnitude(min,max)
+        ints = trait_integers[trait]
+        if (ints) {mag = 1}
+
+        if (isNaN(r0)){
+            r0 = min
+        } else if (isNaN(r1)) {
+            r1 = max
+            r0 = r0 + 1/mag
+        } else {
+            r0 = r0 + 1/mag
+        }
+        
+        n0 = Math.round(r0*mag)/mag
+        n1 = Math.round(r1*mag)/mag
+
+        console.log(trait,r0,r1,n0,n1)
+        return n0+'-'+n1
         }   
 }
+
+function find_magnitude(min,max){
+    minorder = Math.floor(Math.log(min) / Math.LN10 + 0.000000001); // because float math sucks like that
+    minorder = Math.pow(10,-minorder)
+    maxorder = Math.floor(Math.log(max) / Math.LN10 + 0.000000001); // because float math sucks like that
+    console.log(maxorder)
+    maxorder = Math.pow(10,-maxorder)
+    console.log(min,max, minorder,maxorder)
+    return Math.min(maxorder, minorder)*10
+}
+
 
 //build each hive plot
 function plot(p){
