@@ -1153,6 +1153,7 @@ function color_filter_or_undo(sel) {
 
 function count_marks_colored(mark,property,value,equality) {
     count = 0
+
     if (mark == "node"){
         data = nodes
     }
@@ -1162,11 +1163,11 @@ function count_marks_colored(mark,property,value,equality) {
 
     if (equality == '>'){
         for (var i = data.length - 1; i >= 0; i--) {
-             if (data[i][property] > value) {count ++}};
+             if (Number(data[i][property]) > Number(value)) {count ++}};
     }
     else if (equality == '<') {
         for (var i = data.length - 1; i >= 0; i--) {
-             if (data[i][property] < value) {count ++}};
+             if (Number(data[i][property]) < Number(value)) {count ++}};
     }
     else if (equality == '=') {
         for (var i = data.length - 1; i >= 0; i--) {
@@ -1176,6 +1177,7 @@ function count_marks_colored(mark,property,value,equality) {
         for (var i = data.length - 1; i >= 0; i--) {
              if (data[i][property] != value) {count ++}};
     }
+    console.log(count)
     return count
 }
 
@@ -1232,8 +1234,7 @@ function make_coloring(ruleNumber) {
 function reveal_count(mark, filter, color, count){
     if (filter == 'hide'){action = 'filtered out'
     } else if (filter == 'keep'){
-        action = 'filtered out'
-        count = N-count
+        action = 'kept'
     } else {action = 'colored'}
 
     if (count > 1 || count == 0){mark = mark + 's were'
