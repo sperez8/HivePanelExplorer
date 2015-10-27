@@ -235,32 +235,6 @@ def convert_type(data):
     except ValueError:
         return data
 
-# def get_delimiter(inputFile):
-#     '''detect if input file is a tab or comma delimited file
-#         and return delimiter.'''
-    
-#     ext = os.path.splitext(basename(inputFile))[1]
-    
-#     if 'tab' in ext or 'tsv' in ext:
-#         return '\t'
-#     elif 'csv' in ext:
-#         return ','
-#     elif 'txt' in ext:
-#         #detects delimiter by counting the number of tabs and commas in the first line
-#         f = open(inputFile, 'r')
-#         first = f.read()
-#         if first.count(',') > first.count('\t'):
-#             return ','
-#         elif first.count(',') < first.count('\t'):
-#             return '\t'
-#         else:
-#             print_message("Couldn't detect a valid file extension: ", inputFile)
-#             return ','
-#     else:
-#         print_message("Couldn't detect a valid file extension: ", inputFile)
-#         return ','
-
-
 def format_attribute(attribute, debug = False):
     '''takes a list of attribute names and removes all punctuation and numbers'''
     
