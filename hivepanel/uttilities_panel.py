@@ -120,8 +120,8 @@ def convert_graph(G,fileName):
                 row.append('None')
         ef.write('\n' + ','.join([str(r) for r in row]))
     
-    print "writing nodefile", nodeFile
-    print "writing edgefile", edgeFile
+    print_message("writing nodefile", nodeFile)
+    print_message("writing edgefile", edgeFile)
     return None
 
 
@@ -138,15 +138,28 @@ def make_graph(sources, targets, nodes, filterEdges= True, addLonelyNodes = Fals
 
     return G
 
+def load_file(inputFile):
+    #try loading as a tab delimited file, otherwise a comma delimited file.
+    try:
+        data = np.genfromtxt(inputFile, delimiter='\t', dtype='str', filling_values = 'None')
+        attribute = data[0,1:] #this will fail if file is comma
+    except IndexError:
+        try:
+            data = np.genfromtxt(inputFile, delimiter=',', dtype='str', filling_values = 'None')
+            attribute = data[0,1:]
+        except IndexError:
+            print_message("ERROR: Please use a tab delimited or comma delimited text file")
+            sys.exit()
+    return data
+
 
 def get_nodes(inputFile,removeNA=None):
     '''gets nodes and their attribute from csv file'''
-    
-    print os.getcwd()
-    data = np.genfromtxt(inputFile, delimiter='\t', dtype='str', filling_values = 'None')
-    
-    #get attribute and format as strings
+
+    data = load_file(inputFile)
     attribute = data[0,1:]
+
+    #get attribute and format as strings
     attribute = format_attribute(attribute)
     
     if removeNA:
@@ -179,7 +192,7 @@ def get_nodes(inputFile,removeNA=None):
 def get_edges(inputFile):
     '''gets edges and their attribute from csv file'''
     
-    data = np.genfromtxt(inputFile, delimiter='\t', dtype='str', filling_values = 'None')
+    data = load_file(inputFile)
     
     #get attribute and format as strings
     attribute = data[0,2:]
@@ -241,10 +254,10 @@ def convert_type(data):
 #         elif first.count(',') < first.count('\t'):
 #             return '\t'
 #         else:
-#             print "Couldn't detect a valid file extension: ", inputFile
+#             print_message("Couldn't detect a valid file extension: ", inputFile)
 #             return ','
 #     else:
-#         print "Couldn't detect a valid file extension: ", inputFile
+#         print_message("Couldn't detect a valid file extension: ", inputFile)
 #         return ','
 
 
@@ -261,7 +274,7 @@ def format_attribute(attribute, debug = False):
             word = word.replace(c,'')
         if w != word:
             if debug:
-                print "The attribute \'{0}\' contains spaces, punctuation or digits and has been renamed '{1}'".format(w,word)
+                print_message("The attribute \'{0}\' contains spaces, punctuation or digits and has been renamed '{1}'".format(w,word))
         return word
          
     newAttributes = []
@@ -286,6 +299,11 @@ def zipper(*args):
             raise ValueError('The lists to be zipped aren\'t the same length.')
     
     return zip(*args)
+
+def print_message(*args):
+    '''Formats terminal messages for user'''
+    print "\n*\n ", ' '.join(args),"\n"
+    return None
 
 
 

@@ -137,17 +137,17 @@ def main(*argv):
 
     #Get graph in networkx format
     if args.format=='graphml':
-        print "Reading .graphml as a networkx graph."
+        print_message("Reading .graphml as a networkx graph.")
         G = import_graphml(args.input)
         title = basename(args.input).split('.')[0]
         folder = dirname(args.input)
     elif args.format=='txt':
-        print "Reading .txt as a networkx graph."
+        print_message("Reading .txt as a networkx graph.")
         G = import_graph(args.nodes, args.edges)
         title = basename(args.nodes).split('.')[0]
         folder = dirname(args.nodes)
     else:
-        print "Please specify the format of your network: .gexf, .graphml, or a 2 .txt files with node and edge attribute."
+        print_message("Please specify the format of your network: .gexf, .graphml, or a 2 .txt files with node and edge attribute.")
         parser.print_help()
         sys.exit()
 
@@ -174,10 +174,13 @@ def main(*argv):
         measures = m(G)
         nx.set_edge_attributes(G,m.__name__,measures)
 
-    for n,v in G.graph.iteritems():
-        print n,v
+    print "PARAMETERS OF NETWORK:"
+    print "     Network name:", G.graph['title']
+    print "     Node attributes:\n\t\t", '\n\t\t'.join(G.graph['nodeAttributes'])
+    print "     Edge attributes:\n\t\t", '\n\t\t'.join(G.graph['edgeAttributes'])
+    print "     Output folder", G.graph['folder']
 
-    print 'Making panel.'
+    print_message('Making panel.')
     make_panel(G,)
 
 
