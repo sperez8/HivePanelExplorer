@@ -19,7 +19,7 @@ from file_skeletons import parameters_file, html_file
 
 PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),'methodfiles')
 
-NODE_MEASURES = [nx.degree_centrality,
+NODE_MEASURES = [degree,
                 nx.clustering,
                 nx.betweenness_centrality, 
                 nx.closeness_centrality,
@@ -29,7 +29,6 @@ NODE_MEASURES = [nx.degree_centrality,
 EDGE_MEASURES = [nx.edge_betweenness_centrality]
 
 NUM_AXES = 3
-
 
 def get_all_attributes(G):
     '''iters through nodes and edges to get their attributes'''
@@ -60,9 +59,9 @@ def make_js_files(G):
     f.write('var nodes = [\n')
     nodes = G.nodes()
     for node in nodes:
-        line = '    {name: \'' + str(node) +'\''
+        line = '    {name: "' + str(node) +'"'
         for attribute in nodeAttributes:
-            line  += ', '+attribute+': \'' + str(G.node[node][attribute]) + '\''
+            line  += ', '+attribute+': "' + str(G.node[node][attribute]) + '"'
         line += '},\n'
         f.write(line)
     f.write('];')
@@ -73,7 +72,7 @@ def make_js_files(G):
     for (s,t) in G.edges():
         line = '  {source: nodes['+str(nodes.index(s))+'], target: nodes['+str(nodes.index(t))+']'
         for attribute in edgeAttributes:
-            line  += ', '+attribute+': \'' + str(G.edge[s][t][attribute]) + '\''
+            line  += ', '+attribute+': "' + str(G.edge[s][t][attribute]) + '"'
         line += '},\n'
         f.write(line)
     f.write('];')

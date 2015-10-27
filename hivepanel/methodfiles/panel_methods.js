@@ -9,6 +9,7 @@
 var FONT = "Helvetica Neue"
     bkgcolor="white"
     linkfill = "none"
+    hoverOverTime = 900
 
 //display title of panel and number of nodes and links
 d3.select("body").select("#title").select("#thetitle")
@@ -45,6 +46,7 @@ var angles = d3.scale.ordinal()
 var asgScales = {};
     posScales = {};
     minmax_scale = {};
+    trait_integers = {};
 
 //get witdh of the "panel" div and the number of traits to figure out the number of hive plots and their size in the panel
 var width = document.getElementById("panel").offsetWidth
@@ -81,6 +83,18 @@ function sortNumber(a,b) {
 function get_trait_values(trait){
     return nodes.map(function (d) {return Number(d[trait])})
 }
+
+function check_all_ints(trait){
+    data = get_trait_values(trait)
+    ints = true
+    for (var i = data.length - 1; i >= 0; i--) {
+        if (data[i] !== parseInt(data[i],10)) {
+            ints = false
+        }
+    };
+    return ints
+}
+
 
 //returns numerical thresholds to bin node assignment data into about equally sized bins.
 function even_thresholds(trait){
@@ -127,6 +141,30 @@ function make_rank_scale(trait){
 }
 
 
+function make_categorical_rank_scale(trait){
+    rankScale = [];
+    data = nodes.map(function (d) {return d[trait]})
+    total = data.length
+    
+    indices = Array.apply(null, Array(total)).map(function (_, i) {return i;});
+    both = zip([data,indices])
+
+    both.sort(function (a, b) {
+        a = a[0];
+        b = b[0];
+        return a < b ? -1 : (a > b ? 1 : 0);
+    });
+
+    for (var i = 0; i < both.length; i++) {
+        var datum = both[i][0];
+        var ind = both[i][1];
+
+        rankScale[ind] = i/parseFloat(both.length-1)
+    }
+    return rankScale
+}
+
+
 // get the columntraits used for node assignment onto axes and build the desired linear, log 
 //or evenly distributed scales to use later when plotting nodes and links
 console.log('\nAssignment values for grouping of nodes on axes:')
@@ -146,6 +184,7 @@ for (var i in columntraits) {
         min = d3.min(nodes, function (d) {
             return Number(d[trait])});
         minmax_scale[trait] = [min,max]
+        trait_integers[trait] = check_all_ints(trait)
         type = 'linear'
         if (columnTraitScales[trait]=="even"){
             t = even_thresholds(trait)
@@ -178,13 +217,17 @@ console.log('\nScaled values for positioning of nodes onto axes:')
 for (var i in rowtraits) {
     trait = rowtraits[i];
     categorical = !check_quantitative([nodes[0][trait]])  //check if trait is a qualitative or categorical attribute
-    if (categorical){
+    if (categorical && rowTraitScales[trait]!="rank"){
         keys = get_categories(trait)
         posScales[trait] = d3.scale.ordinal()
             .domain(keys)
             .rangeBands([0, 1], 1.0/keys.length/3);
         console.log('Categorical trait', trait, 'has categories: ', keys)
         rowTraitScales[trait]=="categorical"
+    } else if (categorical && rowTraitScales[trait]=="rank"){
+            type = 'rank'            
+            rankScale = make_categorical_rank_scale(trait)
+            posScales[trait] = rankScale
     } else {
         max = d3.max(nodes, function (d) {
             return Number(d[trait])});
@@ -303,23 +346,48 @@ var cell = svg.selectAll(".cell")
   
 //format the labels for axes
 function formatAxisLegend(trait,axis){
-    values = asgScales[trait].domain()
     type = columnTraitScales[trait]
-    //console.log(values, type)
-
     if (type=="categorical"){
+        values = asgScales[trait].domain()
         return values[axis]
     } else {
         range = asgScales[trait].invertExtent(axis)
-        r0 = Math.round(range[0]*100)/100
-        r1 = Math.round(range[1]*100)/100
-        min = Math.round(minmax_scale[trait][0]*100/100)
-        max = Math.round(minmax_scale[trait][1]*100/100)
-        if (isNaN(range[0])){return min+'-'+ r1}
-        else if (isNaN(range[1])){return r0+'-'+max}
-        else {return r0+'-'+r1} 
-        }  	
+        r0 = range[0]
+        r1 = range[1]
+        min = minmax_scale[trait][0]
+        max = minmax_scale[trait][1]
+        mag = find_magnitude(min,max)
+        ints = trait_integers[trait]
+        if (ints) {mag = 1}
+
+        if (isNaN(r0)){
+            r0 = min
+        } else if (isNaN(r1)) {
+            r1 = max
+            r0 = r0 + 1/mag
+        } else {
+            r0 = r0 + 1/mag
+        }
+        
+        n0 = Math.round(r0*mag)/mag
+        n1 = Math.round(r1*mag)/mag
+
+        console.log(trait,r0,r1,n0,n1)
+        return n0+'-'+n1
+        }   
 }
+
+function find_magnitude(min,max){
+    minorder = Math.floor(Math.log(min) / Math.LN10 + 0.000000001); // because float math sucks like that
+    minorder = Math.pow(10,-minorder)
+    maxorder = Math.floor(Math.log(max) / Math.LN10 + 0.000000001); // because float math sucks like that
+    maxorder = Math.pow(10,-maxorder)
+    difforder = Math.floor(Math.log(max-min) / Math.LN10 + 0.000000001); // because float math sucks like that
+    difforder = Math.pow(10,-difforder)
+    console.log('order',minorder,maxorder,difforder,max-min)
+    return Math.min(maxorder, minorder,difforder)*10
+}
+
 
 //build each hive plot
 function plot(p){
@@ -647,9 +715,11 @@ var node_tooltip = function (cx, cy, d, px, py, x, y){
 
 var node_full_reveal = function (node,d) {
     revealNode(d, node.style("fill"))
+    console.log('here',d.name)
 
-    d3.selectAll(".node")
+    d3.selectAll("circle")
         .each(function (n){
+            console.log(n.name)
             if (n.name == d.name){
                 node = d3.select(this)
                 node.classed({"clicked":true})
@@ -665,7 +735,7 @@ var node_full_reveal = function (node,d) {
         .defer(revealNode, d, node.style("fill"))
 
     tasks = []
-    d3.selectAll(".node")
+    d3.selectAll("circle")
         .each(function (n){
             if (n.name == d.name){
                 node = d3.select(this)
@@ -694,7 +764,7 @@ var node_mouseout = function (node) {
                     return opnode
                 }})
     } else {
-        d3.selectAll(".node")
+        d3.selectAll("circle")
             .transition()
             .duration(hoverOverTime/2)
             .attr("r", nodesize)
@@ -732,13 +802,13 @@ var highlight_nodes = function (selection) {
 
 var link_full_reveal = function (link,d,source,target) {
     revealLink(d, link.style("stroke"));
-    d3.selectAll(".link")
+    d3.selectAll("path")
         .each(function (l){
             if (l.source.name == source && l.target.name == target){
                 d3.select(this).call(highlight_links)
             }
         })
-    d3.selectAll(".node")
+    d3.selectAll("circle")
         .each(function (n){
             if (n.name == source || n.name == target){
                 d3.select(this).call(highlight_nodes)
@@ -763,7 +833,7 @@ var link_mouseout = function (link) {
             .style("stroke-opacity", oplink)
             .style("stroke-width", linkwidth)
     } else {
-    d3.selectAll(".link")
+    d3.selectAll("path")
         .transition()
         .duration(hoverOverTime)
         .style("stroke-opacity", oplink)
@@ -1060,12 +1130,12 @@ function color_filter_or_undo(sel) {
 
     } else if (ruleState == 'Undo') {
         //reset all links and nodes to defaults
-        d3.selectAll(".link")
+        d3.selectAll("path")
             .style("stroke", edgeColor)
             .style("visibility", "visible")
             .style("stroke-opacity", oplink)
 
-        d3.selectAll(".node")
+        d3.selectAll("circle")
             .style("fill", nodeColor)
             .style("visibility", "visible")
             .style("fill-opacity", opnode)
@@ -1083,6 +1153,7 @@ function color_filter_or_undo(sel) {
 
 function count_marks_colored(mark,property,value,equality) {
     count = 0
+
     if (mark == "node"){
         data = nodes
     }
@@ -1092,11 +1163,11 @@ function count_marks_colored(mark,property,value,equality) {
 
     if (equality == '>'){
         for (var i = data.length - 1; i >= 0; i--) {
-             if (data[i][property] > value) {count ++}};
+             if (Number(data[i][property]) > Number(value)) {count ++}};
     }
     else if (equality == '<') {
         for (var i = data.length - 1; i >= 0; i--) {
-             if (data[i][property] < value) {count ++}};
+             if (Number(data[i][property]) < Number(value)) {count ++}};
     }
     else if (equality == '=') {
         for (var i = data.length - 1; i >= 0; i--) {
@@ -1106,6 +1177,7 @@ function count_marks_colored(mark,property,value,equality) {
         for (var i = data.length - 1; i >= 0; i--) {
              if (data[i][property] != value) {count ++}};
     }
+    console.log(count)
     return count
 }
 
@@ -1162,8 +1234,7 @@ function make_coloring(ruleNumber) {
 function reveal_count(mark, filter, color, count){
     if (filter == 'hide'){action = 'filtered out'
     } else if (filter == 'keep'){
-    	action = 'filtered out'
-    	count = N-count
+        action = 'kept'
     } else {action = 'colored'}
 
     if (count > 1 || count == 0){mark = mark + 's were'
@@ -1209,10 +1280,10 @@ function color_marks(mark, styling, property, value, color, equality) {
                     .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
                     .classed({"important":true})
                 if (styling == 'visibility' && mark == 'circle'){
-                	d3.selectAll("path")
+                    d3.selectAll("path")
                         .each(function (l){
-                        	// console.log(styling, color)
-                        	// console.log(d.name, l.source.name, l.target.name)
+                            // console.log(styling, color)
+                            // console.log(d.name, l.source.name, l.target.name)
                             if (l.source.name == d.name || l.target.name == d.name){
                                 d3.select(this).style(styling, color)
                             }
@@ -1223,20 +1294,20 @@ function color_marks(mark, styling, property, value, color, equality) {
     }
     else if (equality == '='){
 
-    	// data = nodes
-    	// ids = []
-    	// for (var i = data.length - 1; i >= 0; i--) {
+        // data = nodes
+        // ids = []
+        // for (var i = data.length - 1; i >= 0; i--) {
      //         if (data[i][property] == value) {ids.push("n"+String(i))}
      //     }
      //    for (var i = ids.length - 1; i >= 0; i--) {
-     //    	// console.log(ids[i])
-     //    	d3.selectAll("."+ids[i]).each(function (d) {
-     //    		d3.select(this)
-	    //     		.style(styling, color)
-	    //             .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
-	    //             .classed({"important":true})
-     //    		})
-     //   	};
+     //     // console.log(ids[i])
+     //     d3.selectAll("."+ids[i]).each(function (d) {
+     //         d3.select(this)
+        //          .style(styling, color)
+        //             .style("fill-opacity", function(){if (mark == 'circle'){return opnode_more}})
+        //             .classed({"important":true})
+     //         })
+     //     };
 
 
         d3.selectAll(mark).each(function (d){
