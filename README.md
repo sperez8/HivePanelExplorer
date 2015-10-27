@@ -1,7 +1,7 @@
 HivePanelExplorer
 ===========
 
-**Update**: Interactive hive panels can be easily built using different data formats. A wiki tutorial will be up in the next few days. Stay tuned!
+**Update**: Interactive hive panels can be easily built using different data formats. A wiki tutorial will be up soon. Stay tuned!
 
 A Python script that takes a network and creates a static HTML page with interactive SVG graphics in D3. The interactive features let users explore their network and discover patterns in their network.
 
@@ -18,6 +18,14 @@ A hive panel is exactly what it sounds like: a layout of multiple hive plots, al
 
 ### How does it work?
 [D3](http://d3js.org/) is a JavaScript library used to produce beautiful and interactive graphics in HTML. [Mike Bostock]( http://bost.ocks.org/mike/hive/) developed a D3 library specifically for plotting beautiful hive plots. Unfortunately, writing in JavaScript code and D3 can be challenging, and often isn't part of a researcher's skill set. Yet many researchers' data is best analyzed and visualized using networks! From social networks to biological networks, all deserve beautiful visualizations. HivePanelExplorer (HyPE) provides an easy to use interface to build interactive hive panels. From a simple python script a static HTML page is created along with all the files necessary for you to customize, explore, and export your hive panel.
+
+##An example running HyPE
+To create an interactive hive panel of the test Friends network illustrated above, simply run the following command in your local copy of the repository.
+
+```
+$ cd ~/.../git/HivePanelExplorer/hivepanel
+$ python create_panel.py -nodes ../friends/friends_nodes.txt -edges ../friends_edges.txt -format txt
+```
 
 ##Details
 
@@ -51,17 +59,7 @@ Again, the edge properties can be encoded as text or numbers.
 
 
 ## The old hive plot gui
-An older version of this repository was advertised as a python gui for making hive plots. It is no loner being managed by it's contents can be found in the *hiveplot* folder.
-
-The graphical user interface (GUI) written using Tkinter in Python takes a network and writes the HTML and JavaScript files necessary to create single hive plots in D3. Check out the [wiki page](https://github.com/sperez8/HivePlotter/wiki) for a step-by-step example of how to make a hive plot.
-
-##An example running HyPE
-To create an interactive hive panel of the test Friends network illustrated above, simply run the following command in your local copy of the repository.
-
-```
-$ cd ~/.../git/HivePanelExplorer/hivepanel
-$ python create_panel.py -nodes ../friends/friends_nodes.txt -edges ../friends_edges.txt -format txt
-```
+An older version of this repository was advertised as a python gui for making hive plots. It is no loner being managed by it's contents can be found in the *hiveplot* folder. The graphical user interface (GUI) written using Tkinter in Python takes a network and writes the HTML and JavaScript files necessary to create single hive plots in D3. Check out the [wiki page](https://github.com/sperez8/HivePlotter/wiki) for a step-by-step example of how to make a hive plot.
 
 Happy hive panel exploring!
 
