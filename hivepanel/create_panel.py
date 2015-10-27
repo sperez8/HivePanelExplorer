@@ -10,8 +10,6 @@ import sys
 import os
 import argparse
 import shutil
-import networkx as nx
-import numpy as np
 import string
 from ntpath import basename, dirname
 from uttilities_panel import *

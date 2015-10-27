@@ -3,18 +3,20 @@ created  10/06/2014
 
 by sperez
 
-makes hive panel from user input
+functions used by create_panel
 '''
 
 import sys
 import os
-import argparse
-import networkx as nx
 import numpy as np
 import string
-from ntpath import basename, dirname
 
-ADDLONELYNODES = False
+#Loading local copy of networkx package
+sys.path.insert(0, os.path.abspath(".."))
+import networkx_copy as nx
+
+
+ADD_LONELY_NODES = False
 
 def degree(G):
     return G.degree()
@@ -39,11 +41,11 @@ def import_graph(nodeFile, edgeFile, filterEdges = True):
     nodes, nodeAttributes = get_nodes(nodeFile)
     sources, targets, edgeAttributes = get_edges(edgeFile)
     
-    G = make_graph(sources, targets, nodes, filterEdges, ADDLONELYNODES)
+    G = make_graph(sources, targets, nodes, filterEdges, ADD_LONELY_NODES)
     allNodes = G.nodes()
     for i,n in enumerate(nodes):
         for p,v in nodeAttributes.iteritems():
-            if not ADDLONELYNODES and n not in allNodes:
+            if not ADD_LONELY_NODES and n not in allNodes:
                 continue
             G.node[n][p] = v[i]
 
@@ -140,7 +142,7 @@ def make_graph(sources, targets, nodes, filterEdges= True, addLonelyNodes = Fals
 def get_nodes(inputFile,removeNA=None):
     '''gets nodes and their attribute from csv file'''
     
-
+    print os.getcwd()
     data = np.genfromtxt(inputFile, delimiter='\t', dtype='str', filling_values = 'None')
     
     #get attribute and format as strings
