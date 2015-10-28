@@ -3,7 +3,7 @@ HivePanelExplorer
 
 **Update**: Interactive hive panels can be easily built using different data formats. A wiki tutorial will be up soon. Stay tuned!
 
-A Python script that takes a network and creates a static HTML page with interactive SVG graphics in D3. The interactive features let users explore their network and discover patterns in their network.
+Hive Panel Explorer is a Python script that takes a network and creates a static HTML page with interactive SVG graphics in D3. The visualization produced is a matrix of hive plots plotted using attributes of the nodes and edges (such as degree and centrality). The interactive features let users explore their network and discover patterns in their network. For more information on the design of the tool and on the kind of patterns it can reveal, check out [Sarah Perez's Master Thesis](https://open.library.ubc.ca/cIRcle/collections/ubctheses/24/items/1.0166317)
 
 ## Why visualize networks?
 Networks capture the structure of a system with relationships, wither its a social circle, a protein-protein interaction network, the World Wide Web, or other. These networks are composed of nodes (people, proteins, web pages) and edges (friendships, interactions, weblinks). These networks can get very big and visualizing them can help discover new connective patterns and properties, like social cliques, protein hubs, and modules of highly connected web pages.
@@ -24,7 +24,7 @@ To create an interactive hive panel of the test Friends network illustrated abov
 
 ```
 $ cd ~/.../git/HivePanelExplorer/hivepanel
-$ python create_panel.py -nodes ../friends/friends_nodes.txt -edges ../friends_edges.txt -format txt
+$ python create_panel.py -nodes ../test/friends_data/friends_nodes.txt -edges ../test/friends_data/friends_edges.txt -format txt
 ```
 
 ##Details

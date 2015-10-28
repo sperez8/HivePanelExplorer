@@ -3,18 +3,20 @@ created  10/06/2014
 
 by sperez
 
-makes hive panel from user input
+functions used by create_panel
 '''
 
 import sys
 import os
-import argparse
-import networkx as nx
 import numpy as np
 import string
-from ntpath import basename, dirname
 
-ADDLONELYNODES = False
+#Loading local copy of networkx package
+sys.path.insert(0, os.path.abspath(".."))
+import networkx_copy as nx
+
+
+ADD_LONELY_NODES = False
 
 def degree(G):
     return G.degree()
@@ -39,11 +41,11 @@ def import_graph(nodeFile, edgeFile, filterEdges = True):
     nodes, nodeAttributes = get_nodes(nodeFile)
     sources, targets, edgeAttributes = get_edges(edgeFile)
     
-    G = make_graph(sources, targets, nodes, filterEdges, ADDLONELYNODES)
+    G = make_graph(sources, targets, nodes, filterEdges, ADD_LONELY_NODES)
     allNodes = G.nodes()
     for i,n in enumerate(nodes):
         for p,v in nodeAttributes.iteritems():
-            if not ADDLONELYNODES and n not in allNodes:
+            if not ADD_LONELY_NODES and n not in allNodes:
                 continue
             G.node[n][p] = v[i]
 
@@ -118,8 +120,8 @@ def convert_graph(G,fileName):
                 row.append('None')
         ef.write('\n' + ','.join([str(r) for r in row]))
     
-    print "writing nodefile", nodeFile
-    print "writing edgefile", edgeFile
+    print_message("writing nodefile", nodeFile)
+    print_message("writing edgefile", edgeFile)
     return None
 
 
@@ -136,15 +138,28 @@ def make_graph(sources, targets, nodes, filterEdges= True, addLonelyNodes = Fals
 
     return G
 
+def load_file(inputFile):
+    #try loading as a tab delimited file, otherwise a comma delimited file.
+    try:
+        data = np.genfromtxt(inputFile, delimiter='\t', dtype='str', filling_values = 'None')
+        attribute = data[0,1:] #this will fail if file is comma
+    except IndexError:
+        try:
+            data = np.genfromtxt(inputFile, delimiter=',', dtype='str', filling_values = 'None')
+            attribute = data[0,1:]
+        except IndexError:
+            print_message("ERROR: Please use a tab delimited or comma delimited text file")
+            sys.exit()
+    return data
+
 
 def get_nodes(inputFile,removeNA=None):
     '''gets nodes and their attribute from csv file'''
-    
 
-    data = np.genfromtxt(inputFile, delimiter='\t', dtype='str', filling_values = 'None')
-    
-    #get attribute and format as strings
+    data = load_file(inputFile)
     attribute = data[0,1:]
+
+    #get attribute and format as strings
     attribute = format_attribute(attribute)
     
     if removeNA:
@@ -177,7 +192,7 @@ def get_nodes(inputFile,removeNA=None):
 def get_edges(inputFile):
     '''gets edges and their attribute from csv file'''
     
-    data = np.genfromtxt(inputFile, delimiter='\t', dtype='str', filling_values = 'None')
+    data = load_file(inputFile)
     
     #get attribute and format as strings
     attribute = data[0,2:]
@@ -220,32 +235,6 @@ def convert_type(data):
     except ValueError:
         return data
 
-# def get_delimiter(inputFile):
-#     '''detect if input file is a tab or comma delimited file
-#         and return delimiter.'''
-    
-#     ext = os.path.splitext(basename(inputFile))[1]
-    
-#     if 'tab' in ext or 'tsv' in ext:
-#         return '\t'
-#     elif 'csv' in ext:
-#         return ','
-#     elif 'txt' in ext:
-#         #detects delimiter by counting the number of tabs and commas in the first line
-#         f = open(inputFile, 'r')
-#         first = f.read()
-#         if first.count(',') > first.count('\t'):
-#             return ','
-#         elif first.count(',') < first.count('\t'):
-#             return '\t'
-#         else:
-#             print "Couldn't detect a valid file extension: ", inputFile
-#             return ','
-#     else:
-#         print "Couldn't detect a valid file extension: ", inputFile
-#         return ','
-
-
 def format_attribute(attribute, debug = False):
     '''takes a list of attribute names and removes all punctuation and numbers'''
     
@@ -259,7 +248,7 @@ def format_attribute(attribute, debug = False):
             word = word.replace(c,'')
         if w != word:
             if debug:
-                print "The attribute \'{0}\' contains spaces, punctuation or digits and has been renamed '{1}'".format(w,word)
+                print_message("The attribute \'{0}\' contains spaces, punctuation or digits and has been renamed '{1}'".format(w,word))
         return word
          
     newAttributes = []
@@ -284,6 +273,11 @@ def zipper(*args):
             raise ValueError('The lists to be zipped aren\'t the same length.')
     
     return zip(*args)
+
+def print_message(*args):
+    '''Formats terminal messages for user'''
+    print "\n*\n ", ' '.join(args),"\n"
+    return None
 
 
 
