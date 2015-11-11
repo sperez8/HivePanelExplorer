@@ -1671,7 +1671,7 @@ function place_remove_icon(ruleNumber) {
     }
 
     var icon = document.createElement("d")
-    icon.innerHTML = "<img src='../remove_icon.svg' class='icon' id = 'removeIcon"+ruleNumber+"' onclick='remove_rule(this)'>"
+    icon.innerHTML = "<img src='remove_icon.svg' class='icon' id = 'removeIcon"+ruleNumber+"' onclick='remove_rule(this)'>"
     var div = document.getElementById("equality"+ruleNumber);
     insertAfter(div, icon);
 }
