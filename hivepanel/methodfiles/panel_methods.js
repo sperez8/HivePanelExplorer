@@ -466,7 +466,7 @@ function plot(p){
                 a = get_angles(numAxes, false)[i/2]
             } else {a = 0}
             theta = a-Math.PI
-            h = outer_radius
+            h = outer_radius*1.04
             y = h*Math.cos(theta)
             x = -h*Math.sin(theta)
 
