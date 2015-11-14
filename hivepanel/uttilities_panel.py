@@ -33,7 +33,7 @@ def component_membership(G):
 def import_graphml(graphmlFile):
     #parse graphml file
     G = nx.read_graphml(graphmlFile)
-    return G
+    return G.to_undirected(reciprocal=False)
 
 def import_graph(nodeFile, edgeFile, filterEdges = True):
     '''make a networkx graph from a csv or tsv'''

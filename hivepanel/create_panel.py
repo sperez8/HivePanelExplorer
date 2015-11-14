@@ -12,6 +12,7 @@ import argparse
 import shutil
 import string
 from ntpath import basename, dirname
+from os.path import splitext
 from uttilities_panel import *
 from file_skeletons import parameters_file, html_file
 
@@ -125,31 +126,30 @@ def make_panel(G):
 def main(*argv):
     '''handles user input and creates a panel'''
     parser = argparse.ArgumentParser(description='This scripts takes networks and created the necessary file to make an interactive Hive panel')
-    parser.add_argument('-input', help='Location of network file')
-    parser.add_argument('-format', help='Input format of network')
+    #parser.add_argument('-input', help='Location of network file')
     parser.add_argument('-nodes', help='Location of node network file')
     parser.add_argument('-edges', help='Location of edge network file')
     parser.add_argument('-title', help='Title/Name of graph')
     parser.add_argument('-folder', help='Output folder')
-    parser.add_argument('-axes', help='Number of axes',default=NUM_AXES)
-    parser.add_argument('-double', help='Makes hive plots with doubled axes', action = 'store_true')
+    parser.add_argument('-format', help='Input format of network', default = 'txt')
     args = parser.parse_args()
 
-    #Get graph in networkx format
-    if args.format=='graphml':
-        print_message("Reading .graphml as a networkx graph.")
-        G = import_graphml(args.input)
-        title = basename(args.input).split('.')[0]
-        folder = dirname(args.input)
-    elif args.format=='txt':
+    # #Get graph in networkx format
+    # if args.format=='graphml':
+    #     print_message("Reading .graphml as a networkx graph.")
+    #     G = import_graphml(args.input)
+    #     title = splitext(basename(args.nodes))[0]
+    #     folder = dirname(args.input)
+    # elif
+    if args.format=='txt':
         print_message("Reading .txt as a networkx graph.")
         G = import_graph(args.nodes, args.edges)
-        title = basename(args.nodes).split('.')[0]
+        title = splitext(basename(args.nodes))[0]
         folder = dirname(args.nodes)
     else:
-        print_message("Please specify the format of your network: .gexf, .graphml, or a 2 .txt files with node and edge attribute.")
-        parser.print_help()
-        sys.exit()
+        print_message("Please specify the format of your network. Currently only 2 txt or csv files are accepted")
+    #     parser.print_help()
+    #     sys.exit()
 
 
     if args.title:
@@ -159,8 +159,8 @@ def main(*argv):
         folder = args.folder
 
     #store all the plotting info in the graph as attributes
-    G.graph['axes']=args.axes
-    G.graph['double']=args.double
+    G.graph['axes']= NUM_AXES
+    G.graph['double']= True
     G.graph['folder']=folder
     G.graph['title']=title
     G.graph['nodeAttributes'],G.graph['edgeAttributes']=get_all_attributes(G)

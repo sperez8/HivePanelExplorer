@@ -466,7 +466,7 @@ function plot(p){
                 a = get_angles(numAxes, false)[i/2]
             } else {a = 0}
             theta = a-Math.PI
-            h = outer_radius
+            h = outer_radius*1.04
             y = h*Math.cos(theta)
             x = -h*Math.sin(theta)
 
@@ -1671,7 +1671,7 @@ function place_remove_icon(ruleNumber) {
     }
 
     var icon = document.createElement("d")
-    icon.innerHTML = "<img src='../remove_icon.svg' class='icon' id = 'removeIcon"+ruleNumber+"' onclick='remove_rule(this)'>"
+    icon.innerHTML = "<img src='remove_icon.svg' class='icon' id = 'removeIcon"+ruleNumber+"' onclick='remove_rule(this)'>"
     var div = document.getElementById("equality"+ruleNumber);
     insertAfter(div, icon);
 }
