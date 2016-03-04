@@ -14,24 +14,24 @@ parameters_file = '''  // ****************************************** //
 
 // ****************************************** //
 
-var numAxes = {0}
-    doubleAxes = {1}
+var numAxes = {0}       //number of axes per hive plot
+    doubleAxes = {1}    //if each axis is doubled or not
 
-var nodeColor = 'darkgrey'
-    edgeColor = ['darkgrey']
-    linkwidth = 1.2
-    oplink = 0.3
-    opnode = 0.2
-    opnode_more = 0.6
-    nodesize = 5
-    nodestroke = 0.2
-    nodestrokecolor = "grey"
+var nodeColor = 'darkgrey'      //default color of nodes
+    edgeColor = ['darkgrey']    //default color of edges
+    linkwidth = 1.2             //default thickness of edges
+    oplink = 0.3                //default opacity of edges
+    opnode = 0.2                //default opacity of nodes
+    opnode_more = 0.6           //default opacity when nodes are hovered over or selected
+    nodesize = 5                //default size of nodes
+    nodestroke = 0.2            //default thickness of stroke around node circles
+    nodestrokecolor = "grey"    //default color of stroke around node circles
 
-var columntraits = [{2}];
-    rowtraits = [{3}];
+var columntraits = [{2}];   //node properties used to assignment nodes to axes
+    rowtraits = [{3}];      //node properties used to position nodes onto axes
 
-var columnTraitScales = {{{4}}}
-var rowTraitScales = {{{5}}}'''
+var columnTraitScales = {{{4}}} //the scale used to for each node property used as an assignment rule. Options are "linear","log","even" 
+var rowTraitScales = {{{5}}}    //the scale used to for each node property used as a position rule. Options are "linear","log","rank" '''
 
 
 

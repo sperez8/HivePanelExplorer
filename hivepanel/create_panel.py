@@ -160,7 +160,7 @@ def main(*argv):
 
     #store all the plotting info in the graph as attributes
     G.graph['axes']= NUM_AXES
-    G.graph['double']= True
+    G.graph['double']= False
     G.graph['folder']=folder
     G.graph['title']=title
     G.graph['nodeAttributes'],G.graph['edgeAttributes']=get_all_attributes(G)
