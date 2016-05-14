@@ -13,7 +13,7 @@ import shutil
 import string
 from ntpath import basename, dirname
 from os.path import splitext
-from uttilities_panel import *
+from utilities_panel import *
 from file_skeletons import parameters_file, html_file
 
 PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),'methodfiles')

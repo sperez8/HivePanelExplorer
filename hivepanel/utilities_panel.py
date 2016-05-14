@@ -13,7 +13,7 @@ import string
 
 #Loading local copy of networkx package
 sys.path.insert(0, os.path.abspath(".."))
-import networkx_copy as nx
+import networkx as nx
 
 
 ADD_LONELY_NODES = False
