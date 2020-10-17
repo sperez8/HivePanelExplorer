@@ -1,9 +1,10 @@
 HivePanelExplorer
 ===========
 
-**Update**: Interactive hive panels can be easily built using different data formats. A wiki tutorial will be up soon. Stay tuned!
+Hive Panel Explorer is a Python script that takes a network and creates a static HTML page with interactive SVG graphics in D3. The visualization produced is a matrix of hive plots plotted using attributes of the nodes and edges (such as degree and centrality). The interactive features let users explore their network and discover patterns in their network. For more information on the design of the tool and on the kind of patterns it can reveal, check out this [Oxford Bioinformatics application note](https://academic.oup.com/bioinformatics/advance-article/doi/10.1093/bioinformatics/btaa683/5876826). For even more detail, check out [Sarah Perez's Master Thesis](https://open.library.ubc.ca/cIRcle/collections/ubctheses/24/items/1.0166317)
 
-Hive Panel Explorer is a Python script that takes a network and creates a static HTML page with interactive SVG graphics in D3. The visualization produced is a matrix of hive plots plotted using attributes of the nodes and edges (such as degree and centrality). The interactive features let users explore their network and discover patterns in their network. For more information on the design of the tool and on the kind of patterns it can reveal, check out [Sarah Perez's Master Thesis](https://open.library.ubc.ca/cIRcle/collections/ubctheses/24/items/1.0166317)
+Please cite this project using:
+> Sarah E I Perez, Aria S Hahn, Martin Krzywinski, Steven J Hallam, Hive Panel Explorer: an interactive network visualization tool, Bioinformatics, , btaa683, https://doi.org/10.1093/bioinformatics/btaa683
 
 ## Why visualize networks?
 Networks capture the structure of a system with relationships, wither its a social circle, a protein-protein interaction network, the World Wide Web, or other. These networks are composed of nodes (people, proteins, web pages) and edges (friendships, interactions, weblinks). These networks can get very big and visualizing them can help discover new connective patterns and properties, like social cliques, protein hubs, and modules of highly connected web pages.
