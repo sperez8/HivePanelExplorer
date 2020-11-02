@@ -138,6 +138,7 @@ def main(*argv):
     parser.add_argument('-title', help='Title/Name of graph')
     parser.add_argument('-folder', help='Output folder')
     parser.add_argument('-format', help='Input format of network', default='txt')
+    parser.add_argument('--include_lonely_nodes', help='Include nodes with zero degree in network', action='store_true')
     args = parser.parse_args()
 
     # #Get graph in networkx format
@@ -149,7 +150,7 @@ def main(*argv):
     # elif
     if args.format == 'txt':
         print_message("Reading .txt as a networkx graph.")
-        G = import_graph(args.nodes, args.edges)
+        G = import_graph(args.nodes, args.edges, args.include_lonely_nodes)
         title = splitext(basename(args.nodes))[0]
         folder = dirname(args.nodes)
     else:

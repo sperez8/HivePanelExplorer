@@ -16,8 +16,6 @@ import string
 sys.path.insert(0, os.path.abspath(".."))
 import networkx as nx
 
-ADD_LONELY_NODES = False
-
 
 def degree(G):
     return G.degree()
@@ -39,18 +37,18 @@ def import_graphml(graphmlFile):
     return G.to_undirected(reciprocal=False)
 
 
-def import_graph(nodeFile, edgeFile, filterEdges=True):
+def import_graph(nodeFile, edgeFile, include_lonely_nodes, filterEdges=True):
     '''make a networkx graph from a csv or tsv'''
 
     nodes, nodeAttributes = get_nodes(nodeFile)
     sources, targets, edgeAttributes = get_edges(edgeFile)
 
-    G = make_graph(sources, targets, nodes, filterEdges, ADD_LONELY_NODES)
+    G = make_graph(sources, targets, nodes, include_lonely_nodes, filterEdges)
     allNodes = G.nodes()
     for i, n in enumerate(nodes):
         for p in nodeAttributes.keys():
             v = nodeAttributes[p]
-            if not ADD_LONELY_NODES and n not in allNodes:
+            if not include_lonely_nodes and n not in allNodes:
                 continue
             G.node[n][p] = v[i]
 
@@ -133,15 +131,16 @@ def convert_graph(G, fileName):
     return None
 
 
-def make_graph(sources, targets, nodes, filterEdges=True, addLonelyNodes=False):
+def make_graph(sources, targets, nodes, include_lonely_nodes, filterEdges=True):
     '''Makes a graph using the networkx package Graph instance'''
     G = nx.Graph()
-    if addLonelyNodes:
+    if include_lonely_nodes:
         G.add_nodes_from(nodes)  # add all nodes, even ones without edges...
     G.add_edges_from(zipper(sources, targets))
     if filterEdges:
         for n in G.nodes():
             if n not in nodes:
+                print("I am here")
                 G.remove_node(n)
 
     return G
